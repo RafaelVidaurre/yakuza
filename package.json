@@ -13,6 +13,6 @@
   "author": "Rafael Vidaurre",
   "license": "MIT",
   "dependencies": {
-    "underscore": "^1.7.0"
+    "lodash": "^2.4.1"
   }
 }
