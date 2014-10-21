@@ -12,6 +12,9 @@ var Agent = require('./agent');
   function Scraper () {
     var _configCallbacks = [];
     var _agents = {};
+    var _createAgent = function (agentName) {
+      _agents[agentName] = new Agent();
+    };
 
     // Saves a configuration callback in `_configCallbacks` array
     this.config = function (cbConfig) {
