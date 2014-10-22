@@ -9,8 +9,8 @@ var Agent = require('./agent');
   'use strict';
 
   function Agent () {
-    var _configCallbacks = [];
-    var _agents = {};
+    this._configCallbacks = [];
+    this._agents = {};
 
     // Saves a configuration callback in `configCallbacks` array
     this.config = function (cbConfig) {

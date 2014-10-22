@@ -5,7 +5,7 @@
 
   module.exports = {
     hasKey: function (obj, key) {
-      return _.keys(obj).contains(key);
+      return _.contains(_.keys(obj), key);
     }
   };
 

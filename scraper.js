@@ -10,17 +10,18 @@ var Agent = require('./agent');
   'use strict';
 
   function Scraper () {
-    var _configCallbacks = [];
-    var _agents = {};
-    var _createAgent = function (agentName) {
-      _agents[agentName] = new Agent();
+    this._configCallbacks = [];
+    this._agents = {};
+
+    this._createAgent = function (agentName) {
+      this._agents[agentName] = new Agent();
     };
 
     // Saves a configuration callback in `_configCallbacks` array
     this.config = function (cbConfig) {
-      if (!_.isFunction(cbConfig)) { throw Error('Config argument must be a function'); }
+      if (!_.isFunction(cbConfig)) { throw new Error('Config argument must be a function'); }
 
-      _configCallbacks.push(cbConfig);
+      this._configCallbacks.push(cbConfig);
 
       return Scraper;
     };
@@ -29,8 +30,12 @@ var Agent = require('./agent');
     this.agent = function (agentName) {
       var thisAgent, agentExists;
 
-      agentExists = utils.hasKey(_agents, agentName);
-      thisAgent = agentExists ? _agents[agentName] : _createAgent(agentName);
+      if (!_.isString(agentName) || !agentName) {
+        throw new Error('Agent id must be a non-empty string');
+      }
+
+      agentExists = utils.hasKey(this._agents, agentName);
+      thisAgent = agentExists ? this._agents[agentName] : this._createAgent(agentName);
 
       return thisAgent;
     };
