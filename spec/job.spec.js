@@ -37,8 +37,14 @@ describe('Job', function () {
     });
 
     it('should extend the _params object with new properties in object', function () {
-      job.params({a: 1});
-      expect(job._params['a']).toBe(1);
+      var newJob = new Job();
+      var newJob2 = new Job();
+      newJob.params({a: 1});
+      expect(newJob._params['a']).toBe(1);
+      newJob2._params = {z: 0};
+      newJob2.params({z: 1, b: 10});
+      expect(newJob2._params['z']).toBe(1);
+      expect(newJob2._params['b']).toBe(10);
     });
   });
 });
