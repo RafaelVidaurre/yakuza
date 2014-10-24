@@ -15,12 +15,16 @@ function Yakuza () {
   };
 
   // Returns a scraper instance, if it doesn't exist, it creates it
-  this.scarper = function (scraperName) {
+  this.scraper = function (scraperName) {
     var thisScraper, scraperExists;
 
     scraperExists = utils.hasKey(_scrapers, scraperName);
     thisScraper = scraperExists ? _scrapers[scraperName] : _createScraper(scraperName);
 
     return thisScraper;
+  };
+
+  this.job = function (scraperName, agentName) {
+
   };
 }

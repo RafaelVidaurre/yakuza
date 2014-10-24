@@ -115,6 +115,8 @@ Yakuza.task('banks', 'santander', 'login').hooks({
 
 // == Starting a scraper == //
 var job = Yakuza.job('banks', 'santander');
+// Though a job could tecnically be instanced from a scraper or even an agent, multiple choices
+// here would be rather confusing.
 
 job.params({
   username: '17.142.244-7',
