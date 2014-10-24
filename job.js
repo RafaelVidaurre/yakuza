@@ -16,6 +16,7 @@ var _ = require('lodash');
     };
 
     _this._params = {};
+    _this._enqueuedTasks = [];
     _this.uid = null;
 
     // Set uid
@@ -25,6 +26,17 @@ var _ = require('lodash');
       if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
 
       _.extend(_this._params, paramsObj);
+
+      return _this;
+    };
+
+    // Enqueue tasks by their task_id
+    _this.enqueue = function (taskId) {
+      if (!_.isString(taskId) || taskId.length <= 0) {
+        throw Error('enqueue params isn\'t a valid string');
+      }
+
+      _this._enqueuedTasks.push(taskId);
 
       return _this;
     };
