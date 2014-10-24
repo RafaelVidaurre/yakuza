@@ -137,9 +137,9 @@ job.listen({
 
 // Only schedulize login, acc_list and current transactions tasks.
 // Schedule works with labels
-job.planByTags('login');
-job.planByTags('accounts_list');
-job.planByTags('transactions', 'current');
+job.enqueue('login');
+job.enqueue('accounts_list');
+job.enqueue('transactions', 'current');
 
 // TODO: Params validation could be either removed from the framework's responsibility or defined at
 // setup time, if so, scraper-level params would run for any agent being run, and agent-level
