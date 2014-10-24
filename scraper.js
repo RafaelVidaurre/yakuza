@@ -31,7 +31,7 @@ var Agent = require('./agent');
     _this.agent = function (agentName) {
       var thisAgent, agentExists;
 
-      if (!_.isString(agentName) || !agentName) {
+      if (!agentName || !_.isString(agentName)) {
         throw new Error('Agent id must be a non-empty string');
       }
 
