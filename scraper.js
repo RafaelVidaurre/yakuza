@@ -20,7 +20,7 @@ var Agent = require('./agent');
 
     // Saves a configuration callback in `_configCallbacks` array
     _this.config = function (cbConfig) {
-      if (!_.isFunction(cbConfig)) { throw new Error('Config argument must be a function'); }
+      if (!_.isFunction(cbConfig)) throw new Error('Config argument must be a function');
 
       _this._configCallbacks.push(cbConfig);
 
