@@ -65,7 +65,7 @@ describe('Job', function () {
       expect(function () {job.params(null)}).toThrow(new Error(errMsg));
     });
 
-    it('should extend the _params object with new properties in object', function () {
+    it('should extend the params object with new properties in object', function () {
       var newJob = new Job();
       var newJob2 = new Job();
       newJob.params({a: 1});
