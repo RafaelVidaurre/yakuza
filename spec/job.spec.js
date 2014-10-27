@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var Job = require('../job');
+var Agent = require('../agent');
 
 describe('Job', function () {
   var job;
@@ -67,5 +68,25 @@ describe('Job', function () {
       job.enqueue('task2');
       expect(job._enqueuedTasks).toEqual(['task1', 'task2']);
     });
+  });
+
+  describe('#_buildExecutionPlan', function () {
+    var agent, newJob;
+    beforeEach(function () {
+      agent = new Agent('agentOne');
+      newJob = new Job('jobOne', undefined, agent);
+    });
+
+    it('should build _executionPlan following it\'s agent\'s execution plan', function () {
+      agent.setup(function (config) {
+        config.executionPlan = ['task1', 'task2', ['task3', 'task4'], 'task5', ['task6']];
+      });
+      agent._applySetup();
+      newJob.enqueue('task1'); newJob.enqueue('task3'); newJob.enqueue('task4'); newJob.enqueue('task5');
+      newJob.enqueue('task6');
+      newJob._buildExecutionPlan();
+      expect(newJob._executionPlan).toEqual([['task1'], ['task3', 'task4'], ['task5'], ['task6']]);
+    });
+
   });
 });

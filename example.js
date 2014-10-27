@@ -29,7 +29,7 @@ Yakuza.agent('banks', 'santander').setup(function (config) {
     country: 'chile' // only overriten for santander agent
   };
 
-  config.executionTiers = [
+  config.executionPlan = [
     'login',
     'accounts_list',
     [

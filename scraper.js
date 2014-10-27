@@ -15,7 +15,7 @@ var Agent = require('./agent');
     _this._agents = {};
 
     _this._createAgent = function (agentName) {
-      _this._agents[agentName] = new Agent();
+      _this._agents[agentName] = new Agent(agentName);
     };
 
     // Saves a configuration callback in `_configCallbacks` array
