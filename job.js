@@ -23,28 +23,6 @@ var _ = require('lodash');
       _this.uid = argUid;
     };
 
-    // Set job data
-    if (uid !== undefined) _this._setUid(uid);
-
-    _this.params = function (paramsObj) {
-      if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
-
-      _.extend(_this._params, paramsObj);
-
-      return _this;
-    };
-
-    // Enqueue tasks by their task_id
-    _this.enqueue = function (taskId) {
-      if (!_.isString(taskId) || taskId.length <= 0) {
-        throw Error('enqueue params isn\'t a valid string');
-      }
-
-      _this._enqueuedTasks.push(taskId);
-
-      return _this;
-    };
-
     // Build execution groups to run based on plan and enqueued tasks
     _this._buildExecutionPlan = function () {
       var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup;
@@ -66,6 +44,28 @@ var _ = require('lodash');
       });
 
       _this._executionPlan = newExecutionPlan;
+    };
+
+    // Set job data
+    if (uid !== undefined) _this._setUid(uid);
+
+    _this.params = function (paramsObj) {
+      if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
+
+      _.extend(_this._params, paramsObj);
+
+      return _this;
+    };
+
+    // Enqueue tasks by their task_id
+    _this.enqueue = function (taskId) {
+      if (!_.isString(taskId) || taskId.length <= 0) {
+        throw Error('enqueue params isn\'t a valid string');
+      }
+
+      _this._enqueuedTasks.push(taskId);
+
+      return _this;
     };
 
     // Begin scraping job
