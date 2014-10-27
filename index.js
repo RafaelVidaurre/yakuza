@@ -4,27 +4,43 @@
 var _ = require('lodash');
 var utils = require('./utils');
 var Scraper = require('./scraper');
+var Job = require('./job');
 
-function Yakuza () {
-  var _scrapers = {};
+(function () {
+  'use strict';
 
-  // Creates a new scraper instance
-  var _createScraper = function (scraperName) {
-    _scrapers[scraperName] = new Scraper();
-    return _scrapers[scraperName];
-  };
+  function Yakuza () {
+    var _this = this;
 
-  // Returns a scraper instance, if it doesn't exist, it creates it
-  this.scraper = function (scraperName) {
-    var thisScraper, scraperExists;
+    _this._lastJobId = 0;
+    _this._scrapers = {};
+    _this._jobs = {};
 
-    scraperExists = utils.hasKey(_scrapers, scraperName);
-    thisScraper = scraperExists ? _scrapers[scraperName] : _createScraper(scraperName);
+    // Creates a new scraper instance
+    _this._createScraper = function (scraperName) {
+      _scrapers[scraperName] = new Scraper();
+      return _scrapers[scraperName];
+    };
 
-    return thisScraper;
-  };
+    // Returns a scraper instance, if it doesn't exist, it creates it
+    _this.scraper = function (scraperName) {
+      var thisScraper, scraperExists;
 
-  this.job = function (scraperName, agentName) {
+      scraperExists = utils.hasKey(_scrapers, scraperName);
+      thisScraper = scraperExists ? _scrapers[scraperName] : _createScraper(scraperName);
 
-  };
-}
+      return thisScraper;
+    };
+
+    _this.job = function (scraperName, agentName) {
+      var newId;
+
+      newId = _this._lastJobId + 1;
+      _this._lastJobId = newId;
+      return new Job(newId, scraperName, agentName);
+    };
+  }
+
+  module.exports = new Yakuza();
+
+}());

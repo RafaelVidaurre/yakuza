@@ -6,21 +6,38 @@ var _ = require('lodash');
 (function () {
   'use strict';
 
-  function Job (uid) {
+  function Job (uid, scraperId, agentId) {
     var _this = this;
-    var _setUid = function () {
+
+    _this._params = {};
+    _this._enqueuedTasks = [];
+    _this.uid = null;
+    _this.scraperId = null;
+    _this.agentId = null;
+
+    _this._setUid = function () {
       if (!uid || !_.isString(uid) || uid.length <= 0) {
         throw new Error('Job uid must be a valid string');
       }
       _this.uid = uid;
     };
-
-    _this._params = {};
-    _this._enqueuedTasks = [];
-    _this.uid = null;
+    _this._setScraperId = function () {
+      if (!scraperId || !_.isString(scraperId) || scraperId.length <= 0) {
+        throw new Error('Scraper id must be a valid string');
+      }
+      _this.scraperId = scraperId;
+    };
+    _this._setAgentId = function () {
+      if (!agentId || !_.isString(agentId) || agentId.length <= 0) {
+        throw new Error('Agent id must be a valid string');
+      }
+      _this.agentId = agentId;
+    };
 
     // Set uid
-    if (uid !== undefined) _setUid();
+    if (uid !== undefined) _this._setUid();
+    if (scraperId !== undefined) _this._setScraperId();
+    if (agentId !== undefined) _this._setAgentId();
 
     _this.params = function (paramsObj) {
       if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
