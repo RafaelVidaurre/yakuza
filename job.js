@@ -59,7 +59,9 @@ var _ = require('lodash');
     };
 
     // Begin scraping job
-    _this.run
+    _this.run = function () {
+      _this.buildTaskQueue();
+    };
 
   }
 
