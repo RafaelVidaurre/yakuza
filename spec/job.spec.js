@@ -20,35 +20,10 @@ describe('Job', function () {
       expect(function () {new Job(null);}).toThrow(new Error(errMsg));
     });
 
-    it('should throw error if scraperId param isn\'t a string', function () {
-      var errMsg = 'Scraper id must be a valid string';
-      expect(function () {new Job('jobUid', 123);}).toThrow(new Error(errMsg));
-      expect(function () {new Job('jobUid', {});}).toThrow(new Error(errMsg));
-      expect(function () {new Job('jobUid', null);}).toThrow(new Error(errMsg));
-    });
-
-    it('should throw error if agentId param isn\'t a string', function () {
-      var errMsg = 'Agent id must be a valid string';
-      expect(function () {new Job('jobUid', 'scraperId', 123);}).toThrow(new Error(errMsg));
-      expect(function () {new Job('jobUid', 'scraperId', {});}).toThrow(new Error(errMsg));
-      expect(function () {new Job('jobUid', 'scraperId', null);}).toThrow(new Error(errMsg));
-    });
-
     it('should assign uid', function () {
       var testJob = new Job('asd');
       expect(testJob.uid).toEqual('asd');
     });
-
-    it('should assign scraperId', function () {
-      var testJob = new Job('asd', 'scraperOne');
-      expect(testJob.scraperId).toEqual('scraperOne');
-    });
-
-    it('should assign agentId', function () {
-      var testJob = new Job('asd', 'scraperOne', 'agentOne');
-      expect(testJob.agentId).toEqual('agentOne');
-    });
-
 
     it('should start with an empty _enqueuedTasks array', function () {
       var testJob = new Job();

@@ -33,11 +33,16 @@ var Job = require('./job');
     };
 
     _this.job = function (scraperName, agentName) {
-      var newId;
+      var newId, scraper, agent, newJob;
 
+      scraper = _this._scrapers[scraperName];
+      agent = scraper._agents[agentName];
       newId = _this._lastJobId + 1;
+      newJob = new Job(newId, scraper, agent);
       _this._lastJobId = newId;
-      return new Job(newId, scraperName, agentName);
+      _this._jobs[newId] = newJob;
+      
+      return newJob;
     };
   }
 
