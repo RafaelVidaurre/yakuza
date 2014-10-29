@@ -1,10 +1,12 @@
-/**
-* @author Rafael Vidaurre
-*/
-var _ = require('lodash');
-
 (function () {
   'use strict';
+
+  /**
+  * @author Rafael Vidaurre
+  * @exports Job
+  */
+
+  var _ = require('lodash');
 
   function Job (uid, scraper, agent) {
     var _this = this;
@@ -70,6 +72,7 @@ var _ = require('lodash');
 
     // Begin scraping job
     _this.run = function () {
+      _this.agent._applySetup();
       _this._buildTaskQueue();
     };
 

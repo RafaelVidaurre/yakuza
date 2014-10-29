@@ -1,12 +1,12 @@
-/**
-* @author Rafael Vidaurre
-*/
-var _ = require('lodash');
-var utils = require('./utils');
-
-
 (function () {
   'use strict';
+
+  /**
+  * @author Rafael Vidaurre
+  */
+
+  var _ = require('lodash');
+  var utils = require('./utils');
 
   function Task () {
     var _this = this;

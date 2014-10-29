@@ -2,7 +2,7 @@
   "name": "yakuza",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "jasmine-node spec"
   },
@@ -14,5 +14,9 @@
   "license": "MIT",
   "dependencies": {
     "lodash": "^2.4.1"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-jsdoc": "^0.5.7"
   }
 }

@@ -1,13 +1,15 @@
-/**
-* @author Rafael Vidaurre
-*/
-var _ = require('lodash');
-var utils = require('./utils');
-var Scraper = require('./scraper');
-var Job = require('./job');
-
 (function () {
   'use strict';
+
+  /**
+  * @author Rafael Vidaurre
+  * @exports Yakuza
+  */
+
+  var _ = require('lodash');
+  var utils = require('./utils');
+  var Scraper = require('./scraper');
+  var Job = require('./job');
 
   function Yakuza () {
     var _this = this;
@@ -41,7 +43,7 @@ var Job = require('./job');
       newJob = new Job(newId, scraper, agent);
       _this._lastJobId = newId;
       _this._jobs[newId] = newJob;
-      
+
       return newJob;
     };
   }

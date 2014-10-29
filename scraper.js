@@ -1,13 +1,13 @@
-/**
-* @author Rafael Vidaurre
-*/
-var _ = require('lodash');
-var utils = require('./utils');
-var Agent = require('./agent');
-
-
 (function () {
   'use strict';
+
+  /**
+  * @author Rafael Vidaurre
+  */
+
+  var _ = require('lodash');
+  var utils = require('./utils');
+  var Agent = require('./agent');
 
   function Scraper () {
     var _this = this;
