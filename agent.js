@@ -1,4 +1,6 @@
-(function () {
+(/** @lends <global> */
+
+function () {
   'use strict';
 
   /**
@@ -63,5 +65,6 @@
   }
 
   module.exports = Agent;
+
 
 }());

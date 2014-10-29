@@ -1,4 +1,6 @@
-(function () {
+(/** @lends <global> */
+
+function () {
   'use strict';
 
   /**
@@ -11,6 +13,10 @@
   var Scraper = require('./scraper');
   var Job = require('./job');
 
+  /**
+  * Main framework class used to define scrapers and their properties
+  * @class
+  */
   function Yakuza () {
     var _this = this;
 

@@ -1,4 +1,6 @@
-(function () {
+(/** @lends <global> */
+
+function () {
   'use strict';
 
   /**
@@ -8,6 +10,9 @@
 
   var _ = require('lodash');
 
+  /**
+  * @class
+  */
   function Job (uid, scraper, agent) {
     var _this = this;
 
@@ -79,5 +84,6 @@
   }
 
   module.exports = Job;
+
 
 }());

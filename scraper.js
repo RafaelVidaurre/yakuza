@@ -1,4 +1,6 @@
-(function () {
+(/** @lends <global> */
+
+function () {
   'use strict';
 
   /**
@@ -9,6 +11,9 @@
   var utils = require('./utils');
   var Agent = require('./agent');
 
+  /**
+  * @class
+  */
   function Scraper () {
     var _this = this;
     _this._configCallbacks = [];
@@ -43,5 +48,6 @@
   }
 
   module.exports = Scraper;
+
 
 }());

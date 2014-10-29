@@ -1,4 +1,6 @@
-(function () {
+(/** @lends <global> */
+
+function () {
   'use strict';
 
   /**
@@ -8,6 +10,9 @@
   var _ = require('lodash');
   var utils = require('./utils');
 
+  /**
+  * @class
+  */
   function Task () {
     var _this = this;
     _this._main = null;
@@ -55,4 +60,6 @@
   }
 
   module.exports = Task;
+
+
 }());
