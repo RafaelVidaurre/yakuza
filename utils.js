@@ -7,16 +7,13 @@
 
 var _ = require('lodash');
 
-/**
-* Tells wether a key is present in a given object
-* @function
-*/
-function hasKey (obj, key) {
-  return _.contains(_.keys(obj), key);
-}
-
-console.log();
-
 module.exports = {
-  hasKey: hasKey
+  /**
+  * Tells wether a key is present in a given object
+  * @function
+  * @inner
+  */
+  hasKey: function (obj, key) {
+    return _.contains(_.keys(obj), key);
+  }
 };

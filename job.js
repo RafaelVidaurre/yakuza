@@ -1,6 +1,6 @@
 /**
 * @author Rafael Vidaurre
-* @exports Job
+* @module Job
 */
 
 'use strict';
@@ -9,26 +9,56 @@ var _ = require('lodash');
 
 /**
 * @class
+* @param {string} uid Unique identifier for the job instance
+* @param {Scraper} scraper Reference to the scraper being used by the job
+* @param {Agent} agent Reference to the agent being used by the job
 */
 function Job (uid, scraper, agent) {
   var _this = this;
 
-  _this._params = {};
-  _this._enqueuedTasks = [];
-  _this._executionPlan = null;
-  _this.uid = null;
-  _this.agent = agent;
-  _this.scraper = scraper;
+  /**
+  * Parameters that will be provided to the Task instances
+  * @protected
+  */
+  this._params = {};
 
-  _this._setUid = function (argUid) {
+  /**
+  * Tasks enqueued via Job's API
+  * @protected
+  */
+  this._enqueuedTasks = [];
+
+  /**
+  * Represents enqueued tasks' sincrony and execution order
+  * @protected
+  */
+  this._executionPlan = null;
+
+  /** Unique Job identifier */
+  this.uid = null;
+  /** Reference to the Agent instance being used by the Job */
+  this.agent = agent;
+  /** Reference to the Scraper instance being used by the Job */
+  this.scraper = scraper;
+
+  /**
+  * Sets the Jobs Uid value
+  * @param {string} argUid Uid which uniquely identifies the job
+  * @protected
+  */
+  this._setUid = function (argUid) {
     if (!argUid || !_.isString(argUid) || argUid.length <= 0) {
       throw new Error('Job uid must be a valid string');
     }
     _this.uid = argUid;
   };
 
-  // Build execution groups to run based on plan and enqueued tasks
-  _this._buildExecutionPlan = function () {
+  // TODO: Add @see reference to Job.enqueue()
+  /**
+  * Build execution groups to run based on plan and enqueued tasks
+  * @protected
+  */
+  this._buildExecutionPlan = function () {
     var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup;
     executionPlan = _this.agent._config.executionPlan;
     newExecutionPlan = [];
@@ -50,10 +80,13 @@ function Job (uid, scraper, agent) {
     _this._executionPlan = newExecutionPlan;
   };
 
-  // Set job data
   if (uid !== undefined) _this._setUid(uid);
 
-  _this.params = function (paramsObj) {
+  /**
+  * Sets the Job's uid
+  * @param {object} paramsObj Object containing key-value which are provided to the job's tasks
+  */
+  this.params = function (paramsObj) {
     if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
 
     _.extend(_this._params, paramsObj);
@@ -61,8 +94,11 @@ function Job (uid, scraper, agent) {
     return _this;
   };
 
-  // Enqueue tasks by their task_id
-  _this.enqueue = function (taskId) {
+  /**
+  * Defines a task to be run by this job
+  * @param {string} taskId Id of the task to be run
+  */
+  this.enqueue = function (taskId) {
     if (!_.isString(taskId) || taskId.length <= 0) {
       throw Error('enqueue params isn\'t a valid string');
     }
@@ -72,12 +108,11 @@ function Job (uid, scraper, agent) {
     return _this;
   };
 
-  // Begin scraping job
-  _this.run = function () {
+  /** Begin the scraping job */
+  this.run = function () {
     _this.agent._applySetup();
     _this._buildTaskQueue();
   };
-
 }
 
 module.exports = Job;
