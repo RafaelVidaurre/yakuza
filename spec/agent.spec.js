@@ -8,7 +8,7 @@ describe('Agent', function () {
     agentPlanned = new Agent('agentPlanned');
 
     agentPlanned.setup(function (config) {
-      config.executionPlan = ['task1', ['task2', 'task3']];
+      config.executionPlan = ['task1', [{taskId: 'task2', syncronous: true}, 'task3']];
     });
   });
 
@@ -57,7 +57,18 @@ describe('Agent', function () {
 
       expect(function () {newAgent._applySetup();}).toThrow(new Error(errMsg));
     });
-  });
 
+    it('should format execution plan as an array of arrays of objects', function () {
+      var expectedExecPlan = [
+        [{taskId: 'task1'}],
+        [
+          {taskId: 'task2', syncronous: true},
+          {taskId: 'task3'}
+        ]
+      ];
+      agentPlanned._applySetup();
+      expect(agentPlanned._executionPlan).toEqual(expectedExecPlan);
+    });
+  });
 
 });

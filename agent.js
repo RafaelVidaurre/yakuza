@@ -21,6 +21,12 @@ function Agent (id) {
   this._configCallbacks = [];
 
   /**
+  * Formatted execution plan created based on the agent's config object
+  * @private
+  */
+  this._executionPlan = null;
+
+  /**
   * Set of task instances for this agent
   * @private
   */
@@ -55,21 +61,36 @@ Agent.prototype._applyConfigCallbacks = function () {
 */
 Agent.prototype._formatExecutionPlan = function () {
   var _this = this;
-  var newExecutionPlan, currentTier;
-  newExecutionPlan = [];
+  var formattedExecutionPlan, currentTier, formattedTier, formattedTaskPlan;
+  formattedExecutionPlan = [];
 
   if (_this._config.executionPlan === undefined) {
     throw new Error('Agent '+_this.id+' has no execution plan, use the config object provided' +
       ' by the setup method to define an execution plan');
   }
 
-  // Turn each tier into an array if they are not
-  _.each(_this._config.executionPlan, function (executionTier) {
-    currentTier = _.isArray(executionTier) ? executionTier : [executionTier];
-    newExecutionPlan.push(currentTier);
+  // Turn each tier into an array
+  _.each(_this._config.executionPlan, function (executionGroup) {
+    currentTier = _.isArray(executionGroup) ? executionGroup : [executionGroup];
+    formattedTier = [];
+
+    // Turn each element in the array into an object
+    _.each(currentTier, function (taskPlan) {
+      formattedTaskPlan = {};
+
+      if (_.isString(taskPlan)) {
+        formattedTaskPlan.taskId = taskPlan;
+      } else {
+        formattedTaskPlan = taskPlan;
+      }
+
+      formattedTier.push(formattedTaskPlan);
+    });
+
+    formattedExecutionPlan.push(formattedTier);
   });
 
-  _this._config.executionPlan = newExecutionPlan;
+  _this._executionPlan = formattedExecutionPlan;
 };
 
 /**

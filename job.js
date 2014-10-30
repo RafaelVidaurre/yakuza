@@ -32,6 +32,12 @@ function Job (uid, scraper, agent) {
   */
   this._executionPlan = null;
 
+  /**
+  * Queue of tasks built in runtime defined by task builders and execution plan
+  * @private
+  */
+  this._executionQueue = [];
+
   /** Unique Job identifier */
   this.uid = null;
   /** Reference to the Agent instance being used by the Job */
@@ -61,15 +67,21 @@ Job.prototype._setUid = function (argUid) {
 */
 Job.prototype._buildExecutionPlan = function () {
   var _this = this;
-  var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup;
-  executionPlan = this.agent._config.executionPlan;
+  var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
+  
+  executionPlan = this.agent._executionPlan;
   newExecutionPlan = [];
   newTaskGroup = [];
 
   _.each(executionPlan, function (executionGroup) {
+    groupTaskIds = _.map(executionGroup, function (taskObj) {
+      return taskObj.taskId;
+    });
+
     _.each(_this._enqueuedTasks, function (enqueuedTask) {
-      if (_.contains(executionGroup, enqueuedTask)) {
-        newTaskGroup.push(enqueuedTask);
+      matchIdx = groupTaskIds.indexOf(enqueuedTask);
+      if (matchIdx >= 0) {
+        newTaskGroup.push(executionGroup[matchIdx]);
       }
     });
 
@@ -112,6 +124,7 @@ Job.prototype.enqueue = function (taskId) {
 Job.prototype.run = function () {
   this.agent._applySetup();
   this._buildExecutionPlan();
+
 };
 
 

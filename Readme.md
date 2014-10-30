@@ -15,7 +15,14 @@ Task
 All agents per scraper should have the same amount of tasks, with the same `task_id`s, but each
 task implementation is different per agent
 
+Builder
+-------
+A builder defines the criteria by which a task is instanced. By default tasks have a builder where
+the task is only instanced once and with no parameters.
+
+By using `Task.builder()` you can override this default behaviour.
+
 Execution Plan
 ==============
-Represent an array of arrays of task_ids where each sub-array contains all tasks that can run
-in parallel (based on task config)
+Represent an array of arrays of objects which hold a task_id and other configuration variables
+where each sub-array contains all tasks that can run in parallel (based on task config)

@@ -12,8 +12,6 @@ var utils = require('./utils');
 * @class
 */
 function Task () {
-  var _this = this;
-
   /**
   * The main method of the Task
   * @private
@@ -25,46 +23,66 @@ function Task () {
   * @private
   */
   this._hooks = {};
-  this._builder = function () {return {};}; // Default builder returns empty object
 
-  // Sets main task method
-  this.main = function (mainCb) {
-    if (!_.isFunction(mainCb)) throw new Error('Main method must be a function');
-    _this._main = mainCb;
+  /**
+  * Task's builder method, by default will instantiate the task once with empty parameters
+  * @private
+  */
+  this._builder = function () {return {};};
+}
 
-    return _this;
-  };
+/**
+* Sets main task's method
+* @param {function} mainMethod main task method, this contains the scraping logic that makes a task
+* unique
+*/
+Task.prototype.main = function (mainMethod) {
+  if (!_.isFunction(mainMethod)) throw new Error('Main method must be a function');
+  this._main = mainMethod;
 
-  // Appends hooks to the hooks object
-  this.hooks = function (hooksObj) {
-    var hookKeys, slotIsArray, hookSlot;
-    if (!_.isObject(hooksObj) || _.isArray(hooksObj)) {
-      throw new Error('Hooks parameter must be an object');
+  return this;
+};
+
+/**
+* Sets the task hooks, which will be called at specific points of the task's execution
+* @param {object} hooksObj key-value pairs which define the task hooks
+*/
+Task.prototype.hooks = function (hooksObj) {
+  var _this = this;
+
+  var hookKeys, slotIsArray, hookSlot;
+  if (!_.isObject(hooksObj) || _.isArray(hooksObj)) {
+    throw new Error('Hooks parameter must be an object');
+  }
+
+  // Add new hooks to _hooks object and initialize new keys
+  hookKeys = _.keys(hooksObj);
+  _.each(hookKeys, function (hookKey) {
+    hookSlot = _this._hooks[hookKey];
+    slotIsArray = _.isArray(hookSlot);
+
+    if (!slotIsArray) {
+      _this._hooks[hookKey] = [];
+      hookSlot = _this._hooks[hookKey]; // Reassign variable (because it was pointing to undef)
     }
 
-    // Add new hooks to _hooks object and initialize new keys
-    hookKeys = _.keys(hooksObj);
-    _.each(hookKeys, function (hookKey) {
-      hookSlot = _this._hooks[hookKey];
-      slotIsArray = _.isArray(hookSlot);
+    hookSlot.push(hooksObj[hookKey]);
+  });
 
-      if (!slotIsArray) {
-        _this._hooks[hookKey] = [];
-        hookSlot = _this._hooks[hookKey]; // Reassign variable (because it was pointing to undef)
-      }
+  return this;
+};
 
-      hookSlot.push(hooksObj[hookKey]);
-    });
+/**
+* Sets the task's builder method overriding its default building behaviour
+* @param {function} builderMethod method which defines task's building logic, if the builder returns
+* an array, the task will be instanced once for every element in the array, passing each element in
+* it as a parameter to its corresponding task
+*/
+Task.prototype.builder = function (builderMethod) {
+  if (!_.isFunction(builderMethod)) throw new Error('Builder must be a function');
 
-    return _this;
-  };
-
-  this.builder = function (builderCb) {
-    if (!_.isFunction(builderCb)) throw new Error('Builder must be a function');
-
-    _this._builder = builderCb;
-    return _this;
-  };
-}
+  this._builder = builderMethod;
+  return this;
+};
 
 module.exports = Task;
