@@ -1,5 +1,6 @@
 /**
 * @author Rafael Vidaurre
+* @requires Utils
 */
 
 'use strict';
@@ -12,12 +13,22 @@ var utils = require('./utils');
 */
 function Task () {
   var _this = this;
-  _this._main = null;
-  _this._hooks = {};
-  _this._builder = function () {return {};}; // Default builder returns empty object
+
+  /**
+  * The main method of the Task
+  * @private
+  */
+  this._main = null;
+
+  /**
+  * Set of hooks for the task, defined at setup time
+  * @private
+  */
+  this._hooks = {};
+  this._builder = function () {return {};}; // Default builder returns empty object
 
   // Sets main task method
-  _this.main = function (mainCb) {
+  this.main = function (mainCb) {
     if (!_.isFunction(mainCb)) throw new Error('Main method must be a function');
     _this._main = mainCb;
 
@@ -25,7 +36,7 @@ function Task () {
   };
 
   // Appends hooks to the hooks object
-  _this.hooks = function (hooksObj) {
+  this.hooks = function (hooksObj) {
     var hookKeys, slotIsArray, hookSlot;
     if (!_.isObject(hooksObj) || _.isArray(hooksObj)) {
       throw new Error('Hooks parameter must be an object');
@@ -48,7 +59,7 @@ function Task () {
     return _this;
   };
 
-  _this.builder = function (builderCb) {
+  this.builder = function (builderCb) {
     if (!_.isFunction(builderCb)) throw new Error('Builder must be a function');
 
     _this._builder = builderCb;

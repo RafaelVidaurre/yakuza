@@ -10,7 +10,6 @@ var _ = require('lodash');
 module.exports = {
   /**
   * Tells wether a key is present in a given object
-  * @function
   * @inner
   */
   hasKey: function (obj, key) {
