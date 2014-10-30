@@ -15,6 +15,18 @@ var _ = require('lodash');
 */
 function Job (uid, scraper, agent) {
   /**
+  * Next execution plan group idx from which we will build the next execution queue
+  * @private
+  */
+  this._planIdx = 0;
+
+  /**
+  * Next execution queue group idx to run
+  * @private
+  */
+  this._executionQueueIdx = 0;
+
+  /**
   * Parameters that will be provided to the Task instances
   * @private
   */
@@ -30,7 +42,7 @@ function Job (uid, scraper, agent) {
   * Represents enqueued tasks' sincrony and execution order
   * @private
   */
-  this._executionPlan = null;
+  this._plan = null;
 
   /**
   * Queue of tasks built in runtime defined by task builders and execution plan
@@ -65,11 +77,11 @@ Job.prototype._setUid = function (argUid) {
 * Build execution groups to run based on plan and enqueued tasks
 * @private
 */
-Job.prototype._buildExecutionPlan = function () {
+Job.prototype._buildPlan = function () {
   var _this = this;
   var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
 
-  executionPlan = this.agent._executionPlan;
+  executionPlan = this.agent._plan;
   newExecutionPlan = [];
   newTaskGroup = [];
 
@@ -91,7 +103,16 @@ Job.prototype._buildExecutionPlan = function () {
     }
   });
 
-  this._executionPlan = newExecutionPlan;
+  this._plan = newExecutionPlan;
+};
+
+/**
+* Takes the next execution plan group and processes it into the task queue
+*/
+Job.prototype._buildNextExecutionQueue = function () {
+  var currentPlanGroup;
+
+  currentPlanGroup = this._plan[this._planIdx];
 };
 
 /**
@@ -123,7 +144,8 @@ Job.prototype.enqueue = function (taskId) {
 /** Begin the scraping job */
 Job.prototype.run = function () {
   this.agent._applySetup();
-  this._buildExecutionPlan();
+  this._buildPlan();
+  this._buildNextExecutionQueue();
 };
 
 

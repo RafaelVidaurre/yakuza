@@ -8,7 +8,7 @@ describe('Agent', function () {
     agentPlanned = new Agent('agentPlanned');
 
     agentPlanned.setup(function (config) {
-      config.executionPlan = ['task1', [{taskId: 'task2', syncronous: true}, 'task3']];
+      config.plan = ['task1', [{taskId: 'task2', syncronous: true}, 'task3']];
     });
   });
 
@@ -50,7 +50,7 @@ describe('Agent', function () {
       expect(agentPlanned._config.b).toEqual('hello');
     });
 
-    it('should throw an exception if no executionPlan has been defined', function () {
+    it('should throw an exception if no plan has been defined', function () {
       var newAgent = new Agent('agentOne');
       var errMsg = 'Agent agentOne has no execution plan, use the config object provided' +
         ' by the setup method to define an execution plan';
@@ -59,7 +59,7 @@ describe('Agent', function () {
     });
 
     it('should format execution plan as an array of arrays of objects', function () {
-      var expectedExecPlan = [
+      var expectedPlan = [
         [{taskId: 'task1'}],
         [
           {taskId: 'task2', syncronous: true},
@@ -67,7 +67,7 @@ describe('Agent', function () {
         ]
       ];
       agentPlanned._applySetup();
-      expect(agentPlanned._executionPlan).toEqual(expectedExecPlan);
+      expect(agentPlanned._plan).toEqual(expectedPlan);
     });
   });
 

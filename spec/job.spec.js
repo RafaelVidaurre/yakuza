@@ -70,23 +70,23 @@ describe('Job', function () {
     });
   });
 
-  describe('#_buildExecutionPlan', function () {
+  describe('#_buildPlan', function () {
     var agent, newJob;
     beforeEach(function () {
       agent = new Agent('agentOne');
       newJob = new Job('jobOne', undefined, agent);
     });
 
-    it('should build _executionPlan following it\'s agent\'s execution plan', function () {
+    it('should build _plan following it\'s agent\'s execution plan', function () {
       agent.setup(function (config) {
-        config.executionPlan = [{taskId: 'task1', syncronous: true}, 'task2', ['task3', 'task4'],
+        config.plan = [{taskId: 'task1', syncronous: true}, 'task2', ['task3', 'task4'],
           'task5', ['task6']];
       });
       agent._applySetup();
       newJob.enqueue('task1'); newJob.enqueue('task3'); newJob.enqueue('task4'); newJob.enqueue('task5');
       newJob.enqueue('task6');
-      newJob._buildExecutionPlan();
-      expect(newJob._executionPlan).toEqual([
+      newJob._buildPlan();
+      expect(newJob._plan).toEqual([
         [{taskId:'task1', syncronous: true}], [{taskId: 'task3'}, {taskId: 'task4'}],
         [{taskId:'task5'}],
         [{taskId: 'task6'}]

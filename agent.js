@@ -24,7 +24,7 @@ function Agent (id) {
   * Formatted execution plan created based on the agent's config object
   * @private
   */
-  this._executionPlan = null;
+  this._plan = null;
 
   /**
   * Set of task instances for this agent
@@ -59,38 +59,38 @@ Agent.prototype._applyConfigCallbacks = function () {
 * Turns every element in the execution plan into an array for type consistency
 * @private
 */
-Agent.prototype._formatExecutionPlan = function () {
+Agent.prototype._formatPlan = function () {
   var _this = this;
-  var formattedExecutionPlan, currentTier, formattedTier, formattedTaskPlan;
-  formattedExecutionPlan = [];
+  var formattedPlan, currentGroup, formattedGroup, formattedTaskObj;
+  formattedPlan = [];
 
-  if (_this._config.executionPlan === undefined) {
+  if (_this._config.plan === undefined) {
     throw new Error('Agent '+_this.id+' has no execution plan, use the config object provided' +
       ' by the setup method to define an execution plan');
   }
 
   // Turn each tier into an array
-  _.each(_this._config.executionPlan, function (executionGroup) {
-    currentTier = _.isArray(executionGroup) ? executionGroup : [executionGroup];
-    formattedTier = [];
+  _.each(_this._config.plan, function (taskGroup) {
+    currentGroup = _.isArray(taskGroup) ? taskGroup : [taskGroup];
+    formattedGroup = [];
 
     // Turn each element in the array into an object
-    _.each(currentTier, function (taskPlan) {
-      formattedTaskPlan = {};
+    _.each(currentGroup, function (taskObj) {
+      formattedTaskObj = {};
 
-      if (_.isString(taskPlan)) {
-        formattedTaskPlan.taskId = taskPlan;
+      if (_.isString(taskObj)) {
+        formattedTaskObj.taskId = taskObj;
       } else {
-        formattedTaskPlan = taskPlan;
+        formattedTaskObj = taskObj;
       }
 
-      formattedTier.push(formattedTaskPlan);
+      formattedGroup.push(formattedTaskObj);
     });
 
-    formattedExecutionPlan.push(formattedTier);
+    formattedPlan.push(formattedGroup);
   });
 
-  _this._executionPlan = formattedExecutionPlan;
+  _this._plan = formattedPlan;
 };
 
 /**
@@ -99,7 +99,7 @@ Agent.prototype._formatExecutionPlan = function () {
 */
 Agent.prototype._applySetup = function () {
   this._applyConfigCallbacks();
-  this._formatExecutionPlan();
+  this._formatPlan();
 };
 
 /**
