@@ -93,4 +93,16 @@ describe('Job', function () {
       ]);
     });
   });
+
+  describe('#_processPlanGroup', function () {
+    var agent, newJob;
+    beforeEach(function () {
+      agent = new Agent('agentOne');
+      newJob = new Job('jobOne', undefined, agent);
+    });
+
+    it('should create next executionGroup based on its plan', function () {
+      // TODO: Finish this after implementing agent>task methods
+    });
+  });
 });

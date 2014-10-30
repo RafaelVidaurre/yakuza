@@ -47,9 +47,9 @@ describe('Task', function () {
   describe('#hooks', function () {
     it('should throw error if argument isn\'t an object', function () {
       var errMsg = 'Hooks parameter must be an object';
-      expect(function () {task.hooks(123)}).toThrow(new Error(errMsg));
-      expect(function () {task.hooks("foo")}).toThrow(new Error(errMsg));
-      expect(function () {task.hooks([])}).toThrow(new Error(errMsg));
+      expect(function () {task.hooks(123);}).toThrow(new Error(errMsg));
+      expect(function () {task.hooks("foo");}).toThrow(new Error(errMsg));
+      expect(function () {task.hooks([]);}).toThrow(new Error(errMsg));
     });
 
     it('shoudn\'t throw error if argument is a valid object', function () {
@@ -61,28 +61,28 @@ describe('Task', function () {
       task.hooks({newHook: function () {return 1;}});
       keys = _.keys(task._hooks);
       expect(_.contains(keys, 'newHook')).toBe(true);
-      expect(task._hooks['newHook'].length).toBe(1);
+      expect(task._hooks.newHook.length).toBe(1);
     });
 
     it('should append a new function if hook slot is already initialized', function () {
       task.hooks({newHook: function () {return 1;}});
       keys = _.keys(task._hooks);
-      expect(task._hooks['newHook'].length).toBe(1);
+      expect(task._hooks.newHook.length).toBe(1);
       task.hooks({newHook: function () {return 2;}});
       keys = _.keys(task._hooks);
-      expect(task._hooks['newHook'].length).toBe(2);
+      expect(task._hooks.newHook.length).toBe(2);
       task.hooks({otherHook: function () {return 2;}});
       keys = _.keys(task._hooks);
-      expect(task._hooks['otherHook'].length).toBe(1);
+      expect(task._hooks.newHook.length).toBe(1);
     });
   });
 
   describe('#builder', function () {
     it('should throw error if argument is\'t a function', function () {
       var errMsg = 'Builder must be a function';
-      expect(function () {task.builder(123)}).toThrow(new Error(errMsg));
-      expect(function () {task.builder([])}).toThrow(new Error(errMsg));
-      expect(function () {task.builder("")}).toThrow(new Error(errMsg));
+      expect(function () {task.builder(123);}).toThrow(new Error(errMsg));
+      expect(function () {task.builder([]);}).toThrow(new Error(errMsg));
+      expect(function () {task.builder("");}).toThrow(new Error(errMsg));
     });
 
     it('should not throw error if argument is a function', function () {
@@ -91,10 +91,16 @@ describe('Task', function () {
 
     it('should replace default builder function', function () {
       var defaultFunc = task._builder;
-      var otherFunc = function () {return 2};
+      var otherFunc = function () {return 2;};
       task.builder(otherFunc);
       expect(task._builder).not.toBe(defaultFunc);
       expect(task._builder).toBe(otherFunc);
+    });
+  });
+
+  describe('#_builder', function () {
+    it('should return an array of built tasks depending on the builder\'s output', function () {
+      // TODO: Finish this test
     });
   });
 });

@@ -1,6 +1,7 @@
 /**
 * @author Rafael Vidaurre
 * @requires Utils
+* @requires Task
 * @module Agent
 */
 
@@ -8,6 +9,7 @@
 
 var _ = require('lodash');
 var utils = require('./utils');
+var Task = require('./task');
 
 /**
 * @class

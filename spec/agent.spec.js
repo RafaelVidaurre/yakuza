@@ -27,18 +27,6 @@ describe('Agent', function () {
     });
   });
 
-  describe('#setup', function () {
-    it('should enqueue setup callbacks', function () {
-      var functionOne = function () {return 1;};
-      var functionTwo = function () {return 2;};
-      agent.setup(functionOne);
-      expect(agent._configCallbacks[0]).toBe(functionOne);
-      agent.setup(functionTwo);
-      expect(agent._configCallbacks[0]).toBe(functionOne);
-      expect(agent._configCallbacks[1]).toBe(functionTwo);
-    });
-  });
-
   describe('#_applySetup', function () {
     it('should apply config callbacks in FIFO order', function () {
       agentPlanned.setup(function (config) {config.a = 1;});
@@ -71,4 +59,21 @@ describe('Agent', function () {
     });
   });
 
+  describe('#setup', function () {
+    it('should enqueue setup callbacks', function () {
+      var functionOne = function () {return 1;};
+      var functionTwo = function () {return 2;};
+      agent.setup(functionOne);
+      expect(agent._configCallbacks[0]).toBe(functionOne);
+      agent.setup(functionTwo);
+      expect(agent._configCallbacks[0]).toBe(functionOne);
+      expect(agent._configCallbacks[1]).toBe(functionTwo);
+    });
+  });
+
+  describe('#task', function () {
+    it('should return a new task', function () {
+
+    });
+  });
 });

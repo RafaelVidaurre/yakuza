@@ -107,12 +107,21 @@ Job.prototype._buildPlan = function () {
 };
 
 /**
-* Takes the next execution plan group and processes it into the task queue
+* Takes a plan group and creates one or more execution groups to be inserted into the execution
+* queue
+* @param {array} array of objects which represent tasks methods in a plan
+* @return {array} array of arrays of objects representing task methods with their respective
+* configuration, each element in the outermost array represents
+* an execution group to be inserted into the execution queue
+* @private
 */
-Job.prototype._buildNextExecutionQueue = function () {
-  var currentPlanGroup;
+Job.prototype._processPlanGroup = function (planGroup) {
+  // TODO: Finish this
+};
 
-  currentPlanGroup = this._plan[this._planIdx];
+Job.prototype._prepareRun = function () {
+  this.agent._applySetup();
+  this._buildPlan();
 };
 
 /**
@@ -143,9 +152,8 @@ Job.prototype.enqueue = function (taskId) {
 
 /** Begin the scraping job */
 Job.prototype.run = function () {
-  this.agent._applySetup();
-  this._buildPlan();
-  this._buildNextExecutionQueue();
+  this._prepareRun();
+  this._processPlanGroup(this._planIdx);
 };
 
 

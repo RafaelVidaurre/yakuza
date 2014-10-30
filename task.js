@@ -9,6 +9,28 @@ var _ = require('lodash');
 var utils = require('./utils');
 
 /**
+* Is the product of a Task being built, contains status data, the main method of the task and other,
+* stuff required for it to be run
+* @class
+*/
+function BuiltTask (main, params) {
+  /**
+  * Parameters which will be used by its main method
+  */
+  this.params = params;
+
+  /**
+  * Main method to be run
+  */
+  this.main = main;
+
+  /**
+  * Number of retries performed by the built task
+  */
+  this.retries = 0;
+}
+
+/**
 * @class
 */
 function Task () {
@@ -30,6 +52,13 @@ function Task () {
   */
   this._builder = function () {return {};};
 }
+
+/**
+* Executes the build function and builds
+*/
+Task.prototype._build = function () {
+  
+};
 
 /**
 * Sets main task's method
