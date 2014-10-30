@@ -68,7 +68,7 @@ Job.prototype._setUid = function (argUid) {
 Job.prototype._buildExecutionPlan = function () {
   var _this = this;
   var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
-  
+
   executionPlan = this.agent._executionPlan;
   newExecutionPlan = [];
   newTaskGroup = [];
@@ -124,7 +124,6 @@ Job.prototype.enqueue = function (taskId) {
 Job.prototype.run = function () {
   this.agent._applySetup();
   this._buildExecutionPlan();
-
 };
 
 
