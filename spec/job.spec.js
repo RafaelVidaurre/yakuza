@@ -35,31 +35,31 @@ describe('Job', function () {
   describe('#params', function () {
     it('should throw error if params is\'t an object', function () {
       var errMsg = 'Params must be an object';
-      expect(function () {job.params('')}).toThrow(new Error(errMsg));
-      expect(function () {job.params(123)}).toThrow(new Error(errMsg));
-      expect(function () {job.params([])}).toThrow(new Error(errMsg));
-      expect(function () {job.params(null)}).toThrow(new Error(errMsg));
+      expect(function () {job.params('');}).toThrow(new Error(errMsg));
+      expect(function () {job.params(123);}).toThrow(new Error(errMsg));
+      expect(function () {job.params([]);}).toThrow(new Error(errMsg));
+      expect(function () {job.params(null);}).toThrow(new Error(errMsg));
     });
 
     it('should extend the params object with new properties in object', function () {
       var newJob = new Job();
       var newJob2 = new Job();
       newJob.params({a: 1});
-      expect(newJob._params['a']).toBe(1);
+      expect(newJob._params.a).toBe(1);
       newJob2._params = {z: 0};
       newJob2.params({z: 1, b: 10});
-      expect(newJob2._params['z']).toBe(1);
-      expect(newJob2._params['b']).toBe(10);
+      expect(newJob2._params.z).toBe(1);
+      expect(newJob2._params.b).toBe(10);
     });
   });
 
   describe('#enqueue', function () {
     it('should throw error if argument isn\'t a valid string', function () {
       var errMsg = 'enqueue params isn\'t a valid string';
-      expect(function () {job.enqueue([])}).toThrow(errMsg);
-      expect(function () {job.enqueue('')}).toThrow(errMsg);
-      expect(function () {job.enqueue(123)}).toThrow(errMsg);
-      expect(function () {job.enqueue(null)}).toThrow(errMsg);
+      expect(function () {job.enqueue([]);}).toThrow(errMsg);
+      expect(function () {job.enqueue('');}).toThrow(errMsg);
+      expect(function () {job.enqueue(123);}).toThrow(errMsg);
+      expect(function () {job.enqueue(null);}).toThrow(errMsg);
     });
 
     it('should append string given to _enqueuedTasks', function () {
@@ -87,6 +87,5 @@ describe('Job', function () {
       newJob._buildExecutionPlan();
       expect(newJob._executionPlan).toEqual([['task1'], ['task3', 'task4'], ['task5'], ['task6']]);
     });
-
   });
 });

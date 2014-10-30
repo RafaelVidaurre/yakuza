@@ -72,7 +72,7 @@ Job.prototype._buildExecutionPlan = function () {
         newTaskGroup.push(enqueuedTask);
       }
     });
-    // Group was created
+
     if (newTaskGroup.length > 0) {
       newExecutionPlan.push(newTaskGroup);
       newTaskGroup = [];
@@ -83,8 +83,8 @@ Job.prototype._buildExecutionPlan = function () {
 };
 
 /**
-* Sets the Job's uid
-* @param {object} paramsObj Object containing key-value which are provided to the job's tasks
+* Sets parameters which the job will provide to its tasks
+* @param {object} paramsObj Object containing key-value pair
 */
 Job.prototype.params = function (paramsObj) {
   if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
@@ -95,7 +95,7 @@ Job.prototype.params = function (paramsObj) {
 };
 
 /**
-* Defines a task to be run by Job.prototype job
+* Adds a task to be run by Job.prototype job
 * @param {string} taskId Id of the task to be run
 */
 Job.prototype.enqueue = function (taskId) {
@@ -111,7 +111,7 @@ Job.prototype.enqueue = function (taskId) {
 /** Begin the scraping job */
 Job.prototype.run = function () {
   this.agent._applySetup();
-  this._buildTaskQueue();
+  this._buildExecutionPlan();
 };
 
 
