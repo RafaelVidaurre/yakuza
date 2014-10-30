@@ -1,27 +1,22 @@
-(/** @lends <global> */
+/**
+* Set of miscellaneous utilities
+* @module Utils
+* @author Rafael Vidaurre
+*/
+'use strict';
 
-function () {
-  'use strict';
+var _ = require('lodash');
 
-  /**
-  * @author Rafael Vidaurre
-  * Set of miscellaneous utilities
-  * @exports Utils
-  */
+/**
+* Tells wether a key is present in a given object
+* @function
+*/
+function hasKey (obj, key) {
+  return _.contains(_.keys(obj), key);
+}
 
-  var _ = require('lodash');
+console.log();
 
-  module.exports = {
-    /**
-    * Tells wether a key exists in an object
-    * @func Utils/hasKey
-    * @param {object} obj
-    * @param {string} key
-    * @returns {boolean}
-    */
-    hasKey: function (obj, key) {
-      return _.contains(_.keys(obj), key);
-    }
-  };
-
-}());
+module.exports = {
+  hasKey: hasKey
+};

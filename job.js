@@ -1,89 +1,83 @@
-(/** @lends <global> */
+/**
+* @author Rafael Vidaurre
+* @exports Job
+*/
 
-function () {
-  'use strict';
+'use strict';
 
-  /**
-  * @author Rafael Vidaurre
-  * @exports Job
-  */
+var _ = require('lodash');
 
-  var _ = require('lodash');
+/**
+* @class
+*/
+function Job (uid, scraper, agent) {
+  var _this = this;
 
-  /**
-  * @class
-  */
-  function Job (uid, scraper, agent) {
-    var _this = this;
+  _this._params = {};
+  _this._enqueuedTasks = [];
+  _this._executionPlan = null;
+  _this.uid = null;
+  _this.agent = agent;
+  _this.scraper = scraper;
 
-    _this._params = {};
-    _this._enqueuedTasks = [];
-    _this._executionPlan = null;
-    _this.uid = null;
-    _this.agent = agent;
-    _this.scraper = scraper;
+  _this._setUid = function (argUid) {
+    if (!argUid || !_.isString(argUid) || argUid.length <= 0) {
+      throw new Error('Job uid must be a valid string');
+    }
+    _this.uid = argUid;
+  };
 
-    _this._setUid = function (argUid) {
-      if (!argUid || !_.isString(argUid) || argUid.length <= 0) {
-        throw new Error('Job uid must be a valid string');
-      }
-      _this.uid = argUid;
-    };
+  // Build execution groups to run based on plan and enqueued tasks
+  _this._buildExecutionPlan = function () {
+    var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup;
+    executionPlan = _this.agent._config.executionPlan;
+    newExecutionPlan = [];
+    newTaskGroup = [];
 
-    // Build execution groups to run based on plan and enqueued tasks
-    _this._buildExecutionPlan = function () {
-      var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup;
-      executionPlan = _this.agent._config.executionPlan;
-      newExecutionPlan = [];
-      newTaskGroup = [];
-
-      _.each(executionPlan, function (executionGroup) {
-        _.each(_this._enqueuedTasks, function (enqueuedTask) {
-          if (_.contains(executionGroup, enqueuedTask)) {
-            newTaskGroup.push(enqueuedTask);
-          }
-        });
-        // Group was created
-        if (newTaskGroup.length > 0) {
-          newExecutionPlan.push(newTaskGroup);
-          newTaskGroup = [];
+    _.each(executionPlan, function (executionGroup) {
+      _.each(_this._enqueuedTasks, function (enqueuedTask) {
+        if (_.contains(executionGroup, enqueuedTask)) {
+          newTaskGroup.push(enqueuedTask);
         }
       });
-
-      _this._executionPlan = newExecutionPlan;
-    };
-
-    // Set job data
-    if (uid !== undefined) _this._setUid(uid);
-
-    _this.params = function (paramsObj) {
-      if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
-
-      _.extend(_this._params, paramsObj);
-
-      return _this;
-    };
-
-    // Enqueue tasks by their task_id
-    _this.enqueue = function (taskId) {
-      if (!_.isString(taskId) || taskId.length <= 0) {
-        throw Error('enqueue params isn\'t a valid string');
+      // Group was created
+      if (newTaskGroup.length > 0) {
+        newExecutionPlan.push(newTaskGroup);
+        newTaskGroup = [];
       }
+    });
 
-      _this._enqueuedTasks.push(taskId);
+    _this._executionPlan = newExecutionPlan;
+  };
 
-      return _this;
-    };
+  // Set job data
+  if (uid !== undefined) _this._setUid(uid);
 
-    // Begin scraping job
-    _this.run = function () {
-      _this.agent._applySetup();
-      _this._buildTaskQueue();
-    };
+  _this.params = function (paramsObj) {
+    if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
 
-  }
+    _.extend(_this._params, paramsObj);
 
-  module.exports = Job;
+    return _this;
+  };
 
+  // Enqueue tasks by their task_id
+  _this.enqueue = function (taskId) {
+    if (!_.isString(taskId) || taskId.length <= 0) {
+      throw Error('enqueue params isn\'t a valid string');
+    }
 
-}());
+    _this._enqueuedTasks.push(taskId);
+
+    return _this;
+  };
+
+  // Begin scraping job
+  _this.run = function () {
+    _this.agent._applySetup();
+    _this._buildTaskQueue();
+  };
+
+}
+
+module.exports = Job;
