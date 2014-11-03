@@ -22,5 +22,4 @@ function BuiltTask (main, params) {
   this.retries = 0;
 }
 
-
 module.exports = BuiltTask;
