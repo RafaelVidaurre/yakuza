@@ -34,8 +34,9 @@ function Task () {
 }
 
 /**
-* Executes the build function and builds
+* Executes the builder function and builds the BuiltTask instances
 * @private
+* @return {array} An array of BuiltTask instances
 */
 Task.prototype._build = function () {
   var _this = this;

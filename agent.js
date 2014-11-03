@@ -109,11 +109,25 @@ Agent.prototype._applySetup = function () {
 * @param {function} cbConfig method which modifies the agent's config object (passed as argument)
 */
 Agent.prototype.setup = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) { throw Error('Config argument must be a function'); }
+  if (!_.isFunction(cbConfig)) throw new Error('Config argument must be a function');
 
   this._configCallbacks.push(cbConfig);
 
   return Agent;
+};
+
+/**
+* Creates or retrieves a task for a given task id
+* @param {string} taskId id which identifies the task
+* @private
+* @return {Task}
+*/
+Agent.prototype.task = function (taskId) {
+  if (!utils.hasKey(this._tasks, taskId)) {
+    this._tasks[taskId] = new Task(taskId);
+  }
+
+  return this._tasks[taskId];
 };
 
 

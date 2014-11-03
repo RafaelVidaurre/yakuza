@@ -1,4 +1,5 @@
 var Agent = require('../agent');
+var Task = require('../task');
 var _ = require('underscore');
 
 describe('Agent', function () {
@@ -72,8 +73,22 @@ describe('Agent', function () {
   });
 
   describe('#task', function () {
-    it('should retrieve or create a new task depending on task id', function () {
+    it('should return a task instance', function () {
+      var task = agent.task('task1');
+      expect(task instanceof Task).toBe(true);
+    });
 
+    it('should set the created task in the _tasks object based on id passed', function () {
+      agent.task('task1');
+      expect(agent._tasks.task1).not.toBe(undefined);
+    });
+
+    it('it should not create a new task if there is one with given id', function () {
+      var task = agent.task('task1');
+      var task2 = agent.task('task1');
+      var task3 = agent.task('task3');
+      expect(task).toBe(task2);
+      expect(task).not.toBe(task3);
     });
   });
 });

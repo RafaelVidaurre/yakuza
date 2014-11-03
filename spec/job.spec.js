@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var Job = require('../job');
 var Agent = require('../agent');
+var BuiltTask = require('../built-task');
 
 describe('Job', function () {
   var job;
@@ -70,6 +71,24 @@ describe('Job', function () {
     });
   });
 
+  describe('#_buildTask', function () {
+    var agent, newJob;
+    beforeEach(function () {
+      agent = new Agent('agentOne');
+      newJob = new Job('jobOne', undefined, agent);
+    });
+
+    it('should throw an error if task trying to be built is not defined', function () {
+      var errMsg = 'Task with id task1 does not exist in agent agentOne';
+      expect(function () {newJob._buildTask({taskId: 'task1'});}).toThrow(new Error(errMsg));
+    });
+
+    it('should return an array of BuiltTask instances', function () {
+      agent.task('task1').main(function () {});
+      expect(newJob._buildTask({taskId: 'task1'})[0] instanceof BuiltTask).toBe(true);
+    });
+  });
+
   describe('#_buildPlan', function () {
     var agent, newJob;
     beforeEach(function () {
@@ -102,7 +121,12 @@ describe('Job', function () {
     });
 
     it('should create next executionGroup based on its plan', function () {
-      // TODO: Finish this after implementing agent>task methods
+      var fakePlan = [
+        [{taskId: 't1'}, {taskId: 't2'}],
+        [{taskId: 't3'}],
+        [{taskId: 't4'}]
+      ];
+      newJob._processPlanGroup(fakePlan);
     });
   });
 });

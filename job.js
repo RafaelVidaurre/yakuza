@@ -50,12 +50,14 @@ function Job (uid, scraper, agent) {
   */
   this._executionQueue = [];
 
+  /** Reference to the Agent instance being used by the Job */
+  this._agent = agent;
+
+  /** Reference to the Scraper instance being used by the Job */
+  this._scraper = scraper;
+
   /** Unique Job identifier */
   this.uid = null;
-  /** Reference to the Agent instance being used by the Job */
-  this.agent = agent;
-  /** Reference to the Scraper instance being used by the Job */
-  this.scraper = scraper;
 
   // Set job's uid
   if (uid !== undefined) this._setUid(uid);
@@ -81,7 +83,7 @@ Job.prototype._buildPlan = function () {
   var _this = this;
   var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
 
-  executionPlan = this.agent._plan;
+  executionPlan = this._agent._plan;
   newExecutionPlan = [];
   newTaskGroup = [];
 
@@ -107,16 +109,33 @@ Job.prototype._buildPlan = function () {
 };
 
 /**
+* Returns an undefined number of BuiltTask instances based on a task's builder output
+* @param {object} taskRecipe contains specifications to build a certain task
+* @private
+* @return {array} an array of BuiltTasks
+*/
+Job.prototype._buildTask = function (taskRecipe) {
+  var errMsg, task;
+
+  task = this._agent._tasks[taskRecipe.taskId];
+  errMsg = 'Task with id ' + taskRecipe.taskId + ' does not exist in agent ' + this._agent.id;
+
+  if (task === undefined) throw new Error(errMsg);
+
+  return task._build();
+};
+
+/**
 * Takes a plan group and creates one or more execution groups to be inserted into the execution
 * queue
 * @param {array} array of objects which represent tasks methods in a plan
-* @return {array} array of arrays of objects representing task methods with their respective
+* @private
+* @return {array} array of arrays of BuiltTask instances with their respective
 * configuration, each element in the outermost array represents
 * an execution group to be inserted into the execution queue
-* @private
 */
 Job.prototype._processPlanGroup = function (planGroup) {
-  // TODO: Finish this
+
 };
 
 Job.prototype._prepareRun = function () {
@@ -153,7 +172,7 @@ Job.prototype.enqueue = function (taskId) {
 /** Begin the scraping job */
 Job.prototype.run = function () {
   this._prepareRun();
-  this._processPlanGroup(this._planIdx);
+  this._processPlanGroup(this._plan[this._planIdx]);
 };
 
 
