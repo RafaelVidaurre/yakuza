@@ -72,7 +72,7 @@ describe('Agent', function () {
   });
 
   describe('#task', function () {
-    it('should return a new task', function () {
+    it('should retrieve or create a new task depending on task id', function () {
 
     });
   });

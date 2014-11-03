@@ -1,3 +1,8 @@
+/**
+* @author Rafael Vidaurre
+* @module BuiltTask
+*/
+
 'use strict';
 
 /**
