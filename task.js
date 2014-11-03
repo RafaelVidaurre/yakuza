@@ -7,29 +7,7 @@
 
 var _ = require('lodash');
 var utils = require('./utils');
-
-/**
-* Is the product of a Task being built, contains status data, the main method of the task and other,
-* stuff required for it to be run
-* @class
-*/
-function BuiltTask (main, params) {
-  /**
-  * Parameters which will be used by its main method
-  */
-  this.params = params;
-
-  /**
-  * Main method to be run
-  */
-  this.main = main;
-
-  /**
-  * Number of retries performed by the built task
-  */
-  this.retries = 0;
-}
-
+var BuiltTask = require('./built-task');
 /**
 * @class
 */
@@ -55,9 +33,24 @@ function Task () {
 
 /**
 * Executes the build function and builds
+* @private
 */
 Task.prototype._build = function () {
-  
+  var _this = this;
+  var builderOutput, paramSets, builtTasks, builtTask;
+
+  if (!_.isFunction(this._main)) throw new Error('Cannot build task with no main method set');
+
+  builtTasks = [];
+  // TODO: Here we will expose certain variables via arguments for builders to use
+  paramSets = utils.arrayify(this._builder());
+
+  _.each(paramSets, function (paramSet) {
+    builtTask = new BuiltTask(_this._main, paramSet);
+    builtTasks.push(builtTask);
+  });
+
+  return builtTasks;
 };
 
 /**
@@ -78,8 +71,8 @@ Task.prototype.main = function (mainMethod) {
 */
 Task.prototype.hooks = function (hooksObj) {
   var _this = this;
-
   var hookKeys, slotIsArray, hookSlot;
+
   if (!_.isObject(hooksObj) || _.isArray(hooksObj)) {
     throw new Error('Hooks parameter must be an object');
   }
