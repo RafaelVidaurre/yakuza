@@ -110,15 +110,15 @@ Job.prototype._buildPlan = function () {
 
 /**
 * Returns an undefined number of Task instances based on a taskDefinition's builder output
-* @param {object} taskRecipe contains specifications to build a certain taskDefinition
+* @param {object} taskSpecs contains specifications to build a certain Task via it's TaskDefinition
 * @private
 * @return {array} an array of Tasks
 */
-Job.prototype._buildTask = function (taskRecipe) {
+Job.prototype._buildTask = function (taskSpecs) {
   var errMsg, taskDefinition;
 
-  taskDefinition = this._agent._taskDefinitions[taskRecipe.taskId];
-  errMsg = 'Task with id ' + taskRecipe.taskId + ' does not exist in agent ' + this._agent.id;
+  taskDefinition = this._agent._taskDefinitions[taskSpecs.taskId];
+  errMsg = 'Task with id ' + taskSpecs.taskId + ' does not exist in agent ' + this._agent.id;
 
   if (taskDefinition === undefined) throw new Error(errMsg);
 
@@ -126,18 +126,52 @@ Job.prototype._buildTask = function (taskRecipe) {
 };
 
 /**
-* Takes a plan group and creates one or more execution groups to be inserted into the execution
+* Takes a plan group and creates the next execution block to be inserted into the execution
 * queue
 * @param {array} array of objects which represent tasks methods in a plan
 * @private
-* @return {array} array of arrays of Task instances with their respective
-* configuration, each element in the outermost array represents
-* an execution group to be inserted into the execution queue
+* @return {array} array of objects which contain Task instances with their execution data
+* @example
+* // Input example
+* [{taskId: 1, sync: true}, {taskId: 2}, {taskId: 3}]
+* // Output
+* // [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
-Job.prototype._processPlanGroup = function (planGroup) {
+Job.prototype._buildExecutionBlock = function (planGroup) {
+  var _this = this;
+  var executionBlock, executionObject, tasks, previousObject;
 
+  executionBlock = [];
+
+  _.each(planGroup, function (taskSpecs) {
+    tasks = _this._buildTask(taskSpecs);
+    previousObject = null;
+
+    // Build all execution objects for a specific task and
+    _.each(tasks, function (task) {
+      executionObject = {task: task, next: null};
+
+      // Assign new object to previous object's `next` attribute if the task is self syncronous
+      if (taskSpecs.selfSync) {
+        if (previousObject) {
+          previousObject.next = executionObject;
+          previousObject = executionObject;
+        } else {
+          previousObject = executionObject;
+          executionBlock.push(executionObject);
+        }
+      } else {
+        executionBlock.push(executionObject);
+      }
+    });
+  });
+
+  return executionBlock;
 };
 
+/**
+* Does necessary stuff needed before running can ocur
+*/
 Job.prototype._prepareRun = function () {
   this.agent._applySetup();
   this._buildPlan();
@@ -172,7 +206,7 @@ Job.prototype.enqueue = function (taskId) {
 /** Begin the scraping job */
 Job.prototype.run = function () {
   this._prepareRun();
-  this._processPlanGroup(this._plan[this._planIdx]);
+  this._buildExecutionBlock(this._plan[this._planIdx]);
 };
 
 

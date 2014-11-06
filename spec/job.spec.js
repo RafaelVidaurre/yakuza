@@ -113,20 +113,39 @@ describe('Job', function () {
     });
   });
 
-  describe('#_processPlanGroup', function () {
+  describe('#_buildExecutionBlock', function () {
     var agent, newJob;
     beforeEach(function () {
       agent = new Agent('agentOne');
       newJob = new Job('jobOne', undefined, agent);
     });
 
-    it('should create next executionGroup based on its plan', function () {
-      var fakePlan = [
-        [{taskId: 't1'}, {taskId: 't2'}],
-        [{taskId: 't3'}],
-        [{taskId: 't4'}]
+    it('should create next executionBlock based on its plan', function () {
+      agent.task('t1').main(function () {return true;});
+      agent.task('t2').main(function () {return true;});
+      agent.task('t3').main(function () {return true;});
+      agent.task('t4').main(function () {return true;});
+      agent.task('t1').builder(function () {return [1,2,3];});
+      agent.task('t2').builder(function () {return [2,3];});
+      agent.task('t3').builder(function () {return 3;});
+      agent.task('t4').builder(function () {return [4];});
+
+      var fakePlanGroup = [{taskId: 't1', selfSync: true}, {taskId: 't2'},
+        {taskId: 't3'}, {taskId: 't4', selfSync: true}];
+      var executionBlock = newJob._buildExecutionBlock(fakePlanGroup);
+      var tasks1 = agent.task('t1')._build();
+      var tasks2 = agent.task('t2')._build();
+      var tasks3 = agent.task('t3')._build();
+      var tasks4 = agent.task('t4')._build();
+      var expectedExecutionBlock = [
+        {task: tasks1[0], next: {task: tasks1[1], next: {task: tasks1[2], next: null}}},
+        {task: tasks2[0], next: null},
+        {task: tasks2[1], next: null},
+        {task: tasks3[0], next: null},
+        {task: tasks4[0], next: null}
       ];
-      newJob._processPlanGroup(fakePlan);
+
+      expect(executionBlock).toEqual(expectedExecutionBlock);
     });
   });
 });
