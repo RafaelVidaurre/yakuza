@@ -45,7 +45,7 @@ function Job (uid, scraper, agent) {
   this._plan = null;
 
   /**
-  * Queue of tasks built in runtime defined by task builders and execution plan
+  * Queue of tasks built in runtime defined by taskDefinition builders and execution plan
   * @private
   */
   this._executionQueue = [];
@@ -109,20 +109,20 @@ Job.prototype._buildPlan = function () {
 };
 
 /**
-* Returns an undefined number of BuiltTask instances based on a task's builder output
-* @param {object} taskRecipe contains specifications to build a certain task
+* Returns an undefined number of Task instances based on a taskDefinition's builder output
+* @param {object} taskRecipe contains specifications to build a certain taskDefinition
 * @private
-* @return {array} an array of BuiltTasks
+* @return {array} an array of Tasks
 */
 Job.prototype._buildTask = function (taskRecipe) {
-  var errMsg, task;
+  var errMsg, taskDefinition;
 
-  task = this._agent._tasks[taskRecipe.taskId];
+  taskDefinition = this._agent._taskDefinitions[taskRecipe.taskId];
   errMsg = 'Task with id ' + taskRecipe.taskId + ' does not exist in agent ' + this._agent.id;
 
-  if (task === undefined) throw new Error(errMsg);
+  if (taskDefinition === undefined) throw new Error(errMsg);
 
-  return task._build();
+  return taskDefinition._build();
 };
 
 /**
@@ -130,7 +130,7 @@ Job.prototype._buildTask = function (taskRecipe) {
 * queue
 * @param {array} array of objects which represent tasks methods in a plan
 * @private
-* @return {array} array of arrays of BuiltTask instances with their respective
+* @return {array} array of arrays of Task instances with their respective
 * configuration, each element in the outermost array represents
 * an execution group to be inserted into the execution queue
 */
@@ -156,8 +156,8 @@ Job.prototype.params = function (paramsObj) {
 };
 
 /**
-* Adds a task to be run by Job.prototype job
-* @param {string} taskId Id of the task to be run
+* Adds a taskDefinition to be run by Job.prototype job
+* @param {string} taskId Id of the taskDefinition to be run
 */
 Job.prototype.enqueue = function (taskId) {
   if (!_.isString(taskId) || taskId.length <= 0) {

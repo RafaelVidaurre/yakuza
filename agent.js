@@ -1,7 +1,7 @@
 /**
 * @author Rafael Vidaurre
 * @requires Utils
-* @requires Task
+* @requires TaskDefinition
 * @module Agent
 */
 
@@ -9,7 +9,7 @@
 
 var _ = require('lodash');
 var utils = require('./utils');
-var Task = require('./task');
+var TaskDefinition = require('./task-definition');
 
 /**
 * @class
@@ -32,7 +32,7 @@ function Agent (id) {
   * Set of task instances for this agent
   * @private
   */
-  this._tasks = {};
+  this._taskDefinitions = {};
 
   /**
   * Agent's configuration object (set via config() function)
@@ -72,7 +72,7 @@ Agent.prototype._formatPlan = function () {
   }
 
   // Turn each tier into an array
-  _.each(_this._config.plan, function (taskGroup) {
+  _.each(this._config.plan, function (taskGroup) {
     currentGroup = _.isArray(taskGroup) ? taskGroup : [taskGroup];
     formattedGroup = [];
 
@@ -92,7 +92,7 @@ Agent.prototype._formatPlan = function () {
     formattedPlan.push(formattedGroup);
   });
 
-  _this._plan = formattedPlan;
+  this._plan = formattedPlan;
 };
 
 /**
@@ -120,14 +120,14 @@ Agent.prototype.setup = function (cbConfig) {
 * Creates or retrieves a task for a given task id
 * @param {string} taskId id which identifies the task
 * @private
-* @return {Task}
+* @return {TaskDefinition}
 */
 Agent.prototype.task = function (taskId) {
-  if (!utils.hasKey(this._tasks, taskId)) {
-    this._tasks[taskId] = new Task(taskId);
+  if (!utils.hasKey(this._taskDefinitions, taskId)) {
+    this._taskDefinitions[taskId] = new TaskDefinition(taskId);
   }
 
-  return this._tasks[taskId];
+  return this._taskDefinitions[taskId];
 };
 
 

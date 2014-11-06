@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var Job = require('../job');
 var Agent = require('../agent');
-var BuiltTask = require('../built-task');
+var Task = require('../task');
 
 describe('Job', function () {
   var job;
@@ -83,9 +83,9 @@ describe('Job', function () {
       expect(function () {newJob._buildTask({taskId: 'task1'});}).toThrow(new Error(errMsg));
     });
 
-    it('should return an array of BuiltTask instances', function () {
+    it('should return an array of Task instances', function () {
       agent.task('task1').main(function () {});
-      expect(newJob._buildTask({taskId: 'task1'})[0] instanceof BuiltTask).toBe(true);
+      expect(newJob._buildTask({taskId: 'task1'})[0] instanceof Task).toBe(true);
     });
   });
 

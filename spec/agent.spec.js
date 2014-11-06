@@ -1,5 +1,5 @@
 var Agent = require('../agent');
-var Task = require('../task');
+var TaskDefinition = require('../task-definition');
 var _ = require('underscore');
 
 describe('Agent', function () {
@@ -18,8 +18,9 @@ describe('Agent', function () {
       expect(agent._configCallbacks.length).toEqual(0);
     });
 
-    it('should start with _tasks empty', function () {
-      expect(_.keys(agent._tasks).length).toEqual(0);
+    it('should start with _taskDefinitions empty', function () {
+      expect(_.isObject(agent._taskDefinitions)).toBe(true);
+      expect(_.keys(agent._taskDefinitions).length).toEqual(0);
     });
 
     it('should set its Id', function () {
@@ -73,14 +74,14 @@ describe('Agent', function () {
   });
 
   describe('#task', function () {
-    it('should return a task instance', function () {
+    it('should return a task definition instance', function () {
       var task = agent.task('task1');
-      expect(task instanceof Task).toBe(true);
+      expect(task instanceof TaskDefinition).toBe(true);
     });
 
-    it('should set the created task in the _tasks object based on id passed', function () {
+    it('should set the created task in the _taskDefinitions object based on id passed', function () {
       agent.task('task1');
-      expect(agent._tasks.task1).not.toBe(undefined);
+      expect(agent._taskDefinitions.task1).not.toBe(undefined);
     });
 
     it('it should not create a new task if there is one with given id', function () {

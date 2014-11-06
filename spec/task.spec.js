@@ -1,18 +1,18 @@
 var _ = require('underscore');
+var TaskDefinition = require('../task-definition');
 var Task = require('../task');
-var BuiltTask = require('../built-task');
 
-describe('Task', function () {
+describe('TaskDefinition', function () {
   var task;
   var mainMethod = function () {
 
   };
 
   beforeEach(function () {
-    task = new Task();
+    task = new TaskDefinition();
   });
 
-  describe('#Task', function () {
+  describe('#TaskDefinition', function () {
     it('should start with null _main method', function () {
       expect(task._main).toBe(null);
     });
@@ -114,7 +114,7 @@ describe('Task', function () {
       expect(builtTasks.length).toBe(3);
     });
 
-    it('should add parameters to each BuiltTask instance based on builders output', function () {
+    it('should add parameters to each Task instance based on builders output', function () {
       task.main(mainMethod);
       task.builder(function () {return [{a: 1},{b:2},{c:3}];});
       var builtTasks = task._build();
@@ -123,11 +123,11 @@ describe('Task', function () {
       expect(builtTasks[2].params.c).toBe(3);
     });
 
-    it('should return an array of instances of BuiltTask class', function () {
+    it('should return an array of instances of Task class', function () {
       task.main(mainMethod);
       var builtTasks = task._build();
       expect(builtTasks.length).toBe(1);
-      expect(builtTasks[0] instanceof BuiltTask).toBe(true);
+      expect(builtTasks[0] instanceof Task).toBe(true);
     });
   });
 });
