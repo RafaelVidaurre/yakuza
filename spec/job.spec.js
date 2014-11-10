@@ -106,8 +106,8 @@ describe('Job', function () {
       newJob.enqueue('task6');
       newJob._applyPlan();
       expect(newJob._plan).toEqual([
-        [{taskId:'task1', syncronous: true}], [{taskId: 'task3'}, {taskId: 'task4'}],
-        [{taskId:'task5'}],
+        [{taskId: 'task1', syncronous: true}], [{taskId: 'task3'}, {taskId: 'task4'}],
+        [{taskId: 'task5'}],
         [{taskId: 'task6'}]
       ]);
     });
