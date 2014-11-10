@@ -89,7 +89,7 @@ describe('Job', function () {
     });
   });
 
-  describe('#_buildPlan', function () {
+  describe('#_applyPlan', function () {
     var agent, newJob;
     beforeEach(function () {
       agent = new Agent('agentOne');
@@ -104,7 +104,7 @@ describe('Job', function () {
       agent._applySetup();
       newJob.enqueue('task1'); newJob.enqueue('task3'); newJob.enqueue('task4'); newJob.enqueue('task5');
       newJob.enqueue('task6');
-      newJob._buildPlan();
+      newJob._applyPlan();
       expect(newJob._plan).toEqual([
         [{taskId:'task1', syncronous: true}], [{taskId: 'task3'}, {taskId: 'task4'}],
         [{taskId:'task5'}],

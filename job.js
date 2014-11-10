@@ -76,10 +76,10 @@ Job.prototype._setUid = function (argUid) {
 };
 
 /**
-* Build execution groups to run based on plan and enqueued tasks
+* Prepares execution groups to run based on plan and enqueued tasks
 * @private
 */
-Job.prototype._buildPlan = function () {
+Job.prototype._applyPlan = function () {
   var _this = this;
   var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
 
@@ -170,11 +170,11 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 };
 
 /**
-* Does necessary stuff needed before running can ocur
+* Does necessary stuff needed before running can occur
 */
 Job.prototype._prepareRun = function () {
   this.agent._applySetup();
-  this._buildPlan();
+  this._applyPlan();
 };
 
 /**
