@@ -31,6 +31,14 @@ describe('Job', function () {
       var testJob = new Job();
       expect(testJob._enqueuedTasks).toEqual([]);
     });
+
+    it('should start with _executionQueueIdx as -1', function () {
+      expect(job._executionQueueIdx).toBe(-1);
+    });
+
+    it('should start with _planIdx as -1', function () {
+      expect(job._planIdx).toBe(-1);
+    });
   });
 
   describe('#params', function () {
@@ -146,6 +154,39 @@ describe('Job', function () {
       ];
 
       expect(executionBlock).toEqual(expectedExecutionBlock);
+    });
+  });
+
+  describe('#_applyAgentSetup', function () {
+    it('should call agent\'s _applySetup() method', function () {
+      agent = new Agent('agentOne');
+      newJob = new Job('jobOne', undefined, agent);
+      agent.setup(function (config) {
+        config.plan = [{taskId: 'task1', syncronous: true},
+          'task2', ['task3', 'task4'], 'task5', ['task6']];
+      });
+
+      spyOn(newJob._agent, '_applySetup');
+      newJob._applyAgentSetup();
+      expect(newJob._agent._applySetup).toHaveBeenCalled();
+    });
+  });
+
+  describe('#_applyNextExecutionBlock', function () {
+    var agent, newJob;
+    beforeEach(function () {
+      agent = new Agent('agentOne');
+      newJob = new Job('jobOne', undefined, agent);
+      agent.setup(function (config) {
+        config.plan = [{taskId: 'task1', syncronous: true},
+          'task2', ['task3', 'task4'], 'task5', ['task6']];});
+    });
+
+    it('it should increment _planIdx in every call', function () {
+      newJob._prepareRun();
+      expect(newJob._planIdx).toBe(-1);
+      newJob._applyNextExecutionBlock();
+      expect(newJob._planIdx).toBe(0);
     });
   });
 });

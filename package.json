@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-jsdoc": "^0.5.7"
+    "grunt-jsdoc": "^0.5.7",
+    "jasmine-node": "^1.14.5"
   }
 }

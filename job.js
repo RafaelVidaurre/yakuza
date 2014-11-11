@@ -15,16 +15,16 @@ var _ = require('lodash');
 */
 function Job (uid, scraper, agent) {
   /**
-  * Next execution plan group idx from which we will build the next execution queue
+  * Current execution plan group idx from which we will build the next execution queue
   * @private
   */
-  this._planIdx = 0;
+  this._planIdx = -1;
 
   /**
-  * Next execution queue group idx to run
+  * Current execution queue group idx to run
   * @private
   */
-  this._executionQueueIdx = 0;
+  this._executionQueueIdx = -1;
 
   /**
   * Parameters that will be provided to the Task instances
@@ -170,10 +170,30 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 };
 
 /**
+* increments execution plan index, builds an execution block from it and pushes it to the execution
+* queue. This does NOT increment the
+*/
+Job.prototype._applyNextExecutionBlock = function () {
+  var executionBlock;
+
+  this._planIdx += 1;
+  executionBlock = Job.prototype._buildExecutionBlock(this._plan[this._planIdx]);
+  this._executionQueue.push(executionBlock);
+
+};
+
+/**
+* Triggers the agent's applySetupFunction
+*/
+Job.prototype._applyAgentSetup = function () {
+  this._agent._applySetup();
+};
+
+/**
 * Does necessary stuff needed before running can occur
 */
 Job.prototype._prepareRun = function () {
-  this.agent._applySetup();
+  this._applyAgentSetup();
   this._applyPlan();
 };
 
