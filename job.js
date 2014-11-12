@@ -215,7 +215,7 @@ Job.prototype.params = function (paramsObj) {
 */
 Job.prototype.enqueue = function (taskId) {
   if (!_.isString(taskId) || taskId.length <= 0) {
-    throw Error('enqueue params isn\'t a valid string');
+    throw Error('Enqueue params isn\'t a valid string');
   }
 
   this._enqueuedTasks.push(taskId);
@@ -226,7 +226,7 @@ Job.prototype.enqueue = function (taskId) {
 /** Begin the scraping job */
 Job.prototype.run = function () {
   this._prepareRun();
-  this._buildExecutionBlock(this._plan[this._planIdx]);
+  this._applyNextExecutionBlock();
 };
 
 
