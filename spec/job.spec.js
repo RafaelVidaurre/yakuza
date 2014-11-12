@@ -186,11 +186,65 @@ describe('Job', function () {
           'task2', ['task3', 'task4'], 'task5', ['task6']];});
     });
 
-    it('it should increment _planIdx in every call', function () {
+    it('should increment _planIdx in every call', function () {
       newJob._prepareRun();
       expect(newJob._planIdx).toBe(-1);
       newJob._applyNextExecutionBlock();
       expect(newJob._planIdx).toBe(0);
     });
+
+    it('should push a new execution block', function () {
+      newJob._prepareRun();
+      newJob._applyNextExecutionBlock();
+      expect(newJob._executionQueue.length).toEqual(1);
+    });
   });
+
+  describe('#run', function () {
+    var newJob, agent;
+
+    beforeEach(function () {
+      agent = new Agent();
+      agent.setup(function (config) {
+        config.plan = [{taskId: 'task1', syncronous: true},
+          'task2', ['task3', 'task4'], 'task5', ['task6']];
+      });
+      newJob = new Job('jobOne', undefined, agent);
+    });
+
+    it('should fire job:start event only once', function () {
+      spyOn(newJob._events, 'emit');
+      newJob.run();
+      expect(newJob._events.emit).toHaveBeenCalled();
+      newJob.run();
+      expect(newJob._events.emit.calls.length).toEqual(1);
+    });
+  });
+
+
+  describe('_onJobStart', function () {
+    var agent, newJob;
+
+    beforeEach(function () {
+      agent = new Agent();
+      newJob = new Job('jobTest', undefined, agent);
+      agent.setup(function (config) {
+        config.plan = [{taskId: 'task1', syncronous: true},
+          'task2', ['task3', 'task4'], 'task5', ['task6']];});
+    });
+
+    it('should prepare the job to run', function () {
+      spyOn(newJob, '_prepareRun').andCallThrough();
+      newJob._onJobStart();
+      expect(newJob._prepareRun).toHaveBeenCalled();
+    });
+
+    it('should apply first execution block', function () {
+      spyOn(newJob, '_applyNextExecutionBlock');
+      newJob._onJobStart();
+      expect(newJob._applyNextExecutionBlock).toHaveBeenCalled();
+    });
+  });
+
+
 });

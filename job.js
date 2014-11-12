@@ -15,6 +15,17 @@ var Events = require('eventemitter2').EventEmitter2;
 * @param {Agent} agent Reference to the agent being used by the job
 */
 function Job (uid, scraper, agent) {
+
+  /**
+  * Whether the job has started or not
+  * @private
+  */
+  this._started = false;
+
+  /**
+  * Configuration for _events property
+  * @private
+  */
   this._eventsConfig = {
     wildcard: true
   };
@@ -72,6 +83,9 @@ function Job (uid, scraper, agent) {
 
   // Set job's uid
   if (uid !== undefined) this._setUid(uid);
+
+  // Set event listeners
+  this._setEventListeners();
 }
 
 /**
@@ -183,6 +197,7 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 /**
 * increments execution plan index, builds an execution block from it and pushes it to the execution
 * queue. This does NOT increment the
+* @fires eq:applyBlock
 */
 Job.prototype._applyNextExecutionBlock = function () {
   var executionBlock;
@@ -190,6 +205,8 @@ Job.prototype._applyNextExecutionBlock = function () {
   this._planIdx += 1;
   executionBlock = Job.prototype._buildExecutionBlock(this._plan[this._planIdx]);
   this._executionQueue.push(executionBlock);
+
+  this._events.emit('eq:applyBlock');
 };
 
 /**
@@ -205,6 +222,27 @@ Job.prototype._applyAgentSetup = function () {
 Job.prototype._prepareRun = function () {
   this._applyAgentSetup();
   this._applyPlan();
+};
+
+/**
+* Event handler called on event job:start
+* @private
+*/
+Job.prototype._onJobStart = function () {
+  this._prepareRun();
+  this._applyNextExecutionBlock();
+};
+
+/**
+* Sets all the job's event listeners
+* @private
+*/
+Job.prototype._setEventListeners = function () {
+  var _this = this;
+
+  this._events.once('job:start', function () {
+    _this._onJobStart();
+  });
 };
 
 /**
@@ -233,10 +271,16 @@ Job.prototype.enqueue = function (taskId) {
   return this;
 };
 
-/** Begin the scraping job */
+/**
+* Begin the scraping job
+* @fires job:start
+*/
 Job.prototype.run = function () {
-  this._prepareRun();
-  this._applyNextExecutionBlock();
+  if (this._started) return;
+
+  this._started = true;
+
+  this._events.emit('job:start');
 };
 
 
