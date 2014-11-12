@@ -233,6 +233,10 @@ Job.prototype._onJobStart = function () {
   this._applyNextExecutionBlock();
 };
 
+Job.prototype._onEqApplyBlock = function () {
+
+};
+
 /**
 * Sets all the job's event listeners
 * @private
@@ -242,6 +246,10 @@ Job.prototype._setEventListeners = function () {
 
   this._events.once('job:start', function () {
     _this._onJobStart();
+  });
+
+  this._events.on('eq:applyBlock', function () {
+    _this._onEqApplyBlock();
   });
 };
 
