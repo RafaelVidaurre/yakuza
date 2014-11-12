@@ -195,6 +195,14 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 };
 
 /**
+* Runs execution block placed in current executionQueueIdx
+* @private
+*/
+Job.prototype._runCurrentExecutionBlock = function () {
+  this._runExecutionBlock(this._executionQueue[this._executionQueueIdx]);
+};
+
+/**
 * increments execution plan index, builds an execution block from it and pushes it to the execution
 * queue. This does NOT increment the
 * @fires eq:applyBlock
@@ -233,8 +241,11 @@ Job.prototype._onJobStart = function () {
   this._applyNextExecutionBlock();
 };
 
+/**
+* Event handler called on event eq:applyBlock
+*/
 Job.prototype._onEqApplyBlock = function () {
-
+  this._runCurrentExecutionBlock();
 };
 
 /**

@@ -266,7 +266,11 @@ describe('Job', function () {
   });
 
   describe('_onEqApplyBlock', function () {
-    
+    it('should call _runCurrentExecutionBlock', function () {
+      spyOn(job, '_runCurrentExecutionBlock');
+      job._onEqApplyBlock();
+      expect(job._runCurrentExecutionBlock).toHaveBeenCalled();
+    });
   });
 
 
