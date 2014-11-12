@@ -43,6 +43,12 @@ describe('Job', function () {
     it('should have events wildcards enabled', function () {
       expect(job._eventsConfig.wildcard).toBe(true);
     });
+
+    it('should set event listeners', function () {
+      spyOn(Job.prototype, '_setEventListeners').andCallThrough();
+      new Job();
+      expect(Job.prototype._setEventListeners).toHaveBeenCalled();
+    });
   });
 
   describe('#params', function () {
@@ -243,6 +249,12 @@ describe('Job', function () {
       spyOn(newJob, '_applyNextExecutionBlock');
       newJob._onJobStart();
       expect(newJob._applyNextExecutionBlock).toHaveBeenCalled();
+    });
+  });
+
+  describe('_onEqApplyBlock', function () {
+    it('description', function () {
+
     });
   });
 
