@@ -39,6 +39,10 @@ describe('Job', function () {
     it('should start with _planIdx as -1', function () {
       expect(job._planIdx).toBe(-1);
     });
+
+    it('should have events wildcards enabled', function () {
+      expect(job._eventsConfig.wildcard).toBe(true);
+    });
   });
 
   describe('#params', function () {
@@ -64,7 +68,7 @@ describe('Job', function () {
 
   describe('#enqueue', function () {
     it('should throw error if argument isn\'t a valid string', function () {
-      var errMsg = 'enqueue params isn\'t a valid string';
+      var errMsg = 'Enqueue params isn\'t a valid string';
       expect(function () {job.enqueue([]);}).toThrow(errMsg);
       expect(function () {job.enqueue('');}).toThrow(errMsg);
       expect(function () {job.enqueue(123);}).toThrow(errMsg);

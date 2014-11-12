@@ -6,6 +6,7 @@
 'use strict';
 
 var _ = require('lodash');
+var Events = require('eventemitter2').EventEmitter2;
 
 /**
 * @class
@@ -14,6 +15,16 @@ var _ = require('lodash');
 * @param {Agent} agent Reference to the agent being used by the job
 */
 function Job (uid, scraper, agent) {
+  this._eventsConfig = {
+    wildcard: true
+  };
+
+  /**
+  * EventEmitter2 instance which is encharge of handling events for a job
+  * @private
+  */
+  this._events = new Events(this._eventsConfig);
+
   /**
   * Current execution plan group idx from which we will build the next execution queue
   * @private
@@ -179,7 +190,6 @@ Job.prototype._applyNextExecutionBlock = function () {
   this._planIdx += 1;
   executionBlock = Job.prototype._buildExecutionBlock(this._plan[this._planIdx]);
   this._executionQueue.push(executionBlock);
-
 };
 
 /**
