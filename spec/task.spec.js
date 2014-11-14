@@ -1,133 +1,53 @@
-var _ = require('underscore');
-var TaskDefinition = require('../task-definition');
+'use strict';
+
 var Task = require('../task');
+var Q = require('q');
 
-describe('TaskDefinition', function () {
+describe('Task', function () {
   var task;
-  var mainMethod = function () {
-
-  };
 
   beforeEach(function () {
-    task = new TaskDefinition();
+    task = new Task(function () {
+      return 0;
+    }, {a: 1, b: 2});
   });
 
-  describe('#TaskDefinition', function () {
-    it('should start with null _main method', function () {
-      expect(task._main).toBe(null);
+  describe('#Task', function () {
+    it('should initialize with 0 retries', function () {
+      expect(task._retries).toBe(0);
     });
 
-    it('should start with empty _hooks object', function () {
-      expect(_.keys(task._hooks).length).toEqual(0);
+    it('should initialize with a deferred object', function () {
+      expect(JSON.stringify(task._runningDeferred)).toEqual(JSON.stringify(Q.defer()));
     });
 
-    it('should start with default _builder method', function () {
-      expect(task._builder()).toEqual({});
-    });
-  });
-
-  describe('#main', function () {
-    it('should throw error if argument isn\'t a function', function () {
-      var errorMsg = 'Main method must be a function';
-      expect(function () {task.main({});}).toThrow(new Error(errorMsg));
-      expect(function () {task.main(123);}).toThrow(new Error(errorMsg));
-      expect(function () {task.main("dawd");}).toThrow(new Error(errorMsg));
-    });
-
-    it('should not throw error if argument is a function', function () {
-      task.main(function () {});
-    });
-
-    it('should set the argument as main function', function () {
-      var fooCallback = function () {return 1;};
-      var barCallback = function () {return 2;};
-      expect(task._main).toBe(null);
-      task.main(fooCallback);
-      expect(task._main).toBe(fooCallback);
-      task.main(barCallback);
-      expect(task._main).toBe(barCallback);
+    it('should set main method if passed', function () {
+      var mainMethod = function () {return 1;};
+      var newTask = new Task(mainMethod);
+      expect(newTask._main).toBe(mainMethod);
     });
   });
 
-  describe('#hooks', function () {
-    it('should throw error if argument isn\'t an object', function () {
-      var errMsg = 'Hooks parameter must be an object';
-      expect(function () {task.hooks(123);}).toThrow(new Error(errMsg));
-      expect(function () {task.hooks("foo");}).toThrow(new Error(errMsg));
-      expect(function () {task.hooks([]);}).toThrow(new Error(errMsg));
+  describe('#_run', function () {
+    it('should pass param callbacks as an object with keys to main method', function () {
+      var onSuccess = function () {return 2;};
+      var onError = function () {return 1;};
+      var onExpose = function () {return 3;};
+      var emitter = {
+        success: onSuccess,
+        error: onError,
+        expose: onExpose
+      };
+      spyOn(task, '_main');
+      task._run(onSuccess, onError, onExpose);
+      expect(task._main).toHaveBeenCalledWith(emitter, jasmine.any(Object));
     });
 
-    it('shoudn\'t throw error if argument is a valid object', function () {
-      task.hooks({});
-    });
-
-    it('should initialize a new hook slot as an array if there\'s none with that key', function () {
-      var keys;
-      task.hooks({newHook: function () {return 1;}});
-      keys = _.keys(task._hooks);
-      expect(_.contains(keys, 'newHook')).toBe(true);
-      expect(task._hooks.newHook.length).toBe(1);
-      expect(_.isArray(task._hooks.newHook)).toBe(true);
-    });
-
-    it('should append a new function if hook slot is already initialized', function () {
-      task.hooks({newHook: function () {return 1;}});
-      expect(task._hooks.newHook.length).toBe(1);
-      task.hooks({newHook: function () {return 2;}});
-      expect(task._hooks.newHook.length).toBe(2);
-      task.hooks({otherHook: function () {return 2;}});
-      expect(task._hooks.otherHook.length).toBe(1);
-    });
-  });
-
-  describe('#builder', function () {
-    it('should throw error if argument is\'t a function', function () {
-      var errMsg = 'Builder must be a function';
-      expect(function () {task.builder(123);}).toThrow(new Error(errMsg));
-      expect(function () {task.builder([]);}).toThrow(new Error(errMsg));
-      expect(function () {task.builder("");}).toThrow(new Error(errMsg));
-    });
-
-    it('should not throw error if argument is a function', function () {
-      task.builder(function () {return 1;});
-    });
-
-    it('should replace default builder function', function () {
-      var defaultFunc = task._builder;
-      var otherFunc = function () {return 2;};
-      task.builder(otherFunc);
-      expect(task._builder).not.toBe(defaultFunc);
-      expect(task._builder).toBe(otherFunc);
-    });
-  });
-
-  describe('#_build', function () {
-    it('should throw an error if the task has no main method yet', function () {
-      var errMsg = 'Cannot build task with no main method set';
-      expect(function () {task._build();}).toThrow(new Error(errMsg));
-    });
-
-    it('should return an array of built tasks depending on the builder\'s output', function () {
-      task.main(mainMethod);
-      task.builder(function () {return [{},{},{}];});
-      var builtTasks = task._build();
-      expect(builtTasks.length).toBe(3);
-    });
-
-    it('should add parameters to each Task instance based on builders output', function () {
-      task.main(mainMethod);
-      task.builder(function () {return [{a: 1},{b:2},{c:3}];});
-      var builtTasks = task._build();
-      expect(builtTasks[0].params.a).toBe(1);
-      expect(builtTasks[1].params.b).toBe(2);
-      expect(builtTasks[2].params.c).toBe(3);
-    });
-
-    it('should return an array of instances of Task class', function () {
-      task.main(mainMethod);
-      var builtTasks = task._build();
-      expect(builtTasks.length).toBe(1);
-      expect(builtTasks[0] instanceof Task).toBe(true);
+    it('should pass task params as second argument to main method', function () {
+      var dummyFunction = function () {};
+      spyOn(task, '_main');
+      task._run(dummyFunction, dummyFunction, dummyFunction);
+      expect(task._main).toHaveBeenCalledWith(jasmine.any(Object), task._params);
     });
   });
 });

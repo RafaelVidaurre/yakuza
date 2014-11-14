@@ -82,7 +82,9 @@ function Job (uid, scraper, agent) {
   this.uid = null;
 
   // Set job's uid
-  if (uid !== undefined) this._setUid(uid);
+  if (uid !== undefined) {
+    this._setUid(uid);
+  }
 
   // Set event listeners
   this._setEventListeners();
@@ -106,7 +108,7 @@ Job.prototype._setUid = function (argUid) {
 */
 Job.prototype._applyPlan = function () {
   var _this = this;
-  var executionPlan, nextGroupIdx, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
+  var executionPlan, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
 
   executionPlan = this._agent._plan;
   newExecutionPlan = [];
@@ -145,7 +147,9 @@ Job.prototype._buildTask = function (taskSpecs) {
   taskDefinition = this._agent._taskDefinitions[taskSpecs.taskId];
   errMsg = 'Task with id ' + taskSpecs.taskId + ' does not exist in agent ' + this._agent.id;
 
-  if (taskDefinition === undefined) throw new Error(errMsg);
+  if (taskDefinition === undefined) {
+    throw new Error(errMsg);
+  }
 
   return taskDefinition._build();
 };
@@ -192,6 +196,62 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
   });
 
   return executionBlock;
+};
+
+/**
+* Runs through the executionBlock tree and gathers all promises from tasks
+* @param {object} executionBlock An array of objects which represents a set of tasks to be run in
+* parallel from the executionQueue
+* @private
+* @example
+* //Input example
+* [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
+*/
+Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
+  var promises = [];
+
+  var retrieveTaskSpecPromises = function (taskSpec) {
+    var promises, currentTask;
+
+    currentTask = taskSpec.task;
+    promises = [];
+
+    promises.push(currentTask._runningPromise);
+
+    if (taskSpec.next) {
+      promises = promises.concat(retrieveTaskSpecPromises(taskSpec.next));
+    }
+
+    return promises;
+  };
+
+  _.each(executionBlock, function (taskSpec) {
+    promises = promises.concat(retrieveTaskSpecPromises(taskSpec));
+  });
+
+  return promises;
+};
+
+/**
+* Runs a task and enqueues its `next` task if there is any (recursive)
+* @param {object} taskSpec object with task specifications and the task itself
+* @private
+*/
+Job.prototype._runTask = function (taskSpec) {
+ // TODO: Implement this, enqueuing its `next` task in the .then()
+};
+
+/**
+* Runs an execution block
+* @param {array} executionBlock An array of objects which represents a set of tasks to be run in
+* parallel from the executionQueue
+* @private
+* @example
+* //Input example
+* [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
+*/
+Job.prototype._runExecutionBlock = function (executionBlock) {
+  var runningTasks = this._retrieveExecutionBlockPromises(executionBlock);
 };
 
 /**
@@ -269,7 +329,9 @@ Job.prototype._setEventListeners = function () {
 * @param {object} paramsObj Object containing key-value pair
 */
 Job.prototype.params = function (paramsObj) {
-  if (_.isArray(paramsObj) || !_.isObject(paramsObj)) throw Error('Params must be an object');
+  if (_.isArray(paramsObj) || !_.isObject(paramsObj)) {
+    throw Error('Params must be an object');
+  }
 
   _.extend(this._params, paramsObj);
 
@@ -295,7 +357,9 @@ Job.prototype.enqueue = function (taskId) {
 * @fires job:start
 */
 Job.prototype.run = function () {
-  if (this._started) return;
+  if (this._started) {
+    return;
+  }
 
   this._started = true;
 

@@ -1,7 +1,9 @@
-var _ = require('lodash');
+'use strict';
+
 var Job = require('../job');
 var Agent = require('../agent');
 var Task = require('../task');
+var Q = require('q');
 
 describe('Job', function () {
   var job;
@@ -163,14 +165,14 @@ describe('Job', function () {
         {task: tasks4[0], next: null}
       ];
 
-      expect(executionBlock).toEqual(expectedExecutionBlock);
+      expect(JSON.stringify(executionBlock)).toEqual(JSON.stringify(expectedExecutionBlock));
     });
   });
 
   describe('#_applyAgentSetup', function () {
     it('should call agent\'s _applySetup() method', function () {
-      agent = new Agent('agentOne');
-      newJob = new Job('jobOne', undefined, agent);
+      var agent = new Agent('agentOne');
+      var newJob = new Job('jobOne', undefined, agent);
       agent.setup(function (config) {
         config.plan = [{taskId: 'task1', syncronous: true},
           'task2', ['task3', 'task4'], 'task5', ['task6']];
@@ -227,7 +229,7 @@ describe('Job', function () {
     });
   });
 
-  describe('_setEventListeners', function () {
+  describe('#_setEventListeners', function () {
     it('should set job:start listener to listen once', function () {
       spyOn(job._events, 'once');
       job._setEventListeners();
@@ -241,7 +243,7 @@ describe('Job', function () {
     });
   });
 
-  describe('_onJobStart', function () {
+  describe('#_onJobStart', function () {
     var agent, newJob;
 
     beforeEach(function () {
@@ -249,7 +251,8 @@ describe('Job', function () {
       newJob = new Job('jobTest', undefined, agent);
       agent.setup(function (config) {
         config.plan = [{taskId: 'task1', syncronous: true},
-          'task2', ['task3', 'task4'], 'task5', ['task6']];});
+          'task2', ['task3', 'task4'], 'task5', ['task6']]
+      ;});
     });
 
     it('should prepare the job to run', function () {
@@ -265,7 +268,7 @@ describe('Job', function () {
     });
   });
 
-  describe('_onEqApplyBlock', function () {
+  describe('#_onEqApplyBlock', function () {
     it('should call _runCurrentExecutionBlock', function () {
       spyOn(job, '_runCurrentExecutionBlock');
       job._onEqApplyBlock();
@@ -273,5 +276,21 @@ describe('Job', function () {
     });
   });
 
+  describe('#_retrieveExecutionBlockPromises', function () {
+    it('should return an array of promises', function () {
+      var executionBlock = [
+        {task: new Task(), next: {task: new Task(), next: null}},
+        {task: new Task(), next: null}
+      ];
+
+      var expectedResult = JSON.stringify([Q.defer().promise, Q.defer().promise,
+        Q.defer().promise]);
+
+      var promises = job._retrieveExecutionBlockPromises(executionBlock);
+      promises = JSON.stringify(promises);
+
+      expect(promises).toEqual(expectedResult);
+    });
+  });
 
 });
