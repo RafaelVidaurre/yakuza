@@ -293,4 +293,34 @@ describe('Job', function () {
     });
   });
 
+  describe('#_runTask', function () {
+    var fakeTaskOne, fakeTaskTwo, taskSpec;
+
+    beforeEach(function () {
+      fakeTaskOne = new Task();
+      fakeTaskTwo = new Task();
+      taskSpec = {
+        task: fakeTaskOne,
+        next: {
+          task: fakeTaskTwo,
+          next: null
+        }
+      };
+
+    });
+
+    it('should set a \'.then\' callback if task spec has a next task', function () {
+      spyOn(fakeTaskOne._runningPromise, 'then');
+      spyOn(taskSpec.task, '_run');
+      job._runTask(taskSpec);
+      expect(fakeTaskOne._runningPromise.then).toHaveBeenCalled();
+    });
+
+    it('should run the task in the task spec', function () {
+      spyOn(taskSpec.task, '_run');
+      job._runTask(taskSpec);
+      expect(taskSpec.task._run).toHaveBeenCalled();
+    });
+  });
+
 });

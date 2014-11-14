@@ -240,18 +240,19 @@ Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
 Job.prototype._runTask = function (taskSpec) {
   var _this = this;
 
-  var taskRunning, nextTask;
+  var taskRunning, thisTask, nextTaskSpec;
 
-  taskRunning = taskSpec._runningPromise;
-  nextTask = taskSpec.next;
+  thisTask = taskSpec.task;
+  taskRunning = thisTask._runningPromise;
+  nextTaskSpec = taskSpec.next;
 
-  if (nextTask) {
+  if (nextTaskSpec) {
     taskRunning.then(function () {
-      _this._runTask(taskSpec.next);
+      _this._runTask(nextTaskSpec.next);
     });
   }
 
-  nextTask._run();
+  thisTask._run();
 };
 
 /**
@@ -292,6 +293,7 @@ Job.prototype._applyNextExecutionBlock = function () {
 
 /**
 * Triggers the agent's applySetupFunction
+* @private
 */
 Job.prototype._applyAgentSetup = function () {
   this._agent._applySetup();
@@ -299,6 +301,7 @@ Job.prototype._applyAgentSetup = function () {
 
 /**
 * Does necessary stuff needed before running can occur
+* @private
 */
 Job.prototype._prepareRun = function () {
   this._applyAgentSetup();
@@ -316,6 +319,7 @@ Job.prototype._onJobStart = function () {
 
 /**
 * Event handler called on event eq:applyBlock
+* @private
 */
 Job.prototype._onEqApplyBlock = function () {
   this._runCurrentExecutionBlock();
