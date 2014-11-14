@@ -30,16 +30,13 @@ describe('Task', function () {
 
   describe('#_run', function () {
     it('should pass param callbacks as an object with keys to main method', function () {
-      var onSuccess = function () {return 2;};
-      var onError = function () {return 1;};
-      var onExpose = function () {return 3;};
       var emitter = {
-        success: onSuccess,
-        error: onError,
-        expose: onExpose
+        success: task._onSuccess,
+        error: task._onError,
+        share: task._onShare
       };
       spyOn(task, '_main');
-      task._run(onSuccess, onError, onExpose);
+      task._run();
       expect(task._main).toHaveBeenCalledWith(emitter, jasmine.any(Object));
     });
 

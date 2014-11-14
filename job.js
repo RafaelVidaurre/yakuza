@@ -238,7 +238,7 @@ Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
 * @private
 */
 Job.prototype._runTask = function (taskSpec) {
- // TODO: Implement this, enqueuing its `next` task in the .then()
+  // TODO: Implement this, enqueuing its `next` task in the .then()
 };
 
 /**
