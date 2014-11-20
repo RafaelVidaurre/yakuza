@@ -47,6 +47,7 @@ function Task (main, params) {
   * Storage for the task instance, this saves data which is exposed explicitly via emitter.share()
   * method and is later on provided in the _onSuccess method as an argument of the task's promise's
   * resolve method
+  * @private
   */
   this._sharedStorage = {};
 }
@@ -56,6 +57,7 @@ function Task (main, params) {
 * later on
 * @param {string} key Key by which the value will be shared
 * @param value A value which will be shared
+* @private
 */
 Task.prototype._onShare = function (key, value) {
   this._sharedStorage[key] = value;
@@ -74,6 +76,7 @@ Task.prototype._onSuccess = function (response) {
 * Called by the task's emitter object, called when an error ocurred in the task
 * @param {Error} error Error object with stracktrace and everything
 * @param {string} message Message explaining what failed
+* @private
 */
 Task.prototype._onError = function (error, message) {
   this._runningDeferred.reject(error, message);
