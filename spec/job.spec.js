@@ -323,4 +323,35 @@ describe('Job', function () {
     });
   });
 
+  describe('#_runExecutionBlock', function () {
+    var taskSpec1, taskSpec2, taskSpec3, executionBlock, task1, task2, task3, task4;
+
+    beforeEach(function () {
+      task1 = new Task(function () {});
+      task2 = new Task(function () {});
+      task3 = new Task(function () {});
+      task4 = new Task(function () {});
+
+      taskSpec1 = {task: task1, next: null};
+      taskSpec2 = {task: task2, next: {task: task4, next: null}};
+      taskSpec3 = {task: task3, next: null};
+      executionBlock = [taskSpec1, taskSpec2, taskSpec3];
+    });
+
+    it('should call _runTask with each taskSpec', function () {
+      spyOn(job, '_runTask');
+      job._runExecutionBlock(executionBlock);
+      expect(job._runTask).toHaveBeenCalledWith(executionBlock[0]);
+      expect(job._runTask).toHaveBeenCalledWith(executionBlock[1]);
+      expect(job._runTask).toHaveBeenCalledWith(executionBlock[2]);
+    });
+
+    it('should call Q.all with the task promises', function () {
+      var taskPromises = job._retrieveExecutionBlockPromises(executionBlock);
+      spyOn(Q, 'all').andReturn({then: function () {}});
+      job._runExecutionBlock(executionBlock);
+      expect(Q.all).toHaveBeenCalledWith(taskPromises);
+    });
+  });
+
 });

@@ -7,6 +7,7 @@
 
 var _ = require('lodash');
 var Events = require('eventemitter2').EventEmitter2;
+var Q = require('q');
 
 /**
 * @class
@@ -257,15 +258,27 @@ Job.prototype._runTask = function (taskSpec) {
 
 /**
 * Runs an execution block
-* @param {array} executionBlock An array of objects which represents a set of tasks to be run in
-* parallel from the executionQueue
+* @param {array} executionBlock An array of objects which represents a set of tasks from the
+* executionQueue to be run in parallel. Its responsible of preparing the emission of the
+* executionQueue events such as when it was successful or it failed.
 * @private
 * @example
 * //Input example
 * [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
 Job.prototype._runExecutionBlock = function (executionBlock) {
+  var _this = this;
   var runningTasks = this._retrieveExecutionBlockPromises(executionBlock);
+
+  Q.all(runningTasks).then(function (results) {
+    _this._events.emit('eq:blockSuccess', results);
+  }, function (result) {
+    _this._events.emit('eq:blockFail', result);
+  });
+
+  _.each(executionBlock, function (taskSpec) {
+    _this._runTask(taskSpec);
+  });
 };
 
 /**
