@@ -343,7 +343,7 @@ Job.prototype._onEqBlockApply = function () {
 * @private
 */
 Job.prototype._onEqBlockFail = function () {
-  this._
+  // TODO: Trigger event/callback to the outside
 };
 
 /**
@@ -363,6 +363,7 @@ Job.prototype._setEventListeners = function () {
     _this._onEqBlockApply();
   });
 
+  // When a task from the current execution block fails
   this._events.on('eq:blockFail', function () {
     _this._onEqBlockFail();
   });
