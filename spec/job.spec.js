@@ -232,11 +232,11 @@ describe('Job', function () {
   describe('#on', function () {
     it('should subscribe a provided callback to the event given on the public events objects',
       function () {
-      var eventCb = function () {};
-      var eventString = 'testEvent';
-      spyOn(job._publicEvents, 'on');
-      job.on(eventString, eventCb);
-      expect(job._publicEvents.on).toHaveBeenCalledWith(eventString, eventCb);
+        var eventCb = function () {};
+        var eventString = 'testEvent';
+        spyOn(job._publicEvents, 'on');
+        job.on(eventString, eventCb);
+        expect(job._publicEvents.on).toHaveBeenCalledWith(eventString, eventCb);
     });
   });
 
