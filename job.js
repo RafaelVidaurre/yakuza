@@ -358,6 +358,7 @@ Job.prototype._onEqBlockApply = function () {
 */
 Job.prototype._onEqBlockFail = function () {
   // TODO: Trigger event/callback to the outside
+  this._publicEvents.emit('job:fail');
 };
 
 /**

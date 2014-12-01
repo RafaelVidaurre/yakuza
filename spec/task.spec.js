@@ -32,7 +32,7 @@ describe('Task', function () {
     it('should pass param callbacks as an object with keys to main method', function () {
       var emitter = {
         success: task._onSuccess,
-        error: task._onError,
+        fail: task._onFail,
         share: task._onShare
       };
       spyOn(task, '_main');
@@ -80,11 +80,11 @@ describe('Task', function () {
     });
   });
 
-  describe('#_onError', function () {
+  describe('#_onFail', function () {
     it('it should reject its running promise', function () {
       spyOn(task._runningDeferred, 'resolve');
       spyOn(task._runningDeferred, 'reject');
-      task._onError();
+      task._onFail();
       expect(task._runningDeferred.resolve).not.toHaveBeenCalled();
       expect(task._runningDeferred.reject).toHaveBeenCalled();
     });
@@ -93,7 +93,7 @@ describe('Task', function () {
       var error = new Error('test error');
       var message = 'test message';
       spyOn(task._runningDeferred, 'reject');
-      task._onError(error, message);
+      task._onFail(error, message);
       expect(task._runningDeferred.reject).toHaveBeenCalledWith(error, message);
     });
   });

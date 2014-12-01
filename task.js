@@ -78,7 +78,7 @@ Task.prototype._onSuccess = function (response) {
 * @param {string} message Message explaining what failed
 * @private
 */
-Task.prototype._onError = function (error, message) {
+Task.prototype._onFail = function (error, message) {
   // TODO: Maybe throw an exception to be catched by the framework.
   this._runningDeferred.reject(error, message);
 };
@@ -91,7 +91,7 @@ Task.prototype._onError = function (error, message) {
 Task.prototype._run = function () {
   var emitter = {
     success: this._onSuccess,
-    error: this._onError,
+    fail: this._onFail,
     share: this._onShare
   };
 
