@@ -236,10 +236,10 @@ describe('Job', function () {
       expect(job._events.once).toHaveBeenCalledWith('job:start', jasmine.any(Function));
     });
 
-    it('should set eq:applyBlock listener to listen', function () {
+    it('should set eq:blockApply listener to listen', function () {
       spyOn(job._events, 'on');
       job._setEventListeners();
-      expect(job._events.on).toHaveBeenCalledWith('eq:applyBlock', jasmine.any(Function));
+      expect(job._events.on).toHaveBeenCalledWith('eq:blockApply', jasmine.any(Function));
     });
   });
 
@@ -268,10 +268,10 @@ describe('Job', function () {
     });
   });
 
-  describe('#_onEqApplyBlock', function () {
+  describe('#_onEqBlockApply', function () {
     it('should call _runCurrentExecutionBlock', function () {
       spyOn(job, '_runCurrentExecutionBlock');
-      job._onEqApplyBlock();
+      job._onEqBlockApply();
       expect(job._runCurrentExecutionBlock).toHaveBeenCalled();
     });
   });

@@ -339,6 +339,14 @@ Job.prototype._onEqBlockApply = function () {
 };
 
 /**
+* Event handler called on event eq:blockFail. Stops the job as a block has been marked as failed
+* @private
+*/
+Job.prototype._onEqBlockFail = function () {
+  this._
+};
+
+/**
 * Sets all the job's event listeners
 * @private
 */
@@ -352,7 +360,7 @@ Job.prototype._setEventListeners = function () {
 
   // When the next execution block is applied
   this._events.on('eq:blockApply', function () {
-    _this._onEqApplyBlock();
+    _this._onEqBlockApply();
   });
 
   this._events.on('eq:blockFail', function () {
