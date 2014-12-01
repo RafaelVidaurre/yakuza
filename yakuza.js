@@ -8,6 +8,7 @@
 
 'use strict';
 
+var shortId = require('shortid');
 var utils = require('./utils');
 var Scraper = require('./scraper');
 var Job = require('./job');
@@ -17,14 +18,6 @@ var Job = require('./job');
 * @class
 */
 function Yakuza () {
-  /**
-  * Internal counter to give each job created a unique id, note that this id is not universally
-  * unique so restarting your app would cause it to start from 0 again and create collisions if you
-  * are storing this number somewere external to the app using this framework
-  * @private
-  */
-  this._lastJobId = 0;
-
   /**
   * Set of scraper instances
   * @private
@@ -74,9 +67,8 @@ Yakuza.prototype.job = function (scraperId, agentId) {
 
   scraper = this._scrapers[scraperId];
   agent = scraper._agents[agentId];
-  newId = this._lastJobId + 1;
+  newId = shortId.generate();
   newJob = new Job(newId, scraper, agent);
-  this._lastJobId = newId;
   this._jobs[newId] = newJob;
 
   return newJob;
