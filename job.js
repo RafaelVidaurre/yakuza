@@ -32,10 +32,24 @@ function Job (uid, scraper, agent) {
   };
 
   /**
-  * EventEmitter2 instance which is encharge of handling events for a job
+  * Configuration for _publicEvents property
+  * @private
+  */
+  this._publicEventsConfig = {
+    wildcard: true
+  };
+
+  /**
+  * Event handler object for private events
   * @private
   */
   this._events = new Events(this._eventsConfig);
+
+  /**
+  * Event handler object for public events
+  * @private
+  */
+  this._publicEvents = new Events(this._publicEventsConfig);
 
   /**
   * Current execution plan group idx from which we will build the next execution queue
@@ -409,6 +423,15 @@ Job.prototype.run = function () {
   this._started = true;
 
   this._events.emit('job:start');
+};
+
+/**
+* Suscribes a callback function to a public event
+* @param {string} eventName Name of the event to listent to
+* @param {function} callback Callback function to be run when the event fires
+*/
+Job.prototype.on = function (eventName, callback) {
+  this._publicEvents.on(eventName, callback);
 };
 
 
