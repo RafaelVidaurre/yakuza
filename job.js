@@ -311,6 +311,7 @@ Job.prototype._applyNextExecutionBlock = function () {
   var executionBlock;
 
   this._planIdx += 1;
+  this._executionQueueIdx += 1;
   executionBlock = this._buildExecutionBlock(this._plan[this._planIdx]);
   this._executionQueue.push(executionBlock);
 
