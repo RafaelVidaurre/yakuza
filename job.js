@@ -157,7 +157,6 @@ Job.prototype._applyPlan = function () {
 * @return {array} an array of Tasks
 */
 Job.prototype._buildTask = function (taskSpecs) {
-  // FIXME: this is referring to prototype instead of actual instance
   var errMsg, taskDefinition;
   taskDefinition = this._agent._taskDefinitions[taskSpecs.taskId];
   errMsg = 'Task with id ' + taskSpecs.taskId + ' does not exist in agent ' + this._agent.id;
