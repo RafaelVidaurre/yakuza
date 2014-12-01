@@ -1,4 +1,5 @@
 var Scraper = require('../scraper');
+var Agent = require('../agent');
 var _ = require('underscore');
 
 describe('Scraper', function () {
@@ -67,6 +68,13 @@ describe('Scraper', function () {
         scr.agent("123");
         keys = _.keys(scr._agents);
         expect(keys.length).toBe(1);
+      });
+    });
+
+    describe('#_createAgent', function () {
+      it('should return the newly created agent', function () {
+        var result = scr.agent('asd');
+        expect(result instanceof Agent).toBe(true);
       });
     });
   });

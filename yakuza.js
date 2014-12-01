@@ -8,7 +8,6 @@
 
 'use strict';
 
-var _ = require('lodash');
 var utils = require('./utils');
 var Scraper = require('./scraper');
 var Job = require('./job');
