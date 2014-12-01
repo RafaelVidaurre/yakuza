@@ -157,8 +157,8 @@ Job.prototype._applyPlan = function () {
 * @return {array} an array of Tasks
 */
 Job.prototype._buildTask = function (taskSpecs) {
+  // FIXME: this is referring to prototype instead of actual instance
   var errMsg, taskDefinition;
-
   taskDefinition = this._agent._taskDefinitions[taskSpecs.taskId];
   errMsg = 'Task with id ' + taskSpecs.taskId + ' does not exist in agent ' + this._agent.id;
 
@@ -312,7 +312,7 @@ Job.prototype._applyNextExecutionBlock = function () {
   var executionBlock;
 
   this._planIdx += 1;
-  executionBlock = Job.prototype._buildExecutionBlock(this._plan[this._planIdx]);
+  executionBlock = this._buildExecutionBlock(this._plan[this._planIdx]);
   this._executionQueue.push(executionBlock);
 
   this._events.emit('eq:blockApply');
