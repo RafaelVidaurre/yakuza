@@ -79,6 +79,7 @@ Task.prototype._onSuccess = function (response) {
 * @private
 */
 Task.prototype._onError = function (error, message) {
+  // TODO: Maybe throw an exception to be catched by the framework.
   this._runningDeferred.reject(error, message);
 };
 
@@ -94,6 +95,7 @@ Task.prototype._run = function () {
     share: this._onShare
   };
 
+  // TODO: Maybe handle the exception thrown by the onError method to control crashes
   this._main(emitter, this._params);
 };
 
