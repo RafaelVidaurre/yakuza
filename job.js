@@ -270,10 +270,10 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
   var _this = this;
   var runningTasks = this._retrieveExecutionBlockPromises(executionBlock);
 
-  Q.all(runningTasks).then(function (results) {
-    _this._events.emit('eq:blockSuccess', results);
-  }, function (result) {
-    _this._events.emit('eq:blockFail', result);
+  Q.all(runningTasks).then(function () {
+    _this._events.emit('eq:blockSuccess');
+  }, function () {
+    _this._events.emit('eq:blockFail');
   });
 
   _.each(executionBlock, function (taskSpec) {
@@ -292,7 +292,7 @@ Job.prototype._runCurrentExecutionBlock = function () {
 /**
 * increments execution plan index, builds an execution block from it and pushes it to the execution
 * queue. This does NOT increment the
-* @fires eq:applyBlock
+* @fires eq:blockApply
 */
 Job.prototype._applyNextExecutionBlock = function () {
   var executionBlock;
@@ -301,7 +301,7 @@ Job.prototype._applyNextExecutionBlock = function () {
   executionBlock = Job.prototype._buildExecutionBlock(this._plan[this._planIdx]);
   this._executionQueue.push(executionBlock);
 
-  this._events.emit('eq:applyBlock');
+  this._events.emit('eq:blockApply');
 };
 
 /**
@@ -331,10 +331,10 @@ Job.prototype._onJobStart = function () {
 };
 
 /**
-* Event handler called on event eq:applyBlock
+* Event handler called on event eq:blockApply
 * @private
 */
-Job.prototype._onEqApplyBlock = function () {
+Job.prototype._onEqBlockApply = function () {
   this._runCurrentExecutionBlock();
 };
 
@@ -345,12 +345,18 @@ Job.prototype._onEqApplyBlock = function () {
 Job.prototype._setEventListeners = function () {
   var _this = this;
 
+  // When the job is started
   this._events.once('job:start', function () {
     _this._onJobStart();
   });
 
-  this._events.on('eq:applyBlock', function () {
+  // When the next execution block is applied
+  this._events.on('eq:blockApply', function () {
     _this._onEqApplyBlock();
+  });
+
+  this._events.on('eq:blockFail', function () {
+    _this._onEqBlockFail();
   });
 };
 
