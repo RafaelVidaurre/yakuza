@@ -201,6 +201,13 @@ describe('Job', function () {
       expect(newJob._planIdx).toBe(0);
     });
 
+    it('should increment _executionBQueueIdx in every call', function () {
+      newJob._prepareRun();
+      expect(newJob._executionQueueIdx).toBe(-1);
+      newJob._applyNextExecutionBlock();
+      expect(newJob._executionQueueIdx).toBe(0);
+    });
+
     it('should push a new execution block', function () {
       newJob._prepareRun();
       newJob._applyNextExecutionBlock();
