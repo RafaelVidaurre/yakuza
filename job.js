@@ -8,6 +8,7 @@
 var _ = require('lodash');
 var Events = require('eventemitter2').EventEmitter2;
 var Q = require('q');
+var Http = require('./http');
 
 /**
 * @class
@@ -16,6 +17,11 @@ var Q = require('q');
 * @param {Agent} agent Reference to the agent being used by the job
 */
 function Job (uid, scraper, agent) {
+  /**
+  * Instance of Http class in charge of recording requests/responses and providing a wapper around
+  * mikeal's request library
+  */
+  this._http = new Http();
 
   /**
   * Whether the job has started or not
