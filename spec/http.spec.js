@@ -57,7 +57,7 @@ describe('Http', function () {
     });
 
     it('should return request parameters properly', function () {
-      var cb = function () {};
+      var cb = function () {return 1;};
       var uri = 'http://www.test.com';
       var opts = {uri: uri};
       var res = http._initRequestParams(uri, cb);
@@ -71,7 +71,8 @@ describe('Http', function () {
   });
 
   describe('Request delegators', function () {
-    var uri, opts, cb;
+    var uri, opts, cb, http;
+
     beforeEach(function () {
       uri = 'fakeUri';
       opts = {a: 1};
