@@ -30,8 +30,9 @@ describe('Http', function () {
     it('should call pushToLog', function () {
       var fakeResponse = {fake: 'response'};
       var fakeBody = {fake: 'body'};
+      var fakeCb = function () {};
       spyOn(http, '_pushToLog');
-      http._interceptResponse(null, fakeResponse, fakeBody);
+      http._interceptResponse(null, fakeResponse, fakeBody, fakeCb);
       expect(http._pushToLog).toHaveBeenCalledWith({response: fakeResponse, body: fakeBody});
     });
 
@@ -71,7 +72,7 @@ describe('Http', function () {
   });
 
   describe('Request delegators', function () {
-    var uri, opts, cb, http;
+    var uri, opts, cb;
 
     beforeEach(function () {
       uri = 'fakeUri';
@@ -80,39 +81,51 @@ describe('Http', function () {
     });
 
     describe('#del', function () {
-      spyOn(http._request, 'del');
-      http.del('a', opts, cb);
-      expect(http._request.del).toHaveBeenCalledWith(uri, opts, cb);
+      it('should call with correct parameters', function () {
+        spyOn(http._request, 'del');
+        http.del(uri, opts, cb);
+        expect(http._request.del).toHaveBeenCalledWith(uri, opts, cb);
+      });
     });
 
     describe('#get', function () {
-      spyOn(http._request, 'get');
-      http.del('a', opts, cb);
-      expect(http._request.get).toHaveBeenCalledWith(uri, opts, cb);
+      it('should call with correct parameters', function () {
+        spyOn(http._request, 'get');
+        http.get(uri, opts, cb);
+        expect(http._request.get).toHaveBeenCalledWith(uri, opts, cb);
+      });
     });
 
     describe('#head', function () {
-      spyOn(http._request, 'head');
-      http.del('a', opts, cb);
-      expect(http._request.head).toHaveBeenCalledWith(uri, opts, cb);
+      it('should call with correct parameters', function () {
+        spyOn(http._request, 'head');
+        http.head(uri, opts, cb);
+        expect(http._request.head).toHaveBeenCalledWith(uri, opts, cb);
+      });
     });
 
     describe('#patch', function () {
-      spyOn(http._request, 'patch');
-      http.del('a', opts, cb);
-      expect(http._request.patch).toHaveBeenCalledWith(uri, opts, cb);
+      it('should call with correct parameters', function () {
+        spyOn(http._request, 'patch');
+        http.patch(uri, opts, cb);
+        expect(http._request.patch).toHaveBeenCalledWith(uri, opts, cb);
+      });
     });
 
     describe('#post', function () {
-      spyOn(http._request, 'post');
-      http.del('a', opts, cb);
-      expect(http._request.post).toHaveBeenCalledWith(uri, opts, cb);
+      it('should call with correct parameters', function () {
+        spyOn(http._request, 'post');
+        http.post(uri, opts, cb);
+        expect(http._request.post).toHaveBeenCalledWith(uri, opts, cb);
+      });
     });
 
     describe('#put', function () {
-      spyOn(http._request, 'put');
-      http.del('a', opts, cb);
-      expect(http._request.put).toHaveBeenCalledWith(uri, opts, cb);
+      it('should call with correct parameters', function () {
+        spyOn(http._request, 'put');
+        http.put(uri, opts, cb);
+        expect(http._request.put).toHaveBeenCalledWith(uri, opts, cb);
+      });
     });
   });
 

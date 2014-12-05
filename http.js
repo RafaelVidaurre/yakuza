@@ -39,7 +39,10 @@ function Http (defaultCookies) {
 */
 Http.prototype._interceptResponse = function (err, res, body, callback) {
   this._pushToLog({response: res, body: body});
-  callback(err, res, body);
+
+  if (_.isFunction(callback)) {
+    callback(err, res, body);
+  }
 };
 
 /**
@@ -53,7 +56,7 @@ Http.prototype._pushToLog = function (logEntry) {
 /**
 * Pattern-matches parameters for request calls
 * @param param1 First parameter (required)
-* @param param2 Second parameter (required)
+* @param param2 Second parameter
 * @param param3 Third parameter
 * @return {object} parameters assigned to proper keys
 * @private
@@ -81,9 +84,85 @@ Http.prototype._initRequestParams = function (param1, param2, param3) {
   return {uri: uri, options: options, callback: callback};
 };
 
-Http.prototype.del = function (uri, options, callback) {
-  var params = this._initRequestParams(uri, options, callback);
+Http.prototype.getCookieJar = function () {
+  return this._cookieJar;
+};
+
+/**
+* Delegate to request's `del` method
+* @param param1 First parameter (required) can be options object or URI string
+* @param param2 Second parameter can be options object or callback
+* @param param3 Third parameter callback method
+*/
+Http.prototype.del = function (param1, param2, param3) {
+  var params = this._initRequestParams(param1, param2, param3);
   this._request.del(params.uri, params.options, params.callback);
+};
+
+/**
+* Delegate to request's `get` method
+* @param param1 First parameter (required) can be options object or URI string
+* @param param2 Second parameter can be options object or callback
+* @param param3 Third parameter callback method
+*/
+Http.prototype.get = function (param1, param2, param3) {
+  var params = this._initRequestParams(param1, param2, param3);
+  this._request.get(params.uri, params.options, params.callback);
+};
+
+/**
+* Delegate to request's `head` method
+* @param param1 First parameter (required) can be options object or URI string
+* @param param2 Second parameter can be options object or callback
+* @param param3 Third parameter callback method
+*/
+Http.prototype.head = function (param1, param2, param3) {
+  var params = this._initRequestParams(param1, param2, param3);
+  this._request.head(params.uri, params.options, params.callback);
+};
+
+/**
+* Delegate to request's `patch` method
+* @param param1 First parameter (required) can be options object or URI string
+* @param param2 Second parameter can be options object or callback
+* @param param3 Third parameter callback method
+*/
+Http.prototype.patch = function (param1, param2, param3) {
+  var params = this._initRequestParams(param1, param2, param3);
+  this._request.patch(params.uri, params.options, params.callback);
+};
+
+/**
+* Delegate to request's `post` method
+* @param param1 First parameter (required) can be options object or URI string
+* @param param2 Second parameter can be options object or callback
+* @param param3 Third parameter callback method
+*/
+Http.prototype.post = function (param1, param2, param3) {
+  var params = this._initRequestParams(param1, param2, param3);
+  this._request.post(params.uri, params.options, params.callback);
+};
+
+/**
+* Delegate to request's `post` method
+* @param param1 First parameter (required) can be options object or URI string
+* @param param2 Second parameter can be options object or callback
+* @param param3 Third parameter callback method
+*/
+Http.prototype.post = function (param1, param2, param3) {
+  var params = this._initRequestParams(param1, param2, param3);
+  this._request.post(params.uri, params.options, params.callback);
+};
+
+/**
+* Delegate to request's `put` method
+* @param param1 First parameter (required) can be options object or URI string
+* @param param2 Second parameter can be options object or callback
+* @param param3 Third parameter callback method
+*/
+Http.prototype.put = function (param1, param2, param3) {
+  var params = this._initRequestParams(param1, param2, param3);
+  this._request.put(params.uri, params.options, params.callback);
 };
 
 module.exports = Http;
