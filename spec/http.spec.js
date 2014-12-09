@@ -89,6 +89,14 @@ describe('Http', function () {
         http.del(uri, opts, cb);
         expect(http._request.del).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
+
+      it('should log requests', function () {
+        expect(http._log.length).toBe(0);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(1);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(2);
+      });
     });
 
     describe('#get', function () {
@@ -96,6 +104,14 @@ describe('Http', function () {
         spyOn(http._request, 'get');
         http.get(uri, opts, cb);
         expect(http._request.get).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
+      });
+
+      it('should log requests', function () {
+        expect(http._log.length).toBe(0);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(1);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(2);
       });
     });
 
@@ -105,6 +121,14 @@ describe('Http', function () {
         http.head(uri, opts, cb);
         expect(http._request.head).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
+
+      it('should log requests', function () {
+        expect(http._log.length).toBe(0);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(1);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(2);
+      });
     });
 
     describe('#patch', function () {
@@ -112,6 +136,14 @@ describe('Http', function () {
         spyOn(http._request, 'patch');
         http.patch(uri, opts, cb);
         expect(http._request.patch).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
+      });
+
+      it('should log requests', function () {
+        expect(http._log.length).toBe(0);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(1);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(2);
       });
     });
 
@@ -121,6 +153,14 @@ describe('Http', function () {
         http.post(uri, opts, cb);
         expect(http._request.post).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
+
+      it('should log requests', function () {
+        expect(http._log.length).toBe(0);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(1);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(2);
+      });
     });
 
     describe('#put', function () {
@@ -129,7 +169,16 @@ describe('Http', function () {
         http.put(uri, opts, cb);
         expect(http._request.put).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
+
+      it('should log requests', function () {
+        expect(http._log.length).toBe(0);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(1);
+        http.del(uri, opts, cb);
+        expect(http._log.length).toBe(2);
+      });
     });
+
   });
 
   describe('#getCookieJar', function () {
