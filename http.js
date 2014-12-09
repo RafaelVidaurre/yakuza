@@ -9,6 +9,11 @@
 var request = require('request');
 var _ = require('lodash');
 
+/**
+* @class
+* @param {object} defaultCookies cookie jar for the class instance to be initialized with, defaults
+* to a brand new cookie jar
+*/
 function Http (defaultCookies) {
   /**
   * Cookie jar for the Http instance
