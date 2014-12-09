@@ -32,14 +32,17 @@ describe('Http', function () {
       var fakeBody = {fake: 'body'};
       var fakeCb = function () {};
       spyOn(http, '_pushToLog');
-      http._interceptResponse(null, fakeResponse, fakeBody, fakeCb);
+      http._interceptResponse.bind({
+        callback: fakeCb,
+        _this: http
+      })(null, fakeResponse, fakeBody);
       expect(http._pushToLog).toHaveBeenCalledWith({response: fakeResponse, body: fakeBody});
     });
 
     it('should call the callback with response data', function () {
       var test = {callback: function () {}};
       spyOn(test, 'callback');
-      http._interceptResponse(1, 2, 3, test.callback);
+      http._interceptResponse.bind({callback: test.callback, _this: http})(1, 2, 3);
       expect(test.callback).toHaveBeenCalledWith(1, 2, 3);
     });
   });
@@ -84,7 +87,7 @@ describe('Http', function () {
       it('should call with correct parameters', function () {
         spyOn(http._request, 'del');
         http.del(uri, opts, cb);
-        expect(http._request.del).toHaveBeenCalledWith(uri, opts, cb);
+        expect(http._request.del).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
     });
 
@@ -92,7 +95,7 @@ describe('Http', function () {
       it('should call with correct parameters', function () {
         spyOn(http._request, 'get');
         http.get(uri, opts, cb);
-        expect(http._request.get).toHaveBeenCalledWith(uri, opts, cb);
+        expect(http._request.get).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
     });
 
@@ -100,7 +103,7 @@ describe('Http', function () {
       it('should call with correct parameters', function () {
         spyOn(http._request, 'head');
         http.head(uri, opts, cb);
-        expect(http._request.head).toHaveBeenCalledWith(uri, opts, cb);
+        expect(http._request.head).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
     });
 
@@ -108,7 +111,7 @@ describe('Http', function () {
       it('should call with correct parameters', function () {
         spyOn(http._request, 'patch');
         http.patch(uri, opts, cb);
-        expect(http._request.patch).toHaveBeenCalledWith(uri, opts, cb);
+        expect(http._request.patch).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
     });
 
@@ -116,7 +119,7 @@ describe('Http', function () {
       it('should call with correct parameters', function () {
         spyOn(http._request, 'post');
         http.post(uri, opts, cb);
-        expect(http._request.post).toHaveBeenCalledWith(uri, opts, cb);
+        expect(http._request.post).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
     });
 
@@ -124,14 +127,23 @@ describe('Http', function () {
       it('should call with correct parameters', function () {
         spyOn(http._request, 'put');
         http.put(uri, opts, cb);
-        expect(http._request.put).toHaveBeenCalledWith(uri, opts, cb);
+        expect(http._request.put).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
       });
     });
   });
 
   describe('#getCookieJar', function () {
-    var newCookieJar = request.jar();
-    var newHttp = new Http(newCookieJar);
-    expect(newHttp.getCookieJar()).toEqual(newCookieJar);
+    it('should return the cookie jar', function () {
+      var newCookieJar = request.jar();
+      var newHttp = new Http(newCookieJar);
+      expect(newHttp.getCookieJar()).toEqual(newCookieJar);
+    });
+  });
+
+  describe('#getLog', function () {
+    it('should return the log', function () {
+      var log = http.getLog();
+      expect(log).toBe(http._log);
+    });
   });
 });

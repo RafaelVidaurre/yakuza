@@ -185,4 +185,8 @@ Http.prototype.put = function (param1, param2, param3) {
   this._request.put(params.uri, params.options, boundInterceptor);
 };
 
+Http.prototype.getLog = function () {
+  return this._log;
+};
+
 module.exports = Http;
