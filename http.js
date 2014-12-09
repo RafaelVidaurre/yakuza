@@ -185,6 +185,10 @@ Http.prototype.put = function (param1, param2, param3) {
   this._request.put(params.uri, params.options, boundInterceptor);
 };
 
+/**
+* Returns the current request log as an array
+* @returns {array} current request log
+*/
 Http.prototype.getLog = function () {
   return this._log;
 };
