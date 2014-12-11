@@ -15,8 +15,13 @@ var Agent = require('./agent');
 */
 function Scraper () {
   /**
-    Array of callbacks provided via config() which set the Scraper's configuration variables
-    @private
+  * Determines if the setup processes have been applied
+  */
+  this._applied = false;
+
+  /**
+  * Array of callbacks provided via config() which set the Scraper's configuration variables
+  * @private
   */
   this._configCallbacks = [];
 
@@ -35,6 +40,27 @@ function Scraper () {
 Scraper.prototype._createAgent = function (agentId) {
   this._agents[agentId] = new Agent(agentId);
   return this._agents[agentId];
+};
+
+/**
+* Run functions passed via config(), thus applying their config logic
+* @private
+*/
+Scraper.prototype._applyConfigCallbacks = function () {
+  var _this = this;
+  _.each(_this._configCallbacks, function (configCallback) {
+    configCallback(_this._config);
+  });
+};
+
+/**
+* Applies all necessary processes regarding the setup stage of the scraper
+* @private
+*/
+Scraper.prototype._applySetup = function () {
+  if (this._applied) {return;}
+  this._applyConfigCallbacks();
+  this._applied = true;
 };
 
 /**

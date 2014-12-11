@@ -17,6 +17,11 @@ var TaskDefinition = require('./task-definition');
 */
 function Agent (id) {
   /**
+  * Determines wether the agent's config has been applied or not
+  */
+  this._applied = false;
+
+  /**
   * List of functions which modify the Agent's configuration (provided by setup())
   * @private
   */
@@ -100,8 +105,10 @@ Agent.prototype._formatPlan = function () {
 * @private
 */
 Agent.prototype._applySetup = function () {
+  if (this._applied) {return;}
   this._applyConfigCallbacks();
   this._formatPlan();
+  this._applied = true;
 };
 
 /**

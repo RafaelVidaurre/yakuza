@@ -1,3 +1,5 @@
+'use strict';
+
 var Agent = require('../agent');
 var TaskDefinition = require('../task-definition');
 var _ = require('underscore');
@@ -26,6 +28,10 @@ describe('Agent', function () {
     it('should set its Id', function () {
       var newAgent = new Agent('foo');
       expect(newAgent.id).toEqual('foo');
+    });
+
+    it('should start with _applied false', function () {
+      expect(agent._applied).toBe(false);
     });
   });
 
@@ -58,6 +64,13 @@ describe('Agent', function () {
       ];
       agentPlanned._applySetup();
       expect(agentPlanned._plan).toEqual(expectedPlan);
+    });
+
+    it('should set _applied to true', function () {
+      spyOn(agent, '_applyConfigCallbacks');
+      spyOn(agent, '_formatPlan');
+      agent._applySetup();
+      expect(agent._applied).toBe(true);
     });
   });
 
