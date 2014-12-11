@@ -40,9 +40,9 @@ function TaskDefinition () {
 */
 TaskDefinition.prototype._build = function () {
   var _this = this;
-  var builderOutput, paramSets, tasks, task;
+  var paramSets, tasks, task;
 
-  if (!_.isFunction(this._main)) throw new Error('Cannot build task with no main method set');
+  if (!_.isFunction(this._main)) {throw new Error('Cannot build task with no main method set');}
 
   tasks = [];
   // TODO: Here we will expose certain variables via arguments for builders to use

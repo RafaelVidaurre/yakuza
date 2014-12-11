@@ -6,13 +6,14 @@
 'use strict';
 
 var Q = require('q');
+var Http = require('./http');
 
 /**
 * Is the product of a Task being built, contains status data, the main method of the task and other,
 * stuff required for it to be run
 * @class
 */
-function Task (main, params) {
+function Task (main, params, defaultCookies) {
   /**
   * Number of retries performed by the built task
   * @private
@@ -50,6 +51,15 @@ function Task (main, params) {
   * @private
   */
   this._sharedStorage = {};
+
+  /**
+  * Request object for this task instance
+  * @private
+  */
+  this._http = null;
+
+
+  this._http = defaultCookies ? new Http(defaultCookies) : new Http();
 }
 
 /**
@@ -96,7 +106,7 @@ Task.prototype._run = function () {
   };
 
   // TODO: Maybe handle the exception thrown by the onError method to control crashes
-  this._main(emitter, this._params);
+  this._main(emitter, this._http, this._params);
 };
 
 
