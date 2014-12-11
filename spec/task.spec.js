@@ -2,6 +2,8 @@
 
 var Task = require('../task');
 var Q = require('q');
+var Http = require('../http');
+var request = require('request');
 
 describe('Task', function () {
   var task;
@@ -26,6 +28,17 @@ describe('Task', function () {
       var newTask = new Task(mainMethod);
       expect(newTask._main).toBe(mainMethod);
     });
+
+    it('should initialize with an http instance and no new cookies', function () {
+      expect(task._http instanceof Http).toBe(true);
+    });
+
+    it('should initialize its http instance with cookies if provided', function () {
+      var jar = request.jar();
+      jar.setCookie('foo=bar', 'http://www.fake.com');
+      var newTask = new Task(function () {}, {a: 1}, jar);
+      expect(newTask._http._cookieJar).toEqual(jar);
+    });
   });
 
   describe('#_run', function () {
@@ -37,14 +50,15 @@ describe('Task', function () {
       };
       spyOn(task, '_main');
       task._run();
-      expect(task._main).toHaveBeenCalledWith(emitter, jasmine.any(Object));
+      expect(task._main).toHaveBeenCalledWith(emitter, jasmine.any(Object), jasmine.any(Object));
     });
 
     it('should pass task params as second argument to main method', function () {
       var dummyFunction = function () {};
       spyOn(task, '_main');
       task._run(dummyFunction, dummyFunction, dummyFunction);
-      expect(task._main).toHaveBeenCalledWith(jasmine.any(Object), task._params);
+      expect(task._main).toHaveBeenCalledWith(jasmine.any(Object), jasmine.any(Object),
+        task._params);
     });
   });
 
