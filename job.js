@@ -325,19 +325,11 @@ Job.prototype._applyNextExecutionBlock = function () {
 };
 
 /**
-* Triggers the agent's applySetupFunction
-* @private
-*/
-Job.prototype._applyAgentSetup = function () {
-  this._agent._applySetup();
-};
-
-/**
 * Does necessary stuff needed before running can occur
 * @private
 */
 Job.prototype._prepareRun = function () {
-  this._applyAgentSetup();
+  this._applyComponents();
   this._applyPlan();
 };
 
@@ -391,6 +383,14 @@ Job.prototype._setEventListeners = function () {
 };
 
 /**
+* Applies required scraping components as they need to be ready to run by the job
+*/
+Job.prototype._applyComponents = function () {
+  this._scraper._applySetup();
+  this._agent._applySetup();
+};
+
+/**
 * Sets parameters which the job will provide to its tasks
 * @param {object} paramsObj Object containing key-value pair
 */
@@ -427,8 +427,8 @@ Job.prototype.run = function () {
     return;
   }
 
+  this._prepareRun();
   this._started = true;
-
   this._events.emit('job:start');
 };
 

@@ -4,6 +4,7 @@ var Job = require('../job');
 var Agent = require('../agent');
 var Task = require('../task');
 var Q = require('q');
+var Scraper = require('../scraper');
 
 describe('Job', function () {
   var job;
@@ -169,26 +170,12 @@ describe('Job', function () {
     });
   });
 
-  describe('#_applyAgentSetup', function () {
-    it('should call agent\'s _applySetup() method', function () {
-      var agent = new Agent('agentOne');
-      var newJob = new Job('jobOne', undefined, agent);
-      agent.setup(function (config) {
-        config.plan = [{taskId: 'task1', syncronous: true},
-          'task2', ['task3', 'task4'], 'task5', ['task6']];
-      });
-
-      spyOn(newJob._agent, '_applySetup');
-      newJob._applyAgentSetup();
-      expect(newJob._agent._applySetup).toHaveBeenCalled();
-    });
-  });
-
   describe('#_applyNextExecutionBlock', function () {
-    var agent, newJob;
+    var agent, newJob, scraper;
     beforeEach(function () {
       agent = new Agent('agentOne');
-      newJob = new Job('jobOne', undefined, agent);
+      scraper = new Scraper('scraperOne');
+      newJob = new Job('jobOne', scraper, agent);
       agent.setup(function (config) {
         config.plan = [{taskId: 'task1', syncronous: true},
           'task2', ['task3', 'task4'], 'task5', ['task6']];});
@@ -216,15 +203,16 @@ describe('Job', function () {
   });
 
   describe('#run', function () {
-    var newJob, agent;
+    var newJob, agent, scraper;
 
     beforeEach(function () {
       agent = new Agent();
+      scraper = new Scraper('scraperOne');
       agent.setup(function (config) {
         config.plan = [{taskId: 'task1', syncronous: true},
           'task2', ['task3', 'task4'], 'task5', ['task6']];
       });
-      newJob = new Job('jobOne', undefined, agent);
+      newJob = new Job('jobOne', scraper, agent);
     });
 
     it('should fire job:start event only once', function () {
@@ -268,11 +256,12 @@ describe('Job', function () {
   });
 
   describe('#_onJobStart', function () {
-    var agent, newJob;
+    var agent, newJob, scraper;
 
     beforeEach(function () {
       agent = new Agent();
-      newJob = new Job('jobTest', undefined, agent);
+      scraper = new Scraper();
+      newJob = new Job('jobTest', scraper, agent);
       agent.setup(function (config) {
         config.plan = [{taskId: 'task1', syncronous: true},
           'task2', ['task3', 'task4'], 'task5', ['task6']]
