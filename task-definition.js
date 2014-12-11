@@ -15,6 +15,17 @@ var Task = require('./task');
 */
 function TaskDefinition () {
   /**
+  * List of function which modify the Task definition's configuration (provided by config())
+  */
+  this._configCallbacks = [];
+
+  /**
+  * Task definition's configuration object (set by running all configCallback functions)
+  * @private
+  */
+  this._config = {};
+
+  /**
   * The main method of the TaskDefinition
   * @private
   */
@@ -55,6 +66,24 @@ TaskDefinition.prototype._build = function () {
 
   return tasks;
 };
+
+TaskDefinition.prototype._applySetup = function () {
+  if (this._applied) {return;}
+  this._applyConfigCallbacks();
+  this._applied = true;
+};
+
+/**
+* Run functions passed via config(), thus applying their config logic
+* @private
+*/
+TaskDefinition.prototype._applyConfigCallbacks = function () {
+  var _this = this;
+  _.each(_this._configCallbacks, function (configCallback) {
+    configCallback(_this._config);
+  });
+};
+
 
 /**
 * Sets main task's method
@@ -107,6 +136,20 @@ TaskDefinition.prototype.builder = function (builderMethod) {
   if (!_.isFunction(builderMethod)) {throw new Error('Builder must be a function');}
 
   this._builder = builderMethod;
+
+  return this;
+};
+
+/**
+* Saves a configuration function into the config callbacks array
+* @param {function} cbConfig method which modifies the Task definition's config object (passed as
+* argument)
+*/
+TaskDefinition.prototype.setup = function (cbConfig) {
+  if (!_.isFunction(cbConfig)) {throw new Error('Setup argument must be a function');}
+
+  this._configCallbacks.push(cbConfig);
+
   return this;
 };
 

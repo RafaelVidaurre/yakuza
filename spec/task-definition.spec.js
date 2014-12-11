@@ -132,4 +132,13 @@ describe('TaskDefinition', function () {
       expect(builtTasks[0] instanceof Task).toBe(true);
     });
   });
+
+  describe('#_applySetup', function () {
+    it('should set _applied to true', function () {
+      spyOn(taskDefinition, '_applyConfigCallbacks');
+      taskDefinition._applySetup();
+      expect(taskDefinition._applied).toBe(true);
+
+    });
+  });
 });
