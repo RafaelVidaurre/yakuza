@@ -43,7 +43,7 @@ Scraper.prototype._createAgent = function (agentId) {
 * @param {function} cbConfig function which will modify config parameters
 */
 Scraper.prototype.config = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) throw new Error('Config argument must be a function');
+  if (!_.isFunction(cbConfig)) {throw new Error('Config argument must be a function');}
 
   this._configCallbacks.push(cbConfig);
 

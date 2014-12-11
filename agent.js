@@ -105,7 +105,7 @@ Agent.prototype._applySetup = function () {
 };
 
 /**
-* Saves a configuration function in into the config callbacks array
+* Saves a configuration function into the config callbacks array
 * @param {function} cbConfig method which modifies the agent's config object (passed as argument)
 */
 Agent.prototype.setup = function (cbConfig) {
