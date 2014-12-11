@@ -101,12 +101,23 @@ Agent.prototype._formatPlan = function () {
 };
 
 /**
+* Applies all task definitions
+* @private
+*/
+Agent.prototype._applyTaskDefinitions = function () {
+  _.each(this._taskDefinitions, function (taskDefinition) {
+    taskDefinition._applySetup();
+  });
+};
+
+/**
 * Applies all necessary processes regarding the setup stage of the agent
 * @private
 */
 Agent.prototype._applySetup = function () {
   if (this._applied) {return;}
   this._applyConfigCallbacks();
+  this._applyTaskDefinitions();
   this._formatPlan();
   this._applied = true;
 };
