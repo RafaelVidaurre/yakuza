@@ -17,7 +17,7 @@ var TaskDefinition = require('./task-definition');
 */
 function Agent (id) {
   /**
-  * List of functions which modify the Agent's configuration (provided by config())
+  * List of functions which modify the Agent's configuration (provided by setup())
   * @private
   */
   this._configCallbacks = [];
@@ -35,7 +35,7 @@ function Agent (id) {
   this._taskDefinitions = {};
 
   /**
-  * Agent's configuration object (set via config() function)
+  * Agent's configuration object (set by running all configCallback functions)
   * @private
   */
   this._config = {};
@@ -109,11 +109,11 @@ Agent.prototype._applySetup = function () {
 * @param {function} cbConfig method which modifies the agent's config object (passed as argument)
 */
 Agent.prototype.setup = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) throw new Error('Config argument must be a function');
+  if (!_.isFunction(cbConfig)) {throw new Error('Setup argument must be a function');}
 
   this._configCallbacks.push(cbConfig);
 
-  return Agent;
+  return this;
 };
 
 /**
