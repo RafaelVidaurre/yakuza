@@ -62,7 +62,7 @@ TaskDefinition.prototype._build = function () {
 * unique
 */
 TaskDefinition.prototype.main = function (mainMethod) {
-  if (!_.isFunction(mainMethod)) throw new Error('Main method must be a function');
+  if (!_.isFunction(mainMethod)) {throw new Error('Main method must be a function');}
   this._main = mainMethod;
 
   return this;
@@ -104,7 +104,7 @@ TaskDefinition.prototype.hooks = function (hooksObj) {
 * it as a parameter to its corresponding task
 */
 TaskDefinition.prototype.builder = function (builderMethod) {
-  if (!_.isFunction(builderMethod)) throw new Error('Builder must be a function');
+  if (!_.isFunction(builderMethod)) {throw new Error('Builder must be a function');}
 
   this._builder = builderMethod;
   return this;
