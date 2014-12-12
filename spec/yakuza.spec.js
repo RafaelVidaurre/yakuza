@@ -27,7 +27,6 @@ describe('Yakuza', function () {
       expect(Yakuza._scrapers.test).toBe(undefined);
       var scr = Yakuza.scraper('test');
       expect(Yakuza._scrapers.test).toBe(scr);
-
     });
   });
 });
