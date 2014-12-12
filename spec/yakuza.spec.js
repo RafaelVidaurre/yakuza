@@ -42,11 +42,24 @@ describe('Yakuza', function () {
   });
 
   describe('#job', function () {
-    it('should return a job instance', function () {
+    var job;
+
+    beforeEach(function () {
       Yakuza.scraper('foo');
       Yakuza.scraper('foo').agent('bar');
-      var job = Yakuza.job('foo', 'bar');
+      job = Yakuza.job('foo', 'bar');
+    });
+
+    it('should return a job instance', function () {
       expect(job instanceof Job).toBe(true);
+    });
+
+    it('should give each job a uid', function () {
+      expect(job.uid).toBeTruthy();
+    });
+
+    it('should save each new job in a _jobs object with the uid as key', function () {
+      expect(Yakuza._jobs[job.uid]).toBe(job);
     });
   });
 });
