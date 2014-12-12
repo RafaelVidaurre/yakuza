@@ -62,4 +62,28 @@ describe('Yakuza', function () {
       expect(Yakuza._jobs[job.uid]).toBe(job);
     });
   });
+
+  describe('#ready', function () {
+    it('should apply setup of all agents and scrapers', function () {
+      var scr1 = Yakuza.scraper('scraperOne');
+      var scr2 = Yakuza.scraper('scraperTwo');
+      var agent1 = scr1.agent('agentOne');
+      var agent2 = scr2.agent('agentTwo');
+      var agent3 = scr2.agent('agentThree');
+
+      spyOn(scr1, '_applySetup');
+      spyOn(scr2, '_applySetup');
+      spyOn(agent1, '_applySetup');
+      spyOn(agent2, '_applySetup');
+      spyOn(agent3, '_applySetup');
+
+      Yakuza.ready();
+
+      expect(scr1._applySetup).toHaveBeenCalled();
+      expect(scr2._applySetup).toHaveBeenCalled();
+      expect(agent1._applySetup).toHaveBeenCalled();
+      expect(agent2._applySetup).toHaveBeenCalled();
+      expect(agent3._applySetup).toHaveBeenCalled();
+    });
+  });
 });

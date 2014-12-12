@@ -10,6 +10,7 @@
 
 var shortId = require('shortid');
 var utils = require('./utils');
+var _ = require('lodash');
 var Scraper = require('./scraper');
 var Job = require('./job');
 
@@ -72,6 +73,19 @@ YakuzaBase.prototype.job = function (scraperId, agentId) {
   this._jobs[newId] = newJob;
 
   return newJob;
+};
+
+/**
+* Applies all configurations for all scrapers and agents, Yakuza can eager-load (via this
+* method) or lazy-load (by running a job).
+*/
+YakuzaBase.prototype.ready = function () {
+  _.each(this._scrapers, function (scraper) {
+    scraper._applySetup();
+    _.each(scraper._agents, function (agent) {
+      agent._applySetup();
+    });
+  });
 };
 
 module.exports = YakuzaBase;
