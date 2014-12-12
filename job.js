@@ -16,7 +16,7 @@ var Http = require('./http');
 * @param {Scraper} scraper Reference to the scraper being used by the job
 * @param {Agent} agent Reference to the agent being used by the job
 */
-function Job (uid, scraper, agent) {
+function Job (uid, scraper, agent, params) {
   /**
   * Instance of Http class in charge of recording requests/responses and providing a wapper around
   * mikeal's request library
@@ -73,7 +73,7 @@ function Job (uid, scraper, agent) {
   * Parameters that will be provided to the Task instances
   * @private
   */
-  this._params = {};
+  this._params = params || {};
 
   /**
   * Tasks enqueued via Job's API
@@ -163,7 +163,7 @@ Job.prototype._applyPlan = function () {
 * @return {array} an array of Tasks
 */
 Job.prototype._buildTask = function (taskSpecs) {
-  var errMsg, taskDefinition;
+  var errMsg, taskDefinition, builderParams;
   taskDefinition = this._agent._taskDefinitions[taskSpecs.taskId];
   errMsg = 'Task with id ' + taskSpecs.taskId + ' does not exist in agent ' + this._agent.id;
 
@@ -171,7 +171,12 @@ Job.prototype._buildTask = function (taskSpecs) {
     throw new Error(errMsg);
   }
 
-  return taskDefinition._build();
+  builderParams = {
+    params: this._params,
+    sharedStorage: null // TODO: Assign a value tot his propery
+  };
+
+  return taskDefinition._build(builderParams);
 };
 
 /**

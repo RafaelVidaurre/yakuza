@@ -63,13 +63,13 @@ YakuzaBase.prototype.scraper = function (scraperId) {
 * @param {string} agentId name of the agent that will be used by the Job
 * @return {Job} Job instance that has been created
 */
-YakuzaBase.prototype.job = function (scraperId, agentId) {
+YakuzaBase.prototype.job = function (scraperId, agentId, params) {
   var newId, scraper, agent, newJob;
 
   scraper = this._scrapers[scraperId];
   agent = scraper._agents[agentId];
   newId = shortId.generate();
-  newJob = new Job(newId, scraper, agent);
+  newJob = new Job(newId, scraper, agent, params);
   this._jobs[newId] = newJob;
 
   return newJob;

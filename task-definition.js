@@ -49,7 +49,7 @@ function TaskDefinition () {
 * @private
 * @return {array} An array of Task instances
 */
-TaskDefinition.prototype._build = function () {
+TaskDefinition.prototype._build = function (builderParams) {
   var _this = this;
   var paramSets, tasks, task;
 
@@ -57,7 +57,7 @@ TaskDefinition.prototype._build = function () {
 
   tasks = [];
   // TODO: Here we will expose certain variables via arguments for builders to use
-  paramSets = utils.arrayify(this._builder());
+  paramSets = utils.arrayify(this._builder(builderParams));
 
   _.each(paramSets, function (paramSet) {
     task = new Task(_this._main, paramSet);
