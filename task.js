@@ -100,9 +100,9 @@ Task.prototype._onFail = function (error, message) {
 */
 Task.prototype._run = function () {
   var emitter = {
-    success: this._onSuccess,
-    fail: this._onFail,
-    share: this._onShare
+    success: this._onSuccess.bind(this),
+    fail: this._onFail.bind(this),
+    share: this._onShare.bind(this)
   };
 
   // TODO: Maybe handle the exception thrown by the onError method to control crashes

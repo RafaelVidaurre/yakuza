@@ -264,7 +264,6 @@ Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
 */
 Job.prototype._runTask = function (taskSpec) {
   var _this = this;
-
   var taskRunning, thisTask, nextTaskSpec;
 
   thisTask = taskSpec.task;
@@ -273,7 +272,7 @@ Job.prototype._runTask = function (taskSpec) {
 
   if (nextTaskSpec) {
     taskRunning.then(function () {
-      _this._runTask(nextTaskSpec.next);
+      _this._runTask(nextTaskSpec);
     });
   }
 
