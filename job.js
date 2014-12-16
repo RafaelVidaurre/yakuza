@@ -314,13 +314,20 @@ Job.prototype._runCurrentExecutionBlock = function () {
 
 /**
 * increments execution plan index, builds an execution block from it and pushes it to the execution
-* queue. This does NOT increment the
+* queue.
 * @fires eq:blockApply
 */
 Job.prototype._applyNextExecutionBlock = function () {
   var executionBlock;
 
   this._planIdx += 1;
+
+  if (!this._plan[this._planIdx]) {
+    this._events.emit('job:finish');
+    console.log('Job finished');
+    return;
+  }
+
   this._executionQueueIdx += 1;
   executionBlock = this._buildExecutionBlock(this._plan[this._planIdx]);
   this._executionQueue.push(executionBlock);
@@ -364,6 +371,14 @@ Job.prototype._onEqBlockFail = function () {
 };
 
 /**
+* Event handler called on event eq:blockSuccess. Continues execution of next eqBlock if possible
+* otherwise finishes the job
+*/
+Job.prototype._onEqBlockSuccess = function () {
+  this._applyNextExecutionBlock();
+};
+
+/**
 * Sets all the job's event listeners
 * @private
 */
@@ -383,6 +398,10 @@ Job.prototype._setEventListeners = function () {
   // When a task from the current execution block fails
   this._events.on('eq:blockFail', function () {
     _this._onEqBlockFail();
+  });
+
+  this._events.on('eq:blockSuccess', function () {
+    _this._onEqBlockSuccess();
   });
 };
 
