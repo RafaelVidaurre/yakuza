@@ -323,8 +323,8 @@ Job.prototype._applyNextExecutionBlock = function () {
   this._planIdx += 1;
 
   if (!this._plan[this._planIdx]) {
-    this._events.emit('job:finish');
-    console.log('Job finished');
+    this._events.emit('job:success');
+    console.log('Job successfuly finished');
     return;
   }
 
