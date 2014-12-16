@@ -173,7 +173,7 @@ Job.prototype._buildTask = function (taskSpecs) {
 
   builderParams = {
     params: this._params,
-    sharedStorage: null // TODO: Assign a value tot his propery
+    shared: null // TODO: Assign a value tot his propery
   };
 
   return taskDefinition._build(builderParams);
