@@ -395,6 +395,17 @@ Job.prototype._applyComponents = function () {
 };
 
 /**
+* Verifies if the job's enqueued tasks are present in it's agent
+* @returns {boolean} true if all enqueued tasks exist
+*/
+Job.prototype._enqueuedTasksExist = function () {
+  var _this = this;
+  return _.every(this._enqueuedTasks, function (enqueuedTask) {
+    return !!_this._agent._taskDefinitions[enqueuedTask];
+  });
+};
+
+/**
 * Sets parameters which the job will provide to its tasks
 * @param {object} paramsObj Object containing key-value pair
 */
@@ -431,6 +442,9 @@ Job.prototype.run = function () {
     return;
   }
 
+  if (!this._enqueuedTasksExist()) {
+    throw Error('One or more enqueued tasks are not defined');
+  }
   this._prepareRun();
   this._started = true;
   this._events.emit('job:start');

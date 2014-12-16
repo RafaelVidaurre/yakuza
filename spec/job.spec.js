@@ -222,6 +222,14 @@ describe('Job', function () {
       newJob.run();
       expect(newJob._events.emit.calls.length).toEqual(1);
     });
+
+    it('should throw error if an enqueued task does not exist', function () {
+      var err = 'One or more enqueued tasks are not defined';
+      newJob.enqueue('nonDefinedTask');
+      expect(function () {
+        newJob.run();
+      }).toThrow(new Error(err));
+    });
   });
 
   describe('#on', function () {

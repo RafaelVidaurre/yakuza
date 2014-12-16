@@ -42,17 +42,6 @@ describe('Task', function () {
   });
 
   describe('#_run', function () {
-    it('should pass param callbacks as an object with keys to main method', function () {
-      var emitter = {
-        success: task._onSuccess,
-        fail: task._onFail,
-        share: task._onShare
-      };
-      spyOn(task, '_main');
-      task._run();
-      expect(task._main).toHaveBeenCalledWith(emitter, jasmine.any(Object), jasmine.any(Object));
-    });
-
     it('should pass task params as second argument to main method', function () {
       var dummyFunction = function () {};
       spyOn(task, '_main');
