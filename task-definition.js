@@ -13,7 +13,9 @@ var Task = require('./task');
 /**
 * @class
 */
-function TaskDefinition () {
+function TaskDefinition (id) {
+  this._id = id;
+
   /**
   * List of function which modify the Task definition's configuration (provided by config())
   */
