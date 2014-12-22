@@ -379,6 +379,8 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
         _this._taskStorages[task.taskId][key] = value;
       });
 
+      // Emit event for successful task
+      _this._events.emit('task:success', task, response);
     });
   });
 };
