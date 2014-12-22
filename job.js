@@ -471,7 +471,11 @@ Job.prototype._findInShared = function (query) {
   taskId = splittedQuery[0];
   key = splittedQuery[1];
 
-  // TODO: Search from finished tasks here
+  if (this._taskStorages[taskId] && this._taskStorages[taskId][key] !== undefined) {
+    return this._taskStorages[taskId][key];
+  }
+
+  return undefined;
 };
 
 /**
