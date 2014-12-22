@@ -46,6 +46,7 @@ function TaskDefinition () {
 
 /**
 * Executes the builder function and builds the Task instances
+* Note: This is called by the job
 * @private
 * @return {array} An array of Task instances
 */
@@ -57,6 +58,7 @@ TaskDefinition.prototype._build = function (builderParams) {
 
   tasks = [];
   paramSets = utils.arrayify(this._builder(builderParams));
+
   _.each(paramSets, function (paramSet) {
     task = new Task(_this._main, paramSet);
     tasks.push(task);
