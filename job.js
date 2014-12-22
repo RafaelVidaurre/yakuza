@@ -99,8 +99,11 @@ function Job (uid, scraper, agent, params) {
   /** Reference to the Scraper instance being used by the Job */
   this._scraper = scraper;
 
-  /** Shared storage to persist data between tasks */
-  this._sharedStorage = {};
+  /** Object containing shared storages of all tasks */
+  this._taskStorages = {};
+
+  /** Object with finished task references */
+  this._finishedTasks = {};
 
   /** Unique Job identifier */
   this.uid = null;
@@ -176,7 +179,7 @@ Job.prototype._buildTask = function (taskSpecs) {
 
   builderParams = {
     params: this._params,
-    shared: null // TODO: Assign a value tot his propery
+    shared: this._findInShared
   };
 
   return taskDefinition._build(builderParams);
@@ -356,10 +359,38 @@ Job.prototype._onJobStart = function () {
 };
 
 /**
+* Hooks to the newly created tasks' promises to trigger events and save useful data
+*/
+Job.prototype._prepareCurrentExecutionBlock = function () {
+  var _this, promises;
+
+  _this = this;
+  promises = this._retrieveExecutionBlockPromises(this._executionQueue[this._executionQueueIdx]);
+
+  _.each(promises, function (promise) {
+    promise.then(function (response, task) {
+      // Save task in its corresponding finished task array
+      _this.finishedTasks[task.taskId] = _this.finishedTasks[task.taskId] || [];
+      _this.finishedTasks[task.taskId].push(task);
+
+      // Set each key/value pair for this task's sharedStorage
+      _this.taskStorages[task.taskId] = _this.taskStorages[task.taskId] || {};
+      _.each(task._sharedStorage, function (value, key) {
+        _this._taskStorages[task.taskId][key] = value;
+      });
+
+    });
+  });
+};
+
+/**
 * Event handler called on event eq:blockApply
 * @private
 */
 Job.prototype._onEqBlockApply = function () {
+  // Set the new built tasks' events and listens to their promises
+  this._prepareCurrentExecutionBlock();
+  // Run the new execution block
   this._runCurrentExecutionBlock();
 };
 
@@ -424,6 +455,21 @@ Job.prototype._enqueuedTasksExist = function () {
   return _.every(this._enqueuedTasks, function (enqueuedTask) {
     return !!_this._agent._taskDefinitions[enqueuedTask];
   });
+};
+
+/**
+* Looks for a value shared by a task
+* @param {string} query key Namespaced by taskId using dot notation
+* returns value The value if found, otherwise undefined
+*/
+Job.prototype._findInShared = function (query) {
+  var taskId, key, splittedQuery;
+
+  splittedQuery = query.split('.');
+  taskId = splittedQuery[0];
+  key = splittedQuery[1];
+
+  // TODO: Search from finished tasks here
 };
 
 /**

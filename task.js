@@ -13,7 +13,14 @@ var Http = require('./http');
 * stuff required for it to be run
 * @class
 */
-function Task (main, params, defaultCookies) {
+
+// TODO: Add id to the task
+function Task (taskId, main, params, defaultCookies) {
+  /**
+  * Id of the task's task definition
+  */
+  this.taskId = taskId;
+
   /**
   * Number of retries performed by the built task
   * @private
@@ -79,7 +86,7 @@ Task.prototype._onShare = function (key, value) {
 * @private
 */
 Task.prototype._onSuccess = function (response) {
-  this._runningDeferred.resolve(response, this._sharedStorage);
+  this._runningDeferred.resolve(response, this);
 };
 
 /**

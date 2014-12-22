@@ -355,10 +355,10 @@ describe('Job', function () {
     var taskSpec1, taskSpec2, taskSpec3, executionBlock, task1, task2, task3, task4;
 
     beforeEach(function () {
-      task1 = new Task(function () {});
-      task2 = new Task(function () {});
-      task3 = new Task(function () {});
-      task4 = new Task(function () {});
+      task1 = new Task('task1', function () {});
+      task2 = new Task('task2',function () {});
+      task3 = new Task('task3',function () {});
+      task4 = new Task('task4',function () {});
 
       taskSpec1 = {task: task1, next: null};
       taskSpec2 = {task: task2, next: {task: task4, next: null}};

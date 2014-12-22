@@ -14,7 +14,7 @@ var Task = require('./task');
 * @class
 */
 function TaskDefinition (id) {
-  this._id = id;
+  this.id = id;
 
   /**
   * List of function which modify the Task definition's configuration (provided by config())
@@ -62,7 +62,7 @@ TaskDefinition.prototype._build = function (builderParams) {
   paramSets = utils.arrayify(this._builder(builderParams));
 
   _.each(paramSets, function (paramSet) {
-    task = new Task(_this._main, paramSet);
+    task = new Task(_this.id, _this._main, paramSet);
     tasks.push(task);
   });
 

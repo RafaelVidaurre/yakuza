@@ -25,7 +25,7 @@ describe('Task', function () {
 
     it('should set main method if passed', function () {
       var mainMethod = function () {return 1;};
-      var newTask = new Task(mainMethod);
+      var newTask = new Task('task1', mainMethod);
       expect(newTask._main).toBe(mainMethod);
     });
 
@@ -36,7 +36,7 @@ describe('Task', function () {
     it('should initialize its http instance with cookies if provided', function () {
       var jar = request.jar();
       jar.setCookie('foo=bar', 'http://www.fake.com');
-      var newTask = new Task(function () {}, {a: 1}, jar);
+      var newTask = new Task('task1', function () {}, {a: 1}, jar);
       expect(newTask._http._cookieJar).toEqual(jar);
     });
   });
@@ -75,11 +75,10 @@ describe('Task', function () {
       expect(task._runningDeferred.reject).not.toHaveBeenCalled();
     });
 
-    it('should pass its shared storage in the resolve response', function () {
+    it('should pass itself as param of its resolve response', function () {
       spyOn(task._runningDeferred, 'resolve');
-      task._sharedStorage = {a: 1};
       task._onSuccess(1);
-      expect(task._runningDeferred.resolve).toHaveBeenCalledWith(1, task._sharedStorage);
+      expect(task._runningDeferred.resolve).toHaveBeenCalledWith(1, task);
     });
   });
 
