@@ -381,45 +381,4 @@ describe('Job', function () {
       expect(Q.all).toHaveBeenCalledWith(taskPromises);
     });
   });
-
-  describe('#_sharedStorageSet', function () {
-    var job;
-    beforeEach(function () {
-      var agent = yakuza.scraper('testScraper').agent('testAgent');
-      agent.task('task1');
-      agent.task('task2');
-      job = yakuza.job('testScraper', 'testAgent');
-    });
-
-    it('should add or modify storage records', function () {
-      job._sharedStorageSet('task1', 'foo', 1);
-      job._sharedStorageSet('task1', 'bar', 2);
-      job._sharedStorageSet('task1', 'bar', -1);
-      job._sharedStorageSet('task2', 'foo', 'different foo');
-
-      expect(job._sharedStorage.task1.foo).toEqual(1);
-      expect(job._sharedStorage.task1.bar).toEqual(-1);
-      expect(job._sharedStorage.task2.foo).toEqual('different foo');
-    });
-  });
-
-  describe('#_sharedStorageGet', function () {
-    var job;
-    beforeEach(function () {
-      var agent = yakuza.scraper('testScraper').agent('testAgent');
-      agent.task('task1');
-      agent.task('task2');
-      job = yakuza.job('testScraper', 'testAgent');
-    });
-
-    it('should return the value in storage if defined', function () {
-      job._sharedStorageSet('task1', 'foo', 2);
-      expect(job._sharedStorageGet('task1', 'foo')).toBe(2);
-    });
-
-    it('should return undefined if the value in storage isn\'t defined', function () {
-      expect(job._sharedStorageGet('task1', 'bar')).toBe(undefined);
-    });
-  });
-
 });
