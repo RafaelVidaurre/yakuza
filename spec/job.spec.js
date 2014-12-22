@@ -381,4 +381,22 @@ describe('Job', function () {
       expect(Q.all).toHaveBeenCalledWith(taskPromises);
     });
   });
+
+  describe('#_findInShared', function () {
+    it('should throw an exception if the query is wrongly formatted', function () {
+      var err = 'The shared method key passed is invalid';
+
+      expect(function () {job._findInShared('asd');}).toThrow(new Error(err));
+      expect(function () {job._findInShared(123);}).toThrow(new Error(err));
+    });
+
+    it('should return value if found', function () {
+      job._taskStorages.task1 = {foo: 1, bar: 2};
+      job._taskStorages.task2 = {and: 3};
+      expect(job._findInShared('task1.foo')).toBe(1);
+      expect(job._findInShared('task1.bar')).toBe(2);
+      expect(job._findInShared('task1.none')).toBe(undefined);
+      expect(job._findInShared('task2.and')).toBe(3);
+    });
+  });
 });

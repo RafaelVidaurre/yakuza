@@ -467,9 +467,17 @@ Job.prototype._enqueuedTasksExist = function () {
 Job.prototype._findInShared = function (query) {
   var taskId, key, splittedQuery;
 
+  if (!_.isString(query)) {
+    throw new Error('The shared method key passed is invalid');
+  }
+
   splittedQuery = query.split('.');
   taskId = splittedQuery[0];
   key = splittedQuery[1];
+
+  if (!taskId || !key) {
+    throw new Error('The shared method key passed is invalid');
+  }
 
   if (this._taskStorages[taskId] && this._taskStorages[taskId][key] !== undefined) {
     return this._taskStorages[taskId][key];
