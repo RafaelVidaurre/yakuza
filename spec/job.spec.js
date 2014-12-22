@@ -5,11 +5,13 @@ var Agent = require('../agent');
 var Task = require('../task');
 var Q = require('q');
 var Scraper = require('../scraper');
+var YakuzaBase = require('../yakuza-base');
 
 describe('Job', function () {
-  var job;
+  var job, yakuza;
   beforeEach(function () {
     job = new Job();
+    yakuza = new YakuzaBase();
   });
 
   describe('#Job', function () {
@@ -173,12 +175,16 @@ describe('Job', function () {
   describe('#_applyNextExecutionBlock', function () {
     var agent, newJob, scraper;
     beforeEach(function () {
-      agent = new Agent('agentOne');
-      scraper = new Scraper('scraperOne');
-      newJob = new Job('jobOne', scraper, agent);
+      scraper = yakuza.scraper('scraperOne');
+      agent = scraper.agent('agentOne');
       agent.setup(function (config) {
-        config.plan = [{taskId: 'task1', syncronous: true},
-          'task2', ['task3', 'task4'], 'task5', ['task6']];});
+        config.plan = [
+          {taskId: 'task1', syncronous: true},
+          'task2', ['task3', 'task4'], 'task5', ['task6']
+        ];
+      });
+      agent.task('task1').main(function () {});
+      newJob = yakuza.job('scraperOne', 'agentOne');
     });
 
     it('should increment _planIdx in every call', function () {
@@ -196,6 +202,7 @@ describe('Job', function () {
     });
 
     it('should push a new execution block', function () {
+      newJob.enqueue('task1');
       newJob._prepareRun();
       newJob._applyNextExecutionBlock();
       expect(newJob._executionQueue.length).toEqual(1);
@@ -375,5 +382,44 @@ describe('Job', function () {
     });
   });
 
+  describe('#_sharedStorageSet', function () {
+    var job;
+    beforeEach(function () {
+      var agent = yakuza.scraper('testScraper').agent('testAgent');
+      agent.task('task1');
+      agent.task('task2');
+      job = yakuza.job('testScraper', 'testAgent');
+    });
+
+    it('should add or modify storage records', function () {
+      job._sharedStorageSet('task1', 'foo', 1);
+      job._sharedStorageSet('task1', 'bar', 2);
+      job._sharedStorageSet('task1', 'bar', -1);
+      job._sharedStorageSet('task2', 'foo', 'different foo');
+
+      expect(job._sharedStorage.task1.foo).toEqual(1);
+      expect(job._sharedStorage.task1.bar).toEqual(-1);
+      expect(job._sharedStorage.task2.foo).toEqual('different foo');
+    });
+  });
+
+  describe('#_sharedStorageGet', function () {
+    var job;
+    beforeEach(function () {
+      var agent = yakuza.scraper('testScraper').agent('testAgent');
+      agent.task('task1');
+      agent.task('task2');
+      job = yakuza.job('testScraper', 'testAgent');
+    });
+
+    it('should return the value in storage if defined', function () {
+      job._sharedStorageSet('task1', 'foo', 2);
+      expect(job._sharedStorageGet('task1', 'foo')).toBe(2);
+    });
+
+    it('should return undefined if the value in storage isn\'t defined', function () {
+      expect(job._sharedStorageGet('task1', 'bar')).toBe(undefined);
+    });
+  });
 
 });

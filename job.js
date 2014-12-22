@@ -99,6 +99,9 @@ function Job (uid, scraper, agent, params) {
   /** Reference to the Scraper instance being used by the Job */
   this._scraper = scraper;
 
+  /** Shared storage to persist data between tasks */
+  this._sharedStorage = {};
+
   /** Unique Job identifier */
   this.uid = null;
 
@@ -321,14 +324,13 @@ Job.prototype._applyNextExecutionBlock = function () {
   var executionBlock;
 
   this._planIdx += 1;
+  this._executionQueueIdx += 1;
 
   if (!this._plan[this._planIdx]) {
     this._events.emit('job:success');
-    console.log('Job successfuly finished');
     return;
   }
 
-  this._executionQueueIdx += 1;
   executionBlock = this._buildExecutionBlock(this._plan[this._planIdx]);
   this._executionQueue.push(executionBlock);
 
@@ -422,6 +424,31 @@ Job.prototype._enqueuedTasksExist = function () {
   return _.every(this._enqueuedTasks, function (enqueuedTask) {
     return !!_this._agent._taskDefinitions[enqueuedTask];
   });
+};
+
+/**
+* Sets a new record or modifies existing one in the jobs shared storage
+* param {string} taskId Id of the task sharing the variable
+* param {string} key Key for the shared variable to be stored
+* param value Value to be stored associated with the key
+*/
+Job.prototype._sharedStorageSet = function (taskId, key, value) {
+  this._sharedStorage[taskId] = this._sharedStorage[taskId] || {};
+  this._sharedStorage[taskId][key] = value;
+};
+
+/**
+* Gets a record from the shared storage
+* param {string} taskId Name of the task which stored the value
+* param {string} key Key of the value stored by the task
+* returns value returns the value if it is found, otherwise it returns `undefined`
+*/
+Job.prototype._sharedStorageGet = function (taskId, key) {
+  if (this._sharedStorage[taskId] && this._sharedStorage[taskId][key] !== undefined) {
+    return this._sharedStorage[taskId][key];
+  }
+
+  return undefined;
 };
 
 /**
