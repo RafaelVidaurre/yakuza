@@ -138,6 +138,7 @@ Job.prototype._applyPlan = function () {
   var executionPlan, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
 
   executionPlan = this._agent._plan;
+
   newExecutionPlan = [];
   newTaskGroup = [];
 
@@ -169,7 +170,10 @@ Job.prototype._applyPlan = function () {
 * @return {array} an array of Tasks
 */
 Job.prototype._buildTask = function (taskSpecs) {
-  var errMsg, taskDefinition, builderParams;
+  var _this, errMsg, taskDefinition, builderParams;
+
+  _this = this;
+
   taskDefinition = this._agent._taskDefinitions[taskSpecs.taskId];
   errMsg = 'Task with id ' + taskSpecs.taskId + ' does not exist in agent ' + this._agent.id;
 
@@ -179,10 +183,12 @@ Job.prototype._buildTask = function (taskSpecs) {
 
   builderParams = {
     params: this._params,
-    shared: this._findInShared
+    shared: this._findInShared.bind(_this)
   };
 
-  return taskDefinition._build(builderParams);
+  var buildResponse = taskDefinition._build(builderParams);
+
+  return buildResponse;
 };
 
 /**
@@ -209,6 +215,7 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 
     // Build all execution objects for a specific task and
     _.each(tasks, function (task) {
+
       executionObject = {task: task, next: null};
 
       // Assign new object to previous object's `next` attribute if the task is self syncronous
@@ -336,7 +343,6 @@ Job.prototype._applyNextExecutionBlock = function () {
 
   executionBlock = this._buildExecutionBlock(this._plan[this._planIdx]);
   this._executionQueue.push(executionBlock);
-
   this._events.emit('eq:blockApply');
 };
 
@@ -368,13 +374,15 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
   promises = this._retrieveExecutionBlockPromises(this._executionQueue[this._executionQueueIdx]);
 
   _.each(promises, function (promise) {
-    promise.then(function (response, task) {
+    promise.then(function (response) {
+      var task = response.task;
+
       // Save task in its corresponding finished task array
-      _this.finishedTasks[task.taskId] = _this.finishedTasks[task.taskId] || [];
-      _this.finishedTasks[task.taskId].push(task);
+      _this._finishedTasks[task.taskId] = _this._finishedTasks[task.taskId] || [];
+      _this._finishedTasks[task.taskId].push(task);
 
       // Set each key/value pair for this task's sharedStorage
-      _this.taskStorages[task.taskId] = _this.taskStorages[task.taskId] || {};
+      _this._taskStorages[task.taskId] = _this._taskStorages[task.taskId] || {};
       _.each(task._sharedStorage, function (value, key) {
         _this._taskStorages[task.taskId][key] = value;
       });
@@ -526,7 +534,7 @@ Job.prototype.run = function () {
   if (!this._enqueuedTasksExist()) {
     throw Error('One or more enqueued tasks are not defined');
   }
-  this._prepareRun();
+
   this._started = true;
   this._events.emit('job:start');
 };

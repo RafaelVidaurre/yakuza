@@ -85,8 +85,13 @@ Task.prototype._onShare = function (key, value) {
 * @param response Data retrieved by the task
 * @private
 */
-Task.prototype._onSuccess = function (response) {
-  this._runningDeferred.resolve(response, this);
+Task.prototype._onSuccess = function (data) {
+  var response = {
+    data: data,
+    task: this
+  };
+
+  this._runningDeferred.resolve(response);
 };
 
 /**

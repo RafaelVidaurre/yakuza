@@ -53,6 +53,8 @@ function TaskDefinition (id) {
 * @return {array} An array of Task instances
 */
 TaskDefinition.prototype._build = function (builderParams) {
+  console.log('Building task with: ');
+  console.log(builderParams);
   var _this = this;
   var paramSets, tasks, task;
 
