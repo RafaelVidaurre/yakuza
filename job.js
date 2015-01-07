@@ -406,11 +406,13 @@ Job.prototype._onEqBlockApply = function () {
 
 /**
 * Event handler called on event eq:blockFail. Stops the job as a block has been marked as failed
+* @fires 'job:fail'
+* @fires 'fail'
 * @private
 */
 Job.prototype._onEqBlockFail = function () {
-  // TODO: Trigger event/callback to the outside
   this._publicEvents.emit('job:fail');
+  this._publicEvents.emit('fail');
 };
 
 /**
