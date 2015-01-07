@@ -16,10 +16,17 @@ var Http = require('./http');
 
 // TODO: Add id to the task
 function Task (taskId, main, params, defaultCookies) {
-  /**
-  * Id of the task's task definition
-  */
+  /** Id of the task's task definition */
   this.taskId = taskId;
+
+  /** Time at which the task started running */
+  this.startTime = null;
+
+  /** Time at which the task finished running */
+  this.endTime = null;
+
+  /** Time the task spent running */
+  this.elapsedTime = null;
 
   /**
   * Number of retries performed by the built task
@@ -70,6 +77,15 @@ function Task (taskId, main, params, defaultCookies) {
 }
 
 /**
+* Method run when the task finishes running even if errors ocurred
+* @private
+*/
+Task.prototype._onFinish = function () {
+  this.endTime = Date.now();
+  this.elapsedTime = this.endTime - this.startTime;
+};
+
+/**
 * Called by the task's emitter object, it exposes a key with its value to be used in another task
 * later on
 * @param {string} key Key by which the value will be shared
@@ -91,6 +107,7 @@ Task.prototype._onSuccess = function (data) {
     task: this
   };
 
+  this._onFinish();
   this._runningDeferred.resolve(response);
 };
 
@@ -102,6 +119,8 @@ Task.prototype._onSuccess = function (data) {
 */
 Task.prototype._onFail = function (error, message) {
   // TODO: Maybe throw an exception to be catched by the framework.
+
+  this._onFinish();
   this._runningDeferred.reject(error, message);
 };
 
@@ -116,6 +135,8 @@ Task.prototype._run = function () {
     fail: this._onFail.bind(this),
     share: this._onShare.bind(this)
   };
+
+  this.startTime = Date.now();
 
   // TODO: Maybe handle the exception thrown by the onError method to control crashes
   this._main(emitter, this._http, this._params);

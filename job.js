@@ -378,6 +378,7 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
   _.each(promises, function (promise) {
     promise.then(function (response) {
       var task = response.task;
+      var data = response.data;
 
       // Save task in its corresponding finished task array
       _this._finishedTasks[task.taskId] = _this._finishedTasks[task.taskId] || [];
@@ -390,9 +391,16 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
       });
 
       // Emit event for successful task
-      _this._events.emit('task:success', task, response);
+      _this._events.emit('task:success', task, data);
     });
   });
+};
+
+/**
+* Event handler called on event task:success
+*/
+Job.prototype._onTaskSuccess = function (task, data) {
+  this._publicEvents.emit('task:success', task, data);
 };
 
 /**
@@ -461,6 +469,11 @@ Job.prototype._onEqBlockSuccess = function () {
 */
 Job.prototype._setEventListeners = function () {
   var _this = this;
+
+  // When a task finishes without errors
+  this._events.on('task:success', function (task, data) {
+    _this._onTaskSuccess(task, data);
+  });
 
   // When the job is started
   this._events.once('job:start', function () {
