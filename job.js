@@ -411,8 +411,11 @@ Job.prototype._onEqBlockApply = function () {
 * @private
 */
 Job.prototype._onEqBlockFail = function () {
+  // Finish is triggered when the job fails or succeeds, Basically when it stops running
   this._publicEvents.emit('job:fail');
+  this._publicEvents.emit('job:finish');
   this._publicEvents.emit('fail');
+  this._publicEvents.emit('finish');
 };
 
 /**
