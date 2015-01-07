@@ -20,6 +20,7 @@ function Job (uid, scraper, agent, params) {
   /**
   * Instance of Http class in charge of recording requests/responses and providing a wapper around
   * mikeal's request library
+  * @private
   */
   this._http = new Http();
 
@@ -93,16 +94,24 @@ function Job (uid, scraper, agent, params) {
   */
   this._executionQueue = [];
 
-  /** Reference to the Agent instance being used by the Job */
+  /** Reference to the Agent instance being used by the Job
+  * @private
+  */
   this._agent = agent;
 
-  /** Reference to the Scraper instance being used by the Job */
+  /** Reference to the Scraper instance being used by the Job
+  * @private
+  */
   this._scraper = scraper;
 
-  /** Object containing shared storages of all tasks */
+  /** Object containing shared storages of all tasks
+  * @private
+  */
   this._taskStorages = {};
 
-  /** Object with finished task references */
+  /** Object with finished task references
+  * @private
+  */
   this._finishedTasks = {};
 
   /** Unique Job identifier */
@@ -329,6 +338,7 @@ Job.prototype._runCurrentExecutionBlock = function () {
 * increments execution plan index, builds an execution block from it and pushes it to the execution
 * queue.
 * @fires eq:blockApply
+* @private
 */
 Job.prototype._applyNextExecutionBlock = function () {
   var executionBlock;
@@ -357,6 +367,7 @@ Job.prototype._prepareRun = function () {
 
 /**
 * Hooks to the newly created tasks' promises to trigger events and save useful data
+* @private
 */
 Job.prototype._prepareCurrentExecutionBlock = function () {
   var _this, promises;
@@ -394,6 +405,21 @@ Job.prototype._onJobStart = function () {
 };
 
 /**
+* Event handler called on event job:success
+* @private
+* @fires job:success
+* @fires job:finish
+* @fires success
+* @fires finish
+*/
+Job.prototype._onJobSuccess = function () {
+  this._publicEvents.emit('job:success');
+  this._publicEvents.emit('job:finish');
+  this._publicEvents.emit('success');
+  this._publicEvents.emit('finish');
+};
+
+/**
 * Event handler called on event eq:blockApply
 * @private
 */
@@ -406,9 +432,11 @@ Job.prototype._onEqBlockApply = function () {
 
 /**
 * Event handler called on event eq:blockFail. Stops the job as a block has been marked as failed
-* @fires 'job:fail'
-* @fires 'fail'
 * @private
+* @fires job:fail
+* @fires job:finish
+* @fires fail
+* @fires finish
 */
 Job.prototype._onEqBlockFail = function () {
   // Finish is triggered when the job fails or succeeds, Basically when it stops running
@@ -421,6 +449,7 @@ Job.prototype._onEqBlockFail = function () {
 /**
 * Event handler called on event eq:blockSuccess. Continues execution of next eqBlock if possible
 * otherwise finishes the job
+* @private
 */
 Job.prototype._onEqBlockSuccess = function () {
   this._applyNextExecutionBlock();
@@ -436,6 +465,11 @@ Job.prototype._setEventListeners = function () {
   // When the job is started
   this._events.once('job:start', function () {
     _this._onJobStart();
+  });
+
+  // When the job finishes without errors
+  this._events.once('job:success', function () {
+    _this._onJobSuccess();
   });
 
   // When the next execution block is applied
@@ -455,6 +489,7 @@ Job.prototype._setEventListeners = function () {
 
 /**
 * Applies required scraping components as they need to be ready to run by the job
+* @private
 */
 Job.prototype._applyComponents = function () {
   this._scraper._applySetup();
@@ -464,6 +499,7 @@ Job.prototype._applyComponents = function () {
 /**
 * Verifies if the job's enqueued tasks are present in it's agent
 * @returns {boolean} true if all enqueued tasks exist
+* @private
 */
 Job.prototype._enqueuedTasksExist = function () {
   var _this = this;
@@ -476,6 +512,7 @@ Job.prototype._enqueuedTasksExist = function () {
 * Looks for a value shared by a task
 * @param {string} query key Namespaced by taskId using dot notation
 * returns value The value if found, otherwise undefined
+* @private
 */
 Job.prototype._findInShared = function (query) {
   var taskId, key, splittedQuery;
