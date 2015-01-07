@@ -356,15 +356,6 @@ Job.prototype._prepareRun = function () {
 };
 
 /**
-* Event handler called on event job:start
-* @private
-*/
-Job.prototype._onJobStart = function () {
-  this._prepareRun();
-  this._applyNextExecutionBlock();
-};
-
-/**
 * Hooks to the newly created tasks' promises to trigger events and save useful data
 */
 Job.prototype._prepareCurrentExecutionBlock = function () {
@@ -391,6 +382,15 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
       _this._events.emit('task:success', task, response);
     });
   });
+};
+
+/**
+* Event handler called on event job:start
+* @private
+*/
+Job.prototype._onJobStart = function () {
+  this._prepareRun();
+  this._applyNextExecutionBlock();
 };
 
 /**
