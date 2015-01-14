@@ -251,26 +251,6 @@ describe('Job', function () {
     });
   });
 
-  describe('#_setEventListeners', function () {
-    it('should set job:start listener to listen once', function () {
-      spyOn(job._events, 'once');
-      job._setEventListeners();
-      expect(job._events.once).toHaveBeenCalledWith('job:start', jasmine.any(Function));
-    });
-
-    it('should set eq:blockApply listener', function () {
-      spyOn(job._events, 'on');
-      job._setEventListeners();
-      expect(job._events.on).toHaveBeenCalledWith('eq:blockApply', jasmine.any(Function));
-    });
-
-    it('should set eq:blockFail listener', function () {
-      spyOn(job._events, 'on');
-      job._setEventListeners();
-      expect(job._events.on).toHaveBeenCalledWith('eq:blockFail', jasmine.any(Function));
-    });
-  });
-
   describe('#_onJobStart', function () {
     var agent, newJob, scraper;
 

@@ -7,6 +7,7 @@
 
 var Q = require('q');
 var Http = require('./http');
+var _ = require('lodash');
 
 /**
 * Is the product of a Task being built, contains status data, the main method of the task and other,
@@ -16,6 +17,7 @@ var Http = require('./http');
 
 // TODO: Add id to the task
 function Task (taskId, main, params, defaultCookies, config) {
+
   /** Id of the task's task definition */
   this.taskId = taskId;
 
@@ -27,6 +29,12 @@ function Task (taskId, main, params, defaultCookies, config) {
 
   /** Time the task spent running */
   this.elapsedTime = null;
+
+  /**
+  * Configuration object
+  * @private
+  */
+  this._config = config;
 
   /**
   * Number of retries performed by the built task
