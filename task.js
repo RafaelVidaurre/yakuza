@@ -102,13 +102,36 @@ Task.prototype._onShare = function (key, value) {
 * @private
 */
 Task.prototype._onSuccess = function (data) {
-  var response = {
+  var response, hookMessage, stopJob;
+
+  stopJob = false;
+
+  // Response object to be provided to the promise
+  response = {
     data: data,
-    task: this
+    task: this,
+    status: 'success'
   };
 
+  // Object passed to the hook for execution control and providing useful data
+  hookMessage = {
+    stopJob: function () {
+      stopJob = true;
+    },
+    data: response.data
+  };
+
+  if (_.isFunction(this._config.hooks.onFinish)) {
+    this._config.hooks.onFinish(hookMessage);
+  }
+
   this._onFinish();
-  this._runningDeferred.resolve(response);
+
+  if (stopJob) {
+    this._runningDeferred.reject(response);
+  } else {
+    this._runningDeferred.resolve(response);
+  }
 };
 
 /**
@@ -118,10 +141,16 @@ Task.prototype._onSuccess = function (data) {
 * @private
 */
 Task.prototype._onFail = function (error, message) {
-  // TODO: Maybe throw an exception to be catched by the framework.
+  var response;
+
+  response = {
+    error: error,
+    message: message,
+    status: 'fail'
+  }
 
   this._onFinish();
-  this._runningDeferred.reject(error, message);
+  this._runningDeferred.reject(response);
 };
 
 /**

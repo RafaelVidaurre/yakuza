@@ -302,6 +302,15 @@ Job.prototype._runTask = function (taskSpec) {
 };
 
 /**
+* Called when a task fails, handles plumbing for a fail scenario
+* @fires job:fail
+* @fires fail
+*/
+Job.prototype._failJob = function (response) {
+  this._events.emit('job:fail', response);
+};
+
+/**
 * Runs an execution block
 * @param {array} executionBlock An array of objects which represents a set of tasks from the
 * executionQueue to be run in parallel. Its responsible of preparing the emission of the
@@ -316,9 +325,14 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
   var runningTasks = this._retrieveExecutionBlockPromises(executionBlock);
 
   Q.all(runningTasks).then(function () {
-    _this._events.emit('eq:blockSuccess');
-  }, function () {
-    _this._events.emit('eq:blockFail');
+    _this._events.emit('eq:blockContinue');
+  }, function (response) {
+    if (response.status === 'fail') {
+      _this._failJob(response);
+      _this._events.emit('eq:blockStop');
+    } else if (response.status === 'success') {
+      _this._events.emit('eq:blockContinue');
+    }
   });
 
   _.each(executionBlock, function (taskSpec) {
@@ -427,6 +441,11 @@ Job.prototype._onJobSuccess = function () {
   this._publicEvents.emit('finish');
 };
 
+Job.prototype._onJobFail = function (response) {
+  this._publicEvents.emit('job:fail', response);
+  this._publicEvents.emit('fail', response);
+};
+
 /**
 * Event handler called on event eq:blockApply
 * @private
@@ -439,27 +458,23 @@ Job.prototype._onEqBlockApply = function () {
 };
 
 /**
-* Event handler called on event eq:blockFail. Stops the job as a block has been marked as failed
+* Event handler called on event eq:blockStop. Stops the job as a block has been stopped
 * @private
-* @fires job:fail
 * @fires job:finish
-* @fires fail
 * @fires finish
 */
-Job.prototype._onEqBlockFail = function () {
+Job.prototype._onEqBlockStop = function () {
   // Finish is triggered when the job fails or succeeds, Basically when it stops running
-  this._publicEvents.emit('job:fail');
   this._publicEvents.emit('job:finish');
-  this._publicEvents.emit('fail');
   this._publicEvents.emit('finish');
 };
 
 /**
-* Event handler called on event eq:blockSuccess. Continues execution of next eqBlock if possible
+* Event handler called on event eq:blockContinue. Continues execution of next eqBlock if possible
 * otherwise finishes the job
 * @private
 */
-Job.prototype._onEqBlockSuccess = function () {
+Job.prototype._onEqBlockContinue = function () {
   this._applyNextExecutionBlock();
 };
 
@@ -485,18 +500,23 @@ Job.prototype._setEventListeners = function () {
     _this._onJobSuccess();
   });
 
+  // When the job finishes with errors
+  this._events.once('job:fail', function (response) {
+    _this._onJobFail(response);
+  });
+
   // When the next execution block is applied
   this._events.on('eq:blockApply', function () {
     _this._onEqBlockApply();
   });
 
   // When a task from the current execution block fails
-  this._events.on('eq:blockFail', function () {
-    _this._onEqBlockFail();
+  this._events.on('eq:blockStop', function () {
+    _this._onEqBlockStop();
   });
 
-  this._events.on('eq:blockSuccess', function () {
-    _this._onEqBlockSuccess();
+  this._events.on('eq:blockContinue', function () {
+    _this._onEqBlockContinue();
   });
 };
 
