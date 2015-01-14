@@ -23,9 +23,12 @@ function TaskDefinition (id) {
 
   /**
   * Task definition's configuration object (set by running all configCallback functions)
+  * Property names are pre-defined just for maintainability
   * @private
   */
-  this._config = {};
+  this._config = {
+    hooks: {}
+  };
 
   /**
   * The main method of the TaskDefinition

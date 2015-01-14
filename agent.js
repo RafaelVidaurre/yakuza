@@ -43,7 +43,9 @@ function Agent (id) {
   * Agent's configuration object (set by running all configCallback functions)
   * @private
   */
-  this._config = {};
+  this._config = {
+    plan: []
+  };
 
   /**
   * Id by which an agent is identified
