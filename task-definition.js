@@ -106,35 +106,6 @@ TaskDefinition.prototype.main = function (mainMethod) {
 };
 
 /**
-* Sets the task hooks, which will be called at specific points of the task's execution
-* @param {object} hooksObj key-value pairs which define the task hooks
-*/
-TaskDefinition.prototype.hooks = function (hooksObj) {
-  var _this = this;
-  var hookKeys, slotIsArray, hookSlot;
-
-  if (!_.isObject(hooksObj) || _.isArray(hooksObj)) {
-    throw new Error('Hooks parameter must be an object');
-  }
-
-  // Add new hooks to _hooks object and initialize new keys
-  hookKeys = _.keys(hooksObj);
-  _.each(hookKeys, function (hookKey) {
-    hookSlot = _this._hooks[hookKey];
-    slotIsArray = _.isArray(hookSlot);
-
-    if (!slotIsArray) {
-      _this._hooks[hookKey] = [];
-      hookSlot = _this._hooks[hookKey]; // Reassign variable (because it was pointing to undef)
-    }
-
-    hookSlot.push(hooksObj[hookKey]);
-  });
-
-  return this;
-};
-
-/**
 * Sets the task's builder method overriding its default building behaviour
 * @param {function} builderMethod method which defines task's building logic, if the builder returns
 * an array, the task will be instanced once for every element in the array, passing each element in
