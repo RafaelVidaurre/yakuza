@@ -15,7 +15,7 @@ var Http = require('./http');
 */
 
 // TODO: Add id to the task
-function Task (taskId, main, params, defaultCookies) {
+function Task (taskId, main, params, defaultCookies, config) {
   /** Id of the task's task definition */
   this.taskId = taskId;
 

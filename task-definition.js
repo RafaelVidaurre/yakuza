@@ -68,7 +68,7 @@ TaskDefinition.prototype._build = function (builderParams) {
   paramSets = utils.arrayify(this._builder(builderParams));
 
   _.each(paramSets, function (paramSet) {
-    task = new Task(_this.id, _this._main, paramSet);
+    task = new Task(_this.id, _this._main, paramSet, null, _this._config);
     tasks.push(task);
   });
 
@@ -91,7 +91,6 @@ TaskDefinition.prototype._applyConfigCallbacks = function () {
     configCallback(_this._config);
   });
 };
-
 
 /**
 * Sets main task's method

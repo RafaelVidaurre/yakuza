@@ -51,37 +51,6 @@ describe('TaskDefinition', function () {
     });
   });
 
-  describe('#hooks', function () {
-    it('should throw error if argument isn\'t an object', function () {
-      var errMsg = 'Hooks parameter must be an object';
-      expect(function () {taskDefinition.hooks(123);}).toThrow(new Error(errMsg));
-      expect(function () {taskDefinition.hooks('foo');}).toThrow(new Error(errMsg));
-      expect(function () {taskDefinition.hooks([]);}).toThrow(new Error(errMsg));
-    });
-
-    it('shoudn\'t throw error if argument is a valid object', function () {
-      taskDefinition.hooks({});
-    });
-
-    it('should initialize a new hook slot as an array if there\'s none with that key', function () {
-      var keys;
-      taskDefinition.hooks({newHook: function () {return 1;}});
-      keys = _.keys(taskDefinition._hooks);
-      expect(_.contains(keys, 'newHook')).toBe(true);
-      expect(taskDefinition._hooks.newHook.length).toBe(1);
-      expect(_.isArray(taskDefinition._hooks.newHook)).toBe(true);
-    });
-
-    it('should append a new function if hook slot is already initialized', function () {
-      taskDefinition.hooks({newHook: function () {return 1;}});
-      expect(taskDefinition._hooks.newHook.length).toBe(1);
-      taskDefinition.hooks({newHook: function () {return 2;}});
-      expect(taskDefinition._hooks.newHook.length).toBe(2);
-      taskDefinition.hooks({otherHook: function () {return 2;}});
-      expect(taskDefinition._hooks.otherHook.length).toBe(1);
-    });
-  });
-
   describe('#builder', function () {
     it('should throw error if argument is\'t a function', function () {
       var errMsg = 'Builder must be a function';

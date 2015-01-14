@@ -67,18 +67,11 @@ describe('Task', function () {
 
   describe('#_onSuccess', function () {
     it('should resolve its running promise', function () {
-      var response = {test: 'stuff'};
       spyOn(task._runningDeferred, 'resolve');
       spyOn(task._runningDeferred, 'reject');
-      task._onSuccess(response);
-      expect(task._runningDeferred.resolve).toHaveBeenCalledWith(response, jasmine.any(Object));
+      task._onSuccess({});
+      expect(task._runningDeferred.resolve).toHaveBeenCalled();
       expect(task._runningDeferred.reject).not.toHaveBeenCalled();
-    });
-
-    it('should pass itself as param of its resolve response', function () {
-      spyOn(task._runningDeferred, 'resolve');
-      task._onSuccess(1);
-      expect(task._runningDeferred.resolve).toHaveBeenCalledWith(1, task);
     });
   });
 

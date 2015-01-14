@@ -73,7 +73,7 @@ Agent.prototype._formatPlan = function () {
   var formattedPlan, currentGroup, formattedGroup, formattedTaskObj;
   formattedPlan = [];
 
-  if (_this._config.plan === undefined) {
+  if (_this._config.plan.length <= 0) {
     throw new Error('Agent '+_this.id+' has no execution plan, use the config object provided' +
       ' by the setup method to define an execution plan');
   }
