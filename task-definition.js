@@ -27,7 +27,10 @@ function TaskDefinition (id) {
   * @private
   */
   this._config = {
-    hooks: {}
+    hooks: {
+      onFail: null,
+      onSuccess: null
+    }
   };
 
   /**
