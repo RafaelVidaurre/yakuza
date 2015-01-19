@@ -129,8 +129,8 @@ Task.prototype._onSuccess = function (data) {
     data: response.data
   };
 
-  if (_.isFunction(this._config.hooks.onFinish)) {
-    this._config.hooks.onFinish(hookMessage);
+  if (_.isFunction(this._config.hooks.onSuccess)) {
+    this._config.hooks.onSuccess(hookMessage);
   }
 
   this._onFinish();
