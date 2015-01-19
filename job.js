@@ -224,7 +224,6 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 
     // Build all execution objects for a specific task and
     _.each(tasks, function (task) {
-
       executionObject = {task: task, next: null};
 
       // Assign new object to previous object's `next` attribute if the task is self syncronous
@@ -548,9 +547,12 @@ Job.prototype._enqueuedTasksExist = function () {
 * @private
 */
 Job.prototype._findInShared = function (query) {
+  // FIXME: Errors here are not being thrown, logging for now til fixed
+
   var taskId, key, splittedQuery;
 
   if (!_.isString(query)) {
+    console.log('ERROR: The shared method key passed is invalid');
     throw new Error('The shared method key passed is invalid');
   }
 
@@ -559,12 +561,14 @@ Job.prototype._findInShared = function (query) {
   key = splittedQuery[1];
 
   if (!taskId || !key) {
+    console.log('ERROR: The shared method key passed is invalid');
     throw new Error('The shared method key passed is invalid');
   }
 
   if (this._taskStorages[taskId] && this._taskStorages[taskId][key] !== undefined) {
     return this._taskStorages[taskId][key];
   }
+
 
   return undefined;
 };

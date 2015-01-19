@@ -101,6 +101,9 @@ Task.prototype._onFinish = function () {
 * @private
 */
 Task.prototype._onShare = function (key, value) {
+  if (value === undefined) {
+    throw new Error('Missing key/value in share method call');
+  }
   this._sharedStorage[key] = value;
 };
 
