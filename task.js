@@ -155,7 +155,7 @@ Task.prototype._onFail = function (error, message) {
     error: error,
     message: message,
     status: 'fail'
-  }
+  };
 
   this._onFinish();
   this._runningDeferred.reject(response);
