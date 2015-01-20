@@ -328,10 +328,9 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
   }, function (response) {
     if (response.status === 'fail') {
       _this._failJob(response);
-      _this._events.emit('eq:blockStop');
-    } else if (response.status === 'success') {
-      _this._events.emit('eq:blockContinue');
     }
+
+    _this._events.emit('eq:blockStop');
   });
 
   _.each(executionBlock, function (taskSpec) {
@@ -391,7 +390,6 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
   _.each(promises, function (promise) {
     promise.then(function (response) {
       var task = response.task;
-      var data = response.data;
 
       // Save task in its corresponding finished task array
       _this._finishedTasks[task.taskId] = _this._finishedTasks[task.taskId] || [];
@@ -404,7 +402,8 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
       });
 
       // Emit event for successful task
-      _this._events.emit('task:success', task, data);
+      _this._events.emit('task:success', response);
+
     });
   });
 };

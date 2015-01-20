@@ -157,6 +157,7 @@ Task.prototype._onFail = function (error, message) {
   response = {
     error: error,
     message: message,
+    task: this,
     status: 'fail'
   };
 
