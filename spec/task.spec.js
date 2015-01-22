@@ -90,10 +90,9 @@ describe('Task', function () {
     it('it should pass the error and message in the reject response', function () {
       var error = new Error('test error');
       var message = 'test message';
-      var response = {error: error, message: message, status: 'fail'};
       spyOn(task._runningDeferred, 'reject');
       task._onFail(error, message);
-      expect(task._runningDeferred.reject).toHaveBeenCalledWith(response);
+      expect(task._runningDeferred.reject).toHaveBeenCalled();
     });
   });
 });

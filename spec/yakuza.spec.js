@@ -3,6 +3,8 @@
 var YakuzaBase = require('../yakuza-base');
 var Scraper = require('../scraper');
 var Job = require('../job');
+var Agent = require('../agent');
+var TaskDefinition = require('../task-definition');
 var _ = require('lodash');
 
 describe('Yakuza', function () {
@@ -38,6 +40,33 @@ describe('Yakuza', function () {
 
       expect(scr).toBe(scr2);
       expect(scr).not.toBe(scr3);
+    });
+  });
+
+  describe('#agent', function () {
+    it('should return an agent instance', function () {
+      expect(Yakuza.agent('scraperOne', 'agentOne') instanceof Agent).toBe(true);
+    });
+
+    it('should not create a new scraper if it already did', function () {
+      var scraper = Yakuza.scraper('scraperOne');
+      Yakuza.agent('scraperOne', 'agentOne');
+      var scraper2 = Yakuza.scraper('scraperOne');
+      expect(scraper2).toBe(scraper);
+    });
+  });
+
+  describe('#task', function () {
+    it('should return a task instance', function () {
+      expect(Yakuza.task('scraperOne', 'agentOne', 'taskOne') instanceof TaskDefinition).toBe(true);
+    });
+
+    it('should not create a new agent if it already did', function () {
+      var agent = Yakuza.agent('scraperOne', 'agentOne');
+      Yakuza.task('scraperOne', 'agentOne', 'taskOne');
+      var agent2 = Yakuza.agent('scraperOne', 'agentOne');
+
+      expect(agent).toBe(agent2);
     });
   });
 

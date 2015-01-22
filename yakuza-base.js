@@ -58,6 +58,20 @@ YakuzaBase.prototype.scraper = function (scraperId) {
 };
 
 /**
+* Returns an agent instance, if it doesn't exists, it creates it
+* @param {string} scraperId name of the scraper to which the agent belongs to
+* @param {string} agentId name of the new agent or by which to look for if it exists
+* @return {Agent} agent instance
+*/
+YakuzaBase.prototype.agent = function (scraperId, agentId) {
+  return this.scraper(scraperId).agent(agentId);
+};
+
+YakuzaBase.prototype.task = function (scraperId, agentId, taskId) {
+  return this.agent(scraperId, agentId).task(taskId);
+};
+
+/**
 * Instances a new job
 * @param {string} scraperId name of the scraper that will be used by the Job
 * @param {string} agentId name of the agent that will be used by the Job
