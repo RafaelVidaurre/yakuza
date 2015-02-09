@@ -35,7 +35,8 @@ function Job (uid, scraper, agent, params) {
   * @private
   */
   this._eventsConfig = {
-    wildcard: true
+    wildcard: true,
+    delimiter: ':'
   };
 
   /**
@@ -43,7 +44,8 @@ function Job (uid, scraper, agent, params) {
   * @private
   */
   this._publicEventsConfig = {
-    wildcard: true
+    wildcard: true,
+    delimiter: ':'
   };
 
   /**
@@ -426,6 +428,8 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
       // Emit event for successful task
       _this._events.emit('task:success', response);
 
+    }, function (response) {
+      _this._events.emit('task:fail', response);
     }).done();
   });
 };
@@ -433,8 +437,21 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
 /**
 * Event handler called on event task:success
 */
-Job.prototype._onTaskSuccess = function (task, data) {
-  this._publicEvents.emit('task:success', task, data);
+Job.prototype._onTaskSuccess = function (response) {
+  var taskId;
+
+  taskId = response.task.taskId;
+  this._publicEvents.emit('task:'+taskId+':success', response);
+};
+
+/**
+* Event handler called on event task:fail
+*/
+Job.prototype._onTaskFail = function (response) {
+  var taskId;
+
+  taskId = response.task.taskId;
+  this._publicEvents.emit('task:'+taskId+':fail', response);
 };
 
 /**
@@ -506,8 +523,12 @@ Job.prototype._setEventListeners = function () {
   var _this = this;
 
   // When a task finishes without errors
-  this._events.on('task:success', function (task, data) {
-    _this._onTaskSuccess(task, data);
+  this._events.on('task:success', function (response) {
+    _this._onTaskSuccess(response);
+  });
+
+  this._events.on('task:fail', function (response) {
+    _this._onTaskFail(response)
   });
 
   // When the job is started
