@@ -307,7 +307,7 @@ Job.prototype._runTask = function (taskSpec) {
   nextTaskSpec = taskSpec.next;
 
   if (nextTaskSpec) {
-    taskRunning.then(function (response) {
+    taskRunning.then(function () {
       _this._runTask(nextTaskSpec);
     }).done();
   }
@@ -528,7 +528,7 @@ Job.prototype._setEventListeners = function () {
   });
 
   this._events.on('task:fail', function (response) {
-    _this._onTaskFail(response)
+    _this._onTaskFail(response);
   });
 
   // When the job is started
