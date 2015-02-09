@@ -163,7 +163,7 @@ Task.prototype._onSaveCookies = function () {
   var jar;
 
   // Deep clone the object to avoid it from being updated
-  jar = _.cloneDeep(http.getCookieJar());
+  jar = _.cloneDeep(this._http.getCookieJar());
 
   this._savedJar = jar;
 };

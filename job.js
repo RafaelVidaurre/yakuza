@@ -204,8 +204,9 @@ Job.prototype._buildTask = function (taskSpecs) {
     params: this._params,
     shared: this._findInShared.bind(_this)
   };
-
-  var buildResponse = taskDefinition._build(builderParams, this._savedJar);
+  console.log('Current jar to be used: ');
+  console.log(this._cookieJar);
+  var buildResponse = taskDefinition._build(builderParams, this._cookieJar);
 
   return buildResponse;
 };
@@ -307,7 +308,6 @@ Job.prototype._runTask = function (taskSpec) {
 
   if (nextTaskSpec) {
     taskRunning.then(function (response) {
-      _this._saveCookieJar(response.savedCookieJar);
       _this._runTask(nextTaskSpec);
     });
   }
@@ -338,8 +338,16 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
   var _this = this;
   var runningTasks = this._retrieveExecutionBlockPromises(executionBlock);
 
-  Q.all(runningTasks).then(function () {
+  Q.all(runningTasks).then(function (results) {
+    // Set cookies of results
+    _.each(results, function (result) {
+      if (result.savedCookieJar) {
+        _this._saveCookieJar(result.savedCookieJar);
+      }
+    });
+
     _this._events.emit('eq:blockContinue');
+
   }, function (response) {
     if (response.status === 'fail') {
       _this._failJob(response);
@@ -563,16 +571,16 @@ Job.prototype._enqueuedTasksExist = function () {
 Job.prototype._findInShared = function (query) {
   // FIXME: Errors here are not being thrown, logging for now til fixed
 
-  var taskId, key, splittedQuery;
+  var taskId, key, splitQuery;
 
   if (!_.isString(query)) {
     console.log('ERROR: The shared method key passed is invalid');
     throw new Error('The shared method key passed is invalid');
   }
 
-  splittedQuery = query.split('.');
-  taskId = splittedQuery[0];
-  key = splittedQuery[1];
+  splitQuery = query.split('.');
+  taskId = splitQuery[0];
+  key = splitQuery[1];
 
   if (!taskId || !key) {
     console.log('ERROR: The shared method key passed is invalid');
@@ -593,7 +601,7 @@ Job.prototype._findInShared = function (query) {
 */
 Job.prototype.params = function (paramsObj) {
   if (_.isArray(paramsObj) || !_.isObject(paramsObj)) {
-    throw Error('Params must be an object');
+    throw new Error('Params must be an object');
   }
 
   _.extend(this._params, paramsObj);
@@ -607,7 +615,7 @@ Job.prototype.params = function (paramsObj) {
 */
 Job.prototype.enqueue = function (taskId) {
   if (!_.isString(taskId) || taskId.length <= 0) {
-    throw Error('Enqueue params isn\'t a valid string');
+    throw new Error('Enqueue params isn\'t a valid string');
   }
 
   this._enqueuedTasks.push(taskId);
@@ -625,7 +633,7 @@ Job.prototype.run = function () {
   }
 
   if (!this._enqueuedTasksExist()) {
-    throw Error('One or more enqueued tasks are not defined');
+    throw new Error('One or more enqueued tasks are not defined');
   }
 
   this._started = true;
