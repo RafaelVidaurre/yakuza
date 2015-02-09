@@ -309,7 +309,7 @@ Job.prototype._runTask = function (taskSpec) {
   if (nextTaskSpec) {
     taskRunning.then(function (response) {
       _this._runTask(nextTaskSpec);
-    });
+    }).done();
   }
 
   thisTask._run();
@@ -354,7 +354,7 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
     }
 
     _this._events.emit('eq:blockStop');
-  });
+  }).done();
 
   _.each(executionBlock, function (taskSpec) {
     _this._runTask(taskSpec);
@@ -427,7 +427,7 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
       // Emit event for successful task
       _this._events.emit('task:success', response);
 
-    });
+    }).done();
   });
 };
 
