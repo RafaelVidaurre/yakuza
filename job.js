@@ -94,25 +94,35 @@ function Job (uid, scraper, agent, params) {
   */
   this._executionQueue = [];
 
-  /** Reference to the Agent instance being used by the Job
+  /**
+  * Reference to the Agent instance being used by the Job
   * @private
   */
   this._agent = agent;
 
-  /** Reference to the Scraper instance being used by the Job
+  /**
+  * Reference to the Scraper instance being used by the Job
   * @private
   */
   this._scraper = scraper;
 
-  /** Object containing shared storages of all tasks
+  /**
+  * Object containing shared storages of all tasks
   * @private
   */
   this._taskStorages = {};
 
-  /** Object with finished task references
+  /**
+  * Object with finished task references
   * @private
   */
   this._finishedTasks = {};
+
+  /**
+  * Cookie jar to be used in the next execution block
+  * @private
+  */
+  this._cookieJar = null;
 
   /** Unique Job identifier */
   this.uid = null;
@@ -278,6 +288,10 @@ Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
   return promises;
 };
 
+Job.prototype._saveCookieJar = function (cookieJar) {
+  this._cookieJar = cookieJar;
+};
+
 /**
 * Runs a task and enqueues its `next` task if there is any (recursive)
 * @param {object} taskSpec object with task specifications and the task itself
@@ -292,7 +306,8 @@ Job.prototype._runTask = function (taskSpec) {
   nextTaskSpec = taskSpec.next;
 
   if (nextTaskSpec) {
-    taskRunning.then(function () {
+    taskRunning.then(function (response) {
+      _this._saveCookieJar(response.savedCookieJar);
       _this._runTask(nextTaskSpec);
     });
   }
