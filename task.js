@@ -80,6 +80,13 @@ function Task (taskId, main, params, defaultCookies, config) {
   */
   this._http = null;
 
+  /**
+  * Jar to be saved by the task, if defined it will be used in the next execution block if this task
+  * finishes successfully
+  * @private
+  */
+  this._savedJar = null;
+
 
   this._http = defaultCookies ? new Http(defaultCookies) : new Http();
 }
@@ -108,7 +115,7 @@ Task.prototype._onShare = function (key, value) {
 };
 
 /**
-* Called by the task's emitter object, called when task ended successfuly
+* Called in the task's main method when the task ended successfuly
 * @param response Data retrieved by the task
 * @private
 */
@@ -121,7 +128,8 @@ Task.prototype._onSuccess = function (data) {
   response = {
     data: data,
     task: this,
-    status: 'success'
+    status: 'success',
+    savedCookieJar: this._savedJar
   };
 
   // Object passed to the hook for execution control and providing useful data
@@ -146,7 +154,22 @@ Task.prototype._onSuccess = function (data) {
 };
 
 /**
-* Called by the task's emitter object, called when an error ocurred in the task
+* Called in the task's main method, it saves the current cookies that have been set by the task.
+* note that the cookies ONLY get applied if the task finishes successfully
+* @private
+*/
+Task.prototype._onSaveCookies = function () {
+  // TODO: Accept custom jar as parameter
+  var jar;
+
+  // Deep clone the object to avoid it from being updated
+  jar = _.cloneDeep(http.getCookieJar());
+
+  this._savedJar = jar;
+};
+
+/**
+* Called by the task's main method when an error ocurred
 * @param {Error} error Error object with stracktrace and everything
 * @param {string} message Message explaining what failed
 * @private
