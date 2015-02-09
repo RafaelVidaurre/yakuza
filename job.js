@@ -205,7 +205,7 @@ Job.prototype._buildTask = function (taskSpecs) {
     shared: this._findInShared.bind(_this)
   };
 
-  var buildResponse = taskDefinition._build(builderParams);
+  var buildResponse = taskDefinition._build(builderParams, this._savedJar);
 
   return buildResponse;
 };

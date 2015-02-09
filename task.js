@@ -197,7 +197,8 @@ Task.prototype._run = function () {
   var emitter = {
     success: this._onSuccess.bind(this),
     fail: this._onFail.bind(this),
-    share: this._onShare.bind(this)
+    share: this._onShare.bind(this),
+    saveCookies: this._onSaveCookies.bind(this)
   };
 
   this.startTime = Date.now();
