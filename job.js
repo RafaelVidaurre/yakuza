@@ -204,8 +204,6 @@ Job.prototype._buildTask = function (taskSpecs) {
     params: this._params,
     shared: this._findInShared.bind(_this)
   };
-  console.log('Current jar to be used: ');
-  console.log(this._cookieJar);
   var buildResponse = taskDefinition._build(builderParams, this._cookieJar);
 
   return buildResponse;
@@ -349,6 +347,7 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
     _this._events.emit('eq:blockContinue');
 
   }, function (response) {
+    //TODO: After this runs an exception is run by Q for some reason
     if (response.status === 'fail') {
       _this._failJob(response);
     }
