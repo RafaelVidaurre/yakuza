@@ -161,7 +161,7 @@ Agent.prototype.task = function (taskId) {
 * @param {array} array of taskIds which the routine will include
 */
 Agent.prototype.routine = function (routineName, taskIds) {
-  if (_.isArray(taskIds)) {
+  if (!_.isArray(taskIds)) {
     throw new Error('An array of task Ids must be passed to the routine method');
   }
 
