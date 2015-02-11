@@ -30,6 +30,18 @@ function Scraper () {
   * @private
   */
   this._agents = {};
+
+  /**
+  * Config object, contains configuration data and is exposed via the setup() method
+  * @private
+  */
+  this._config = {};
+
+  /**
+  * Object which contains scraper-wide routine definitions, routines are set via the routine()
+  * method
+  */
+  this._routines = {};
 }
 
 /**
@@ -68,7 +80,7 @@ Scraper.prototype._applySetup = function () {
 * allows a scraper to be configured in multiple different places
 * @param {function} cbConfig function which will modify config parameters
 */
-Scraper.prototype.config = function (cbConfig) {
+Scraper.prototype.setup = function (cbConfig) {
   if (!_.isFunction(cbConfig)) {throw new Error('Config argument must be a function');}
 
   this._configCallbacks.push(cbConfig);
@@ -91,6 +103,25 @@ Scraper.prototype.agent = function (agentId) {
   agentExists = utils.hasKey(this._agents, agentId);
   thisAgent = agentExists ? this._agents[agentId] : this._createAgent(agentId);
   return thisAgent;
+};
+
+/**
+* Creates a scraper-wide routine which will be available for all agents
+* @param {string} routineName name of the routine
+* @param {array} array of taskIds which the routine will include
+*/
+Scraper.prototype.routine = function (routineName, taskIds) {
+  if (_.isArray(taskIds)) {
+    throw new Error('An array of task Ids must be passed to the routine method');
+  }
+
+  if (!_.isString(routineName)) {
+    throw new Error('Routine name must be a string');
+  }
+
+  this._routines[routineName] = taskIds;
+
+  return this;
 };
 
 module.exports = Scraper;

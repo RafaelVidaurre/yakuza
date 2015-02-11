@@ -642,6 +642,18 @@ Job.prototype._taskIsInPlan = function (taskId) {
   });
 };
 
+Job.prototype.enqueueTaskArray = function (taskArray) {
+  var _this = this;
+
+  if (!_.isArray(taskArray)) {
+    throw new Error('Expected an array of task Ids');
+  }
+
+  _.each(taskArray, function (taskId) {
+    _this.enqueue(taskId);
+  });
+}
+
 /**
 * Sets parameters which the job will provide to its tasks
 * @param {object} paramsObj Object containing key-value pair
@@ -673,6 +685,21 @@ Job.prototype.enqueue = function (taskId) {
   this._enqueuedTasks.push(taskId);
 
   return this;
+};
+
+/**
+* Enqueues the tasks present in a certain routine, it will first search in the agent, and then in
+* the scraper if not found.
+* @param {string} routineName Name of the routine
+*/
+Job.prototype.routine = function (routineName) {
+  if (this._agent._routines[routineName]) {
+    this.enqueueTaskArray(this._agent._routines[routineName]);
+  } else if (this._scraper._routines[routineName]) {
+    this.enqueueTaskArray(this._scraper._routines[routineName]);
+  } else {
+    throw new Error('No routine with name '+routineName+' was found');
+  }
 };
 
 /**

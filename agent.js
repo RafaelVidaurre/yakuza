@@ -48,6 +48,11 @@ function Agent (id) {
   };
 
   /**
+  * Routines defined at agent-level, these override scraper-level routines
+  */
+  this._routines = {};
+
+  /**
   * Id by which an agent is identified
   */
   this.id = id;
@@ -148,6 +153,25 @@ Agent.prototype.task = function (taskId) {
   }
 
   return this._taskDefinitions[taskId];
+};
+
+/**
+* Creates an agent-wide routine which will be available for all agents
+* @param {string} routineName name of the routine
+* @param {array} array of taskIds which the routine will include
+*/
+Agent.prototype.routine = function (routineName, taskIds) {
+  if (_.isArray(taskIds)) {
+    throw new Error('An array of task Ids must be passed to the routine method');
+  }
+
+  if (!_.isString(routineName)) {
+    throw new Error('Routine name must be a string');
+  }
+
+  this._routines[routineName] = taskIds;
+
+  return this;
 };
 
 
