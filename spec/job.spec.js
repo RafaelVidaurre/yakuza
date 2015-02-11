@@ -315,14 +315,6 @@ describe('Job', function () {
           next: null
         }
       };
-
-    });
-
-    it('should set a \'.then\' callback if task spec has a next task', function () {
-      spyOn(fakeTaskOne._runningPromise, 'then');
-      spyOn(taskSpec.task, '_run');
-      job._runTask(taskSpec);
-      expect(fakeTaskOne._runningPromise.then).toHaveBeenCalled();
     });
 
     it('should run the task in the task spec', function () {
@@ -353,13 +345,6 @@ describe('Job', function () {
       expect(job._runTask).toHaveBeenCalledWith(executionBlock[0]);
       expect(job._runTask).toHaveBeenCalledWith(executionBlock[1]);
       expect(job._runTask).toHaveBeenCalledWith(executionBlock[2]);
-    });
-
-    it('should call Q.all with the task promises', function () {
-      var taskPromises = job._retrieveExecutionBlockPromises(executionBlock);
-      spyOn(Q, 'all').andReturn({then: function () {}});
-      job._runExecutionBlock(executionBlock);
-      expect(Q.all).toHaveBeenCalledWith(taskPromises);
     });
   });
 

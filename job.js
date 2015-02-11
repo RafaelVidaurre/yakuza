@@ -9,6 +9,7 @@ var _ = require('lodash');
 var Events = require('eventemitter2').EventEmitter2;
 var Q = require('q');
 var Http = require('./http');
+var utils = require('./utils');
 
 /**
 * @class
@@ -125,6 +126,11 @@ function Job (uid, scraper, agent, params) {
   * @private
   */
   this._cookieJar = null;
+
+  /**
+  * Determines wether the job's components have been applied or not
+  * @private
+  */
 
   /** Unique Job identifier */
   this.uid = null;
@@ -566,8 +572,14 @@ Job.prototype._setEventListeners = function () {
 * @private
 */
 Job.prototype._applyComponents = function () {
+  if (this._componentsApplied) {
+    return;
+  }
+
   this._scraper._applySetup();
   this._agent._applySetup();
+
+  this._componentsApplied = true;
 };
 
 /**
@@ -613,6 +625,23 @@ Job.prototype._findInShared = function (query) {
   return undefined;
 };
 
+Job.prototype._taskIsInPlan = function (taskId) {
+  var tasks;
+
+  this._applyComponents();
+
+  return _.some(this._agent._plan, function (planBlock) {
+    tasks = utils.arrayify(planBlock);
+
+    return _.some(planBlock, function (taskObject) {
+      var planTaskId;
+
+      planTaskId = _.isString(taskObject) ? taskObject : taskObject.taskId;
+      return planTaskId === taskId;
+    })
+  });
+};
+
 /**
 * Sets parameters which the job will provide to its tasks
 * @param {object} paramsObj Object containing key-value pair
@@ -634,6 +663,11 @@ Job.prototype.params = function (paramsObj) {
 Job.prototype.enqueue = function (taskId) {
   if (!_.isString(taskId) || taskId.length <= 0) {
     throw new Error('Enqueue params isn\'t a valid string');
+  }
+
+  if (!this._taskIsInPlan(taskId)) {
+    throw new Error('Enqueued task '+taskId+' is not in the agent '+this._agent.id+'\'s plan' +
+      ' add it to the agent\'s config array via the .setup method');
   }
 
   this._enqueuedTasks.push(taskId);
