@@ -589,8 +589,6 @@ Job.prototype._enqueuedTasksExist = function () {
 * @private
 */
 Job.prototype._findInShared = function (query) {
-  // FIXME: Errors here are not being thrown, logging for now til fixed
-
   var taskId, key, splitQuery;
 
   if (!_.isString(query)) {
