@@ -30,6 +30,12 @@ function YakuzaBase () {
   * @private
   */
   this._jobs = {};
+
+  /**
+  * Share methods available at framework-level
+  * @private
+  */
+  this._shareMethods = {};
 }
 
 /**
@@ -100,6 +106,23 @@ YakuzaBase.prototype.ready = function () {
       agent._applySetup();
     });
   });
+};
+
+/**
+* Defines a custom share method which will be available to any scraper
+* @param {string} methodName Name of the method to be defined
+* @param {function} sharingFunction Function to be used
+*/
+YakuzaBase.prototype.addShareMethod = function (methodName, shareFunction) {
+  if (!_.isString(methodName)) {
+    throw new Error('Share method name must be a string');
+  }
+
+  if (!_.isFunction(shareFunction)) {
+    throw new Error('Share method must be a function')
+  }
+  
+  this._shareMethods[methodName] = sharingFunction;
 };
 
 module.exports = YakuzaBase;
