@@ -212,7 +212,7 @@ Job.prototype._buildTask = function (taskSpecs) {
     params: this._params,
     shared: this._findInShared.bind(_this)
   };
-  var buildResponse = taskDefinition._build(builderParams, this._cookieJar);
+  var buildResponse = taskDefinition._build(builderParams, this._cookieJar, this);
 
   return buildResponse;
 };
@@ -595,7 +595,7 @@ Job.prototype._enqueuedTasksExist = function () {
 * @private
 */
 Job.prototype._findInShared = function (query) {
-  var taskId, key, splitQuery;
+  var taskId, key, splitQuery, result;
 
   if (!_.isString(query)) {
     console.log('ERROR: The shared method key passed is invalid');
@@ -609,6 +609,12 @@ Job.prototype._findInShared = function (query) {
   if (!taskId || !key) {
     console.log('ERROR: The shared method key passed is invalid');
     throw new Error('The shared method key passed is invalid');
+  }
+
+  result = this._getShared(taskId, key);
+
+  if (result === undefined) {
+    throw new Error('\''+key+'\' was never shared by task \''+taskId+'\'');
   }
 
   return this._getShared(taskId, key);

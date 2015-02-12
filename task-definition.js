@@ -58,7 +58,7 @@ function TaskDefinition (id) {
 * @private
 * @return {array} An array of Task instances
 */
-TaskDefinition.prototype._build = function (builderParams, cookieJar) {
+TaskDefinition.prototype._build = function (builderParams, cookieJar, job) {
   var _this = this;
   var paramSets, tasks, task;
 
@@ -68,7 +68,7 @@ TaskDefinition.prototype._build = function (builderParams, cookieJar) {
   paramSets = utils.arrayify(this._builder(builderParams));
 
   _.each(paramSets, function (paramSet) {
-    task = new Task(_this.id, _this._main, paramSet, cookieJar, _this._config);
+    task = new Task(_this.id, _this._main, paramSet, cookieJar, _this._config, job);
     tasks.push(task);
   });
 

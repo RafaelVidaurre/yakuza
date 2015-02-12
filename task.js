@@ -8,6 +8,7 @@
 var Q = require('q');
 var Http = require('./http');
 var _ = require('lodash');
+var Yakuza = require('./yakuza');
 
 /**
 * Is the product of a Task being built, contains status data, the main method of the task and other,
@@ -127,15 +128,12 @@ Task.prototype._onShare = function (key, value, options) {
 
   if (_.isString(shareMethod)) {
     shareMethodFunction = this._job._scraper._shareMethods[shareMethod];
-    if (!shareMethodFunction) {
-      shareMethodFunction = Yakuza._shareMethods[shareMethod];
-    }
   } else {
     shareMethodFunction = shareMethod;
   }
 
   if (!shareMethodFunction) {
-    throw new Error('Share method doesn\'t exist.';)
+    throw new Error('Share method doesn\'t exist.');
   }
 
   if (!_.isFunction(shareMethodFunction)) {

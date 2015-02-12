@@ -42,6 +42,19 @@ function Scraper () {
   * method
   */
   this._routines = {};
+
+  /**
+  * Share methods available at scraper-level
+  * @private
+  */
+  this._shareMethods = {
+    replace: function (current, next) {
+      return next;
+    }
+  };
+
+  // Define the default sharing method
+  this._shareMethods.default = this._shareMethods.replace;
 }
 
 /**
@@ -122,6 +135,23 @@ Scraper.prototype.routine = function (routineName, taskIds) {
   this._routines[routineName] = taskIds;
 
   return this;
+};
+
+/**
+* Adds a new scraper-level share method, it will override framework-level methods
+* @params {string} methodName name of the share method
+* @params {string} shareFunction
+*/
+Scraper.prototype.addShareMethod = function (methodName, shareFunction) {
+  if (!_.isString(methodName)) {
+    throw new Error('Share method name must be a string');
+  }
+
+  if (!_.isFunction(shareFunction)) {
+    throw new Error('Share method must be a function')
+  }
+
+  this._shareMethods[methodName] = shareFunction;
 };
 
 module.exports = Scraper;
