@@ -35,7 +35,14 @@ function YakuzaBase () {
   * Share methods available at framework-level
   * @private
   */
-  this._shareMethods = {};
+  this._shareMethods = {
+    replace: function (current, next) {
+      return next;
+    }
+  };
+
+  // Define the default sharing method
+  this._shareMethods.default = this._shareMethods.replace;
 }
 
 /**
@@ -121,7 +128,7 @@ YakuzaBase.prototype.addShareMethod = function (methodName, shareFunction) {
   if (!_.isFunction(shareFunction)) {
     throw new Error('Share method must be a function')
   }
-  
+
   this._shareMethods[methodName] = sharingFunction;
 };
 

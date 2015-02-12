@@ -15,7 +15,7 @@ var _ = require('lodash');
 * @class
 */
 
-function Task (taskId, main, params, defaultCookies, config) {
+function Task (taskId, main, params, defaultCookies, config, job) {
 
   /** Id of the task's task definition */
   this.taskId = taskId;
@@ -86,6 +86,11 @@ function Task (taskId, main, params, defaultCookies, config) {
   */
   this._savedJar = null;
 
+  /**
+  * Reference to the job that instanced this task
+  */
+  this._job = job;
+
 
   this._http = defaultCookies ? new Http(defaultCookies) : new Http();
 }
@@ -104,13 +109,41 @@ Task.prototype._onFinish = function () {
 * later on
 * @param {string} key Key by which the value will be shared
 * @param value A value which will be shared
+* @param {object} options Object of options for sharing
 * @private
 */
 Task.prototype._onShare = function (key, value, options) {
+  var shareMethod, shareMethodFunction, current;
+
+  shareMethod = options.method;
+
   if (value === undefined) {
     throw new Error('Missing key/value in share method call');
   }
-  this._sharedStorage[key] = value;
+
+  if (!shareMethod) {
+    shareMethod = 'default';
+  }
+
+  if (_.isString(shareMethod)) {
+    shareMethodFunction = this._job._scraper._shareMethods[shareMethod];
+    if (!shareMethodFunction) {
+      shareMethodFunction = Yakuza._shareMethods[shareMethod];
+    }
+  } else {
+    shareMethodFunction = shareMethod;
+  }
+
+  if (!shareMethodFunction) {
+    throw new Error('Share method doesn\'t exist.';)
+  }
+
+  if (!_.isFunction(shareMethodFunction)) {
+    throw new Error('Share method is not a function');
+  }
+
+  current = this._job._getShared(this.taskId, key);
+  this._job._setShared(this.taskId, key, shareMethodFunction(current, value));
 };
 
 /**

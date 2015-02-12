@@ -425,12 +425,6 @@ Job.prototype._prepareCurrentExecutionBlock = function () {
       _this._finishedTasks[task.taskId] = _this._finishedTasks[task.taskId] || [];
       _this._finishedTasks[task.taskId].push(task);
 
-      // Set each key/value pair for this task's sharedStorage
-      _this._taskStorages[task.taskId] = _this._taskStorages[task.taskId] || {};
-      _.each(task._sharedStorage, function (value, key) {
-        _this._taskStorages[task.taskId][key] = value;
-      });
-
       // Emit event for successful task
       _this._events.emit('task:success', response);
 
@@ -617,12 +611,20 @@ Job.prototype._findInShared = function (query) {
     throw new Error('The shared method key passed is invalid');
   }
 
+  return this._getShared(taskId, key);
+};
+
+Job.prototype._getShared = function (taskId, key) {
   if (this._taskStorages[taskId] && this._taskStorages[taskId][key] !== undefined) {
     return this._taskStorages[taskId][key];
   }
 
-
   return undefined;
+};
+
+Job.prototype._setShared = function (taskId, key, value) {
+  this._taskStorages[taskId] = this._taskStorages[taskId] || {};
+  this._taskStorages[taskId][key] = value;
 };
 
 Job.prototype._taskIsInPlan = function (taskId) {
