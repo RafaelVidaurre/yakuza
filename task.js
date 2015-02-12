@@ -15,7 +15,6 @@ var _ = require('lodash');
 * @class
 */
 
-// TODO: Add id to the task
 function Task (taskId, main, params, defaultCookies, config) {
 
   /** Id of the task's task definition */
@@ -107,7 +106,7 @@ Task.prototype._onFinish = function () {
 * @param value A value which will be shared
 * @private
 */
-Task.prototype._onShare = function (key, value) {
+Task.prototype._onShare = function (key, value, options) {
   if (value === undefined) {
     throw new Error('Missing key/value in share method call');
   }
