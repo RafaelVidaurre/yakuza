@@ -112,7 +112,7 @@ Scraper.prototype.agent = function (agentId) {
   if (!agentId || !_.isString(agentId)) {
     throw new Error('Agent id must be a non-empty string');
   }
-
+  
   agentExists = utils.hasKey(this._agents, agentId);
   thisAgent = agentExists ? this._agents[agentId] : this._createAgent(agentId);
   return thisAgent;

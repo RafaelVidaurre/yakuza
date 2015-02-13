@@ -89,6 +89,7 @@ function Task (taskId, main, params, defaultCookies, config, job) {
 
   /**
   * Reference to the job that instanced this task
+  * @private
   */
   this._job = job;
 
