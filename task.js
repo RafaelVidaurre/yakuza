@@ -117,7 +117,9 @@ Task.prototype._onFinish = function () {
 Task.prototype._onShare = function (key, value, options) {
   var shareMethod, shareMethodFunction, current;
 
-  shareMethod = options.method;
+  if (options) {
+    shareMethod = options.method;
+  }
 
   if (value === undefined) {
     throw new Error('Missing key/value in share method call');
