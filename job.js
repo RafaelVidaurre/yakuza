@@ -10,6 +10,9 @@ var Events = require('eventemitter2').EventEmitter2;
 var Q = require('q');
 var Http = require('./http');
 var utils = require('./utils');
+var tough = require('tough-cookie');
+var request = require('request');
+var CookieJar = tough.CookieJar;
 
 /**
 * @class
@@ -125,7 +128,7 @@ function Job (uid, scraper, agent, params) {
   * Cookie jar to be used in the next execution block
   * @private
   */
-  this._cookieJar = null;
+  this._cookieJar = request.jar();
 
   /**
   * Determines wether the job's components have been applied or not
@@ -191,13 +194,20 @@ Job.prototype._applyPlan = function () {
 };
 
 /**
+* Returns a cloned version of a cookie jar
+*/
+Job.prototype._cloneCookieJar = function (cookieJar) {
+  return {_jar: new CookieJar(_.cloneDeep(cookieJar._jar.store))};
+};
+
+/**
 * Returns an undefined number of Task instances based on a taskDefinition's builder output
 * @param {object} taskSpecs contains specifications to build a certain Task via it's TaskDefinition
 * @private
 * @return {array} an array of Tasks
 */
 Job.prototype._buildTask = function (taskSpecs) {
-  var _this, errMsg, taskDefinition, builderParams;
+  var _this, errMsg, taskDefinition, builderParams, buildResponse, clonedCookieJar;
 
   _this = this;
 
@@ -212,7 +222,9 @@ Job.prototype._buildTask = function (taskSpecs) {
     params: this._params,
     shared: this._findInShared.bind(_this)
   };
-  var buildResponse = taskDefinition._build(builderParams, this._cookieJar, this);
+
+  clonedCookieJar = this._cloneCookieJar(this._cookieJar);
+  buildResponse = taskDefinition._build(builderParams, clonedCookieJar, this);
 
   return buildResponse;
 };
@@ -646,7 +658,7 @@ Job.prototype._taskIsInPlan = function (taskId) {
 
       planTaskId = _.isString(taskObject) ? taskObject : taskObject.taskId;
       return planTaskId === taskId;
-    })
+    });
   });
 };
 
@@ -660,7 +672,7 @@ Job.prototype.enqueueTaskArray = function (taskArray) {
   _.each(taskArray, function (taskId) {
     _this.enqueue(taskId);
   });
-}
+};
 
 /**
 * Sets parameters which the job will provide to its tasks

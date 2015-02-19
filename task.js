@@ -195,8 +195,7 @@ Task.prototype._onSaveCookies = function () {
   // TODO: Accept custom jar as parameter
   var jar;
 
-  // Deep clone the object to avoid it from being updated
-  jar = _.cloneDeep(this._http.getCookieJar());
+  jar = this._http.getCookieJar();
 
   this._savedJar = jar;
 };
