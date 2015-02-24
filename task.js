@@ -8,7 +8,6 @@
 var Q = require('q');
 var Http = require('./http');
 var _ = require('lodash');
-var Yakuza = require('./yakuza');
 
 /**
 * Is the product of a Task being built, contains status data, the main method of the task and other,
