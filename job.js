@@ -195,6 +195,8 @@ Job.prototype._applyPlan = function () {
 
 /**
 * Returns a cloned version of a cookie jar
+* @param cookieJar a cookie jar
+* @return a clone of the current cookie jar
 */
 Job.prototype._cloneCookieJar = function (cookieJar) {
   return {_jar: new CookieJar(_.cloneDeep(cookieJar._jar.store))};
@@ -607,7 +609,7 @@ Job.prototype._enqueuedTasksExist = function () {
 /**
 * Looks for a value shared by a task
 * @param {string} query key Namespaced by taskId using dot notation
-* returns value The value if found, otherwise undefined
+* @return The value if found, otherwise undefined
 * @private
 */
 Job.prototype._findInShared = function (query) {
@@ -636,6 +638,12 @@ Job.prototype._findInShared = function (query) {
   return this._getShared(taskId, key);
 };
 
+/**
+* Gets a shared value belonging to a specific task and key
+* @params {string} taskId Task id of the task containing the value shared
+* @params {string} key Key to which the value is assigned
+* @returns the value found, or undefined
+*/
 Job.prototype._getShared = function (taskId, key) {
   if (this._taskStorages[taskId] && this._taskStorages[taskId][key] !== undefined) {
     return this._taskStorages[taskId][key];
@@ -644,11 +652,22 @@ Job.prototype._getShared = function (taskId, key) {
   return undefined;
 };
 
+/**
+* Sets a shared value for a specific task and key
+* @param {string} taskId task id of the task associated with the value shared
+* @param {string} key key to which the value should be assigned to
+* @param value value to set
+*/
 Job.prototype._setShared = function (taskId, key, value) {
   this._taskStorages[taskId] = this._taskStorages[taskId] || {};
   this._taskStorages[taskId][key] = value;
 };
 
+/**
+* Check wether a task is present on the job's agent's plan
+* @param {string} taskId task id of the task
+* @returns {boolean} true if the task is in the plan
+*/
 Job.prototype._taskIsInPlan = function (taskId) {
   var tasks;
 
@@ -666,6 +685,11 @@ Job.prototype._taskIsInPlan = function (taskId) {
   });
 };
 
+/**
+* Enqueues all tasks present in the array
+* @param {Array} taskArray array of task Ids
+* @public
+*/
 Job.prototype.enqueueTaskArray = function (taskArray) {
   var _this = this;
 
