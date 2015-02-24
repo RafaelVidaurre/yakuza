@@ -279,7 +279,7 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 * parallel from the executionQueue
 * @private
 * @example
-* //Input example
+* // Input example
 * [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
 Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
@@ -307,6 +307,10 @@ Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
   return promises;
 };
 
+/**
+* Saves the given cookie jar, to be used by the job in the execution blocks that follow
+* @private
+*/
 Job.prototype._saveCookieJar = function (cookieJar) {
   this._cookieJar = cookieJar;
 };
@@ -367,7 +371,7 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
     _this._events.emit('eq:blockContinue');
 
   }, function (response) {
-    //TODO: After this runs an exception is run by Q for some reason
+    // FIXME: After this runs an exception is run by Q for some reason
     if (response.status === 'fail') {
       _this._failJob(response);
     }
