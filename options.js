@@ -13,16 +13,29 @@ var _ = require('lodash');
 * @param {object} defaultOptions POJO with default options
 */
 function Options (defaultOptions) {
-  this._defaults = defaultOptions;
-  this._currentOptions = this.defaults;
+  if (defaultOptions && !_.isObject(defaultOptions)) {
+    throw new Error('Default options must be an object');
+  }
+
+  this._defaults = defaultOptions || {};
+  this._currentOptions = this._defaults;
 }
 
 /**
-* Set default options to be used
+* Set default options to be used, if no argument is passed returns it instead
 * @param {object} defaultOptions default options to be used
+* @return current default options if argument is set, otherwise undefined
 * @public
 */
 Options.prototype.defaults = function (defaultOptions) {
+  if (!defaultOptions) {
+    return _.cloneDeep(this._defaults);
+  }
+
+  if (!_.isObject(defaultOptions)) {
+    throw new Error('Default options must be an object');
+  }
+
   this._defaults = defaultOptions;
 };
 
@@ -36,9 +49,9 @@ Options.prototype.extend = function (options) {
     throw new Error('Options must be an object');
   }
 
-  this._currentOptions = _.extend(this.currentOptions, options);
+  this._currentOptions = _.extend(this._currentOptions, options);
 
-  return this.getOptions();
+  return this.options();
 };
 
 /**
@@ -49,6 +62,7 @@ Options.prototype.options = function (options) {
   if (_.isObject(options)) {
     this.extend(options);
   }
+
   return _.cloneDeep(this._currentOptions);
 };
 
@@ -60,12 +74,19 @@ Options.prototype.options = function (options) {
 Options.prototype.set = function (key, value) {
   this._currentOptions[key] = value;
 
-  return this.getOptions();
+  return this.options();
 };
 
-// TODO: Add a reset to defaults method
+/**
+* Resets options instance to defaults
+* @public
+*/
+Options.prototype.reset = function () {
+  this._currentOptions = this._defaults;
+};
 
 /** @alias defaults */
 Options.prototype.default = Options.prototype.defaults;
+
 
 module.exports = Options;
