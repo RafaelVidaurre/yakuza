@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "quotes": [2, "single"],
+    "one-var": 1,
+    "block-scoped-var": 2,
+    "no-else-return": 1,
+    "no-floating-decimal": 1,
+    "no-self-compare": 2,
+    "no-throw-literal": 2,
+    "radix": 1,
+    "vars-on-top": 1,
+    "indent": [2, 2],
+    "brace-style": [2, "1tbs"],
+    "comma-style": 1,
+    "consistent-this": [1, "_this"],
+    "no-underscore-dangle": 0,
+    "space-after-keywords": [2, "always"],
+    "space-before-blocks": [2, "always"],
+    "space-before-function-parentheses": [2, "always"],
+    "space-in-brackets": [2, "never"],
+    "space-in-parens": [2, "never"],
+    "spaced-line-comment": [1, "always"]
+  },
+  "env": {
+    "node": true
+  }
+}
