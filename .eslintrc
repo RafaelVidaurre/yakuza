@@ -19,7 +19,8 @@
     "space-before-function-parentheses": [2, "always"],
     "space-in-brackets": [2, "never"],
     "space-in-parens": [2, "never"],
-    "spaced-line-comment": [1, "always"]
+    "spaced-line-comment": [1, "always"],
+    "func-style": [2, "declaration"]
   },
   "env": {
     "node": true

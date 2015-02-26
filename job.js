@@ -5,14 +5,16 @@
 
 'use strict';
 
-var _ = require('lodash');
-var Events = require('eventemitter2').EventEmitter2;
-var Q = require('q');
-var Http = require('./http');
-var utils = require('./utils');
-var tough = require('tough-cookie');
-var request = require('request');
-var CookieJar = tough.CookieJar;
+var _, Events, Q, Http, CookieJar, utils, tough, request;
+
+_ = require('lodash');
+Events = require('eventemitter2').EventEmitter2;
+Q = require('q');
+Http = require('./http');
+utils = require('./utils');
+tough = require('tough-cookie');
+request = require('request');
+CookieJar = tough.CookieJar;
 
 /**
 * @class
@@ -164,8 +166,9 @@ Job.prototype._setUid = function (argUid) {
 * @private
 */
 Job.prototype._applyPlan = function () {
-  var _this = this;
-  var executionPlan, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
+  var _this, executionPlan, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
+
+  _this = this;
 
   executionPlan = this._agent._plan;
 
@@ -244,8 +247,9 @@ Job.prototype._buildTask = function (taskSpecs) {
 * // [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
 Job.prototype._buildExecutionBlock = function (planGroup) {
-  var _this = this;
-  var executionBlock, executionObject, tasks, previousObject;
+  var _this, executionBlock, executionObject, tasks, previousObject;
+
+  _this = this;
 
   executionBlock = [];
 
@@ -285,9 +289,9 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 * [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
 Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
-  var promises = [];
+  var finalPromises;
 
-  var retrieveTaskSpecPromises = function (taskSpec) {
+  function retrieveTaskSpecPromises (taskSpec) {
     var promises, currentTask;
 
     currentTask = taskSpec.task;
@@ -300,13 +304,15 @@ Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
     }
 
     return promises;
-  };
+  }
+
+  finalPromises = [];
 
   _.each(executionBlock, function (taskSpec) {
-    promises = promises.concat(retrieveTaskSpecPromises(taskSpec));
+    finalPromises = finalPromises.concat(retrieveTaskSpecPromises(taskSpec));
   });
 
-  return promises;
+  return finalPromises;
 };
 
 /**
@@ -323,8 +329,9 @@ Job.prototype._saveCookieJar = function (cookieJar) {
 * @private
 */
 Job.prototype._runTask = function (taskSpec) {
-  var _this = this;
-  var taskRunning, thisTask, nextTaskSpec;
+  var _this, taskRunning, thisTask, nextTaskSpec;
+
+  _this = this;
 
   thisTask = taskSpec.task;
   taskRunning = thisTask._runningPromise;
@@ -359,8 +366,10 @@ Job.prototype._failJob = function (response) {
 * [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
 Job.prototype._runExecutionBlock = function (executionBlock) {
-  var _this = this;
-  var runningTasks = this._retrieveExecutionBlockPromises(executionBlock);
+  var _this, runningTasks;
+
+  _this = this;
+  runningTasks = this._retrieveExecutionBlockPromises(executionBlock);
 
   Q.all(runningTasks).then(function (results) {
     // Set cookies of results
@@ -373,7 +382,7 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
     _this._events.emit('eq:blockContinue');
 
   }, function (response) {
-    // FIXME: After this runs an exception is run by Q for some reason
+    // FIXME: After this runs an exception is thrown by Q for some reason
     if (response.status === 'fail') {
       _this._failJob(response);
     }
@@ -459,7 +468,7 @@ Job.prototype._onTaskSuccess = function (response) {
   var taskId;
 
   taskId = response.task.taskId;
-  this._publicEvents.emit('task:'+taskId+':success', response);
+  this._publicEvents.emit('task:' + taskId + ':success', response);
 };
 
 /**
@@ -469,7 +478,7 @@ Job.prototype._onTaskFail = function (response) {
   var taskId;
 
   taskId = response.task.taskId;
-  this._publicEvents.emit('task:'+taskId+':fail', response);
+  this._publicEvents.emit('task:' + taskId + ':fail', response);
 };
 
 /**
@@ -632,7 +641,7 @@ Job.prototype._findInShared = function (query) {
   result = this._getShared(taskId, key);
 
   if (result === undefined) {
-    throw new Error('\''+key+'\' was never shared by task \''+taskId+'\'');
+    throw new Error('\'' + key + '\' was never shared by task \'' + taskId + '\'');
   }
 
   return this._getShared(taskId, key);
@@ -676,7 +685,7 @@ Job.prototype._taskIsInPlan = function (taskId) {
   return _.some(this._agent._plan, function (planBlock) {
     tasks = utils.arrayify(planBlock);
 
-    return _.some(planBlock, function (taskObject) {
+    return _.some(tasks, function (taskObject) {
       var planTaskId;
 
       planTaskId = _.isString(taskObject) ? taskObject : taskObject.taskId;
@@ -726,8 +735,8 @@ Job.prototype.enqueue = function (taskId) {
   }
 
   if (!this._taskIsInPlan(taskId)) {
-    throw new Error('Enqueued task '+taskId+' is not in the agent '+this._agent.id+'\'s plan' +
-      ' add it to the agent\'s config array via the .setup method');
+    throw new Error('Enqueued task ' + taskId + ' is not in the agent ' + this._agent.id +
+      '\'s plan' + ' add it to the agent\'s config array via the .setup method');
   }
 
   this._enqueuedTasks.push(taskId);
@@ -746,7 +755,7 @@ Job.prototype.routine = function (routineName) {
   } else if (this._scraper._routines[routineName]) {
     this.enqueueTaskArray(this._scraper._routines[routineName]);
   } else {
-    throw new Error('No routine with name '+routineName+' was found');
+    throw new Error('No routine with name ' + routineName + ' was found');
   }
 };
 
