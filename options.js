@@ -6,7 +6,9 @@
 
 'use strict';
 
-var _ = require('lodash');
+var _;
+
+_ = require('lodash');
 
 /**
 * @class

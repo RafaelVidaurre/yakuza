@@ -6,8 +6,10 @@
 
 'use strict';
 
-var request = require('request');
-var _ = require('lodash');
+var request, _;
+
+request = require('request');
+_ = require('lodash');
 
 /**
 * @class
@@ -100,8 +102,7 @@ Http.prototype.getCookieJar = function () {
 * @param param3 Third parameter callback method
 */
 Http.prototype.del = function (param1, param2, param3) {
-  var params, boundInterceptor, _this;
-  _this = this;
+  var params, boundInterceptor;
 
   params = this._initRequestParams(param1, param2, param3);
   // Bind callback method to the incerceptor so that it can be referenced on response

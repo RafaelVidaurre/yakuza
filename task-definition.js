@@ -6,9 +6,11 @@
 
 'use strict';
 
-var _ = require('lodash');
-var utils = require('./utils');
-var Task = require('./task');
+var _, utils, Task;
+
+_ = require('lodash');
+utils = require('./utils');
+Task = require('./task');
 
 /**
 * @class
@@ -49,7 +51,9 @@ function TaskDefinition (id) {
   * TaskDefinition's builder method, by default will instantiate the task once with empty parameters
   * @private
   */
-  this._builder = function () {return {};};
+  this._builder = function () {
+    return {};
+  };
 }
 
 /**
@@ -59,10 +63,13 @@ function TaskDefinition (id) {
 * @return {array} An array of Task instances
 */
 TaskDefinition.prototype._build = function (builderParams, cookieJar, job) {
-  var _this = this;
-  var paramSets, tasks, task;
+  var _this, paramSets, tasks, task;
 
-  if (!_.isFunction(this._main)) {throw new Error('Cannot build task with no main method set');}
+  _this = this;
+
+  if (!_.isFunction(this._main)) {
+    throw new Error('Cannot build task with no main method set');
+  }
 
   tasks = [];
   paramSets = utils.arrayify(this._builder(builderParams));
@@ -76,7 +83,10 @@ TaskDefinition.prototype._build = function (builderParams, cookieJar, job) {
 };
 
 TaskDefinition.prototype._applySetup = function () {
-  if (this._applied) {return;}
+  if (this._applied) {
+    return;
+  }
+
   this._applyConfigCallbacks();
   this._applied = true;
 };
@@ -87,6 +97,7 @@ TaskDefinition.prototype._applySetup = function () {
 */
 TaskDefinition.prototype._applyConfigCallbacks = function () {
   var _this = this;
+
   _.each(_this._configCallbacks, function (configCallback) {
     configCallback(_this._config);
   });
@@ -98,7 +109,10 @@ TaskDefinition.prototype._applyConfigCallbacks = function () {
 * unique
 */
 TaskDefinition.prototype.main = function (mainMethod) {
-  if (!_.isFunction(mainMethod)) {throw new Error('Main method must be a function');}
+  if (!_.isFunction(mainMethod)) {
+    throw new Error('Main method must be a function');
+  }
+
   this._main = mainMethod;
 
   return this;
@@ -111,7 +125,9 @@ TaskDefinition.prototype.main = function (mainMethod) {
 * it as a parameter to its corresponding task
 */
 TaskDefinition.prototype.builder = function (builderMethod) {
-  if (!_.isFunction(builderMethod)) {throw new Error('Builder must be a function');}
+  if (!_.isFunction(builderMethod)) {
+    throw new Error('Builder must be a function');
+  }
 
   this._builder = builderMethod;
 
@@ -124,7 +140,9 @@ TaskDefinition.prototype.builder = function (builderMethod) {
 * argument)
 */
 TaskDefinition.prototype.setup = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) {throw new Error('Setup argument must be a function');}
+  if (!_.isFunction(cbConfig)) {
+    throw new Error('Setup argument must be a function');
+  }
 
   this._configCallbacks.push(cbConfig);
 

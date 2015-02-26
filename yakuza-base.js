@@ -8,11 +8,13 @@
 
 'use strict';
 
-var shortId = require('shortid');
-var utils = require('./utils');
-var _ = require('lodash');
-var Scraper = require('./scraper');
-var Job = require('./job');
+var shortId, utils, _, Scraper, Job;
+
+shortId = require('shortid');
+utils = require('./utils');
+_ = require('lodash');
+Scraper = require('./scraper');
+Job = require('./job');
 
 /**
 * Main singleton class used to define scrapers and their properties

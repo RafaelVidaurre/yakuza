@@ -5,9 +5,11 @@
 
 'use strict';
 
-var Q = require('q');
-var Http = require('./http');
-var _ = require('lodash');
+var Q, Http, _;
+
+Q = require('q');
+Http = require('./http');
+_ = require('lodash');
 
 /**
 * Is the product of a Task being built, contains status data, the main method of the task and other,

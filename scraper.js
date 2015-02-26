@@ -6,9 +6,11 @@
 
 'use strict';
 
-var _ = require('lodash');
-var utils = require('./utils');
-var Agent = require('./agent');
+var _, utils, Agent;
+
+_ = require('lodash');
+utils = require('./utils');
+Agent = require('./agent');
 
 /**
 * @class
@@ -83,7 +85,9 @@ Scraper.prototype._applyConfigCallbacks = function () {
 * @private
 */
 Scraper.prototype._applySetup = function () {
-  if (this._applied) {return;}
+  if (this._applied) {
+    return;
+  }
   this._applyConfigCallbacks();
   this._applied = true;
 };
@@ -94,7 +98,9 @@ Scraper.prototype._applySetup = function () {
 * @param {function} cbConfig function which will modify config parameters
 */
 Scraper.prototype.setup = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) {throw new Error('Config argument must be a function');}
+  if (!_.isFunction(cbConfig)) {
+    throw new Error('Config argument must be a function');
+  }
 
   this._configCallbacks.push(cbConfig);
 
@@ -112,7 +118,7 @@ Scraper.prototype.agent = function (agentId) {
   if (!agentId || !_.isString(agentId)) {
     throw new Error('Agent id must be a non-empty string');
   }
-  
+
   agentExists = utils.hasKey(this._agents, agentId);
   thisAgent = agentExists ? this._agents[agentId] : this._createAgent(agentId);
   return thisAgent;

@@ -7,9 +7,11 @@
 
 'use strict';
 
-var _ = require('lodash');
-var utils = require('./utils');
-var TaskDefinition = require('./task-definition');
+var _, utils, TaskDefinition;
+
+_ = require('lodash');
+utils = require('./utils');
+TaskDefinition = require('./task-definition');
 
 /**
 * @class
@@ -74,12 +76,13 @@ Agent.prototype._applyConfigCallbacks = function () {
 * @private
 */
 Agent.prototype._formatPlan = function () {
-  var _this = this;
-  var formattedPlan, currentGroup, formattedGroup, formattedTaskObj;
+  var _this, formattedPlan, currentGroup, formattedGroup, formattedTaskObj;
+
+  _this = this;
   formattedPlan = [];
 
   if (_this._config.plan.length <= 0) {
-    throw new Error('Agent '+_this.id+' has no execution plan, use the config object provided' +
+    throw new Error('Agent ' + _this.id + ' has no execution plan, use the config object provided' +
       ' by the setup method to define an execution plan');
   }
 
@@ -122,7 +125,9 @@ Agent.prototype._applyTaskDefinitions = function () {
 * @private
 */
 Agent.prototype._applySetup = function () {
-  if (this._applied) {return;}
+  if (this._applied) {
+    return;
+  }
   this._applyConfigCallbacks();
   this._applyTaskDefinitions();
   this._formatPlan();
@@ -134,7 +139,9 @@ Agent.prototype._applySetup = function () {
 * @param {function} cbConfig method which modifies the agent's config object (passed as argument)
 */
 Agent.prototype.setup = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) {throw new Error('Setup argument must be a function');}
+  if (!_.isFunction(cbConfig)) {
+    throw new Error('Setup argument must be a function');
+  }
 
   this._configCallbacks.push(cbConfig);
 
