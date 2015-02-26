@@ -45,6 +45,7 @@ function Http (defaultCookies) {
 * @private
 */
 Http.prototype._interceptResponse = function (err, res, body) {
+  // TODO: Push better log entry with cookies and stuff
   this._this._pushToLog({response: res, body: body});
 
   if (_.isFunction(this.callback)) {

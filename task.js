@@ -214,7 +214,8 @@ Task.prototype._onFail = function (error, message) {
     error: error,
     message: message,
     task: this,
-    status: 'fail'
+    status: 'fail',
+    requestLog: this._http.getLog()
   };
 
   this._onFinish();
