@@ -82,6 +82,18 @@ YakuzaBase.prototype.task = function (scraperId, agentId, taskId) {
 YakuzaBase.prototype.job = function (scraperId, agentId, params) {
   var newId, scraper, agent, newJob;
 
+  if (!scraperId) {
+    throw new Error('Scraper id must be passed');
+  }
+
+  if (!agentId) {
+    throw new Error('Agent id must be passed');
+  }
+
+  if (params && !_.isObject(params)) {
+    throw new Error('Params passed must be an object');
+  }
+
   scraper = this._scrapers[scraperId];
   agent = scraper._agents[agentId];
   newId = shortId.generate();
