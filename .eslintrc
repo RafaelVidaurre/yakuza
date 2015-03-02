@@ -21,9 +21,11 @@
     "space-in-parens": [2, "never"],
     "spaced-line-comment": [1, "always"],
     "func-style": [2, "declaration"],
-    "quote-props": [2, "as-needed"]
+    "quote-props": [2, "as-needed"],
+    "sort-vars": 1
   },
   "env": {
-    "node": true
+    "node": true,
+    "mocha": true
   }
 }

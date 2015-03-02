@@ -1,7 +1,14 @@
 'use strict';
 
-var Http = require('../http');
-var request = require('request');
+var Http, chai, request, sinon, sinonChai;
+
+Http = require('../http');
+request = require('request');
+sinonChai = require('sinon-chai');
+sinon = require('sinon');
+chai = require('chai');
+chai.should();
+chai.use(sinonChai);
 
 describe('Http', function () {
   var http;
@@ -12,187 +19,42 @@ describe('Http', function () {
 
   describe('#Http', function () {
     it('should set default cookies if provided', function () {
-      var jar = request.jar();
-      var newHttp = new Http(jar);
-      expect(newHttp._cookieJar).toBe(jar);
+      var jar, newHttp;
+
+      jar = request.jar();
+      newHttp = new Http(jar);
+
+      newHttp._cookieJar.should.be.eql(jar);
     });
 
-    it('should set a new cookie jar if no cookes are provided', function () {
-      expect(http._cookieJar).toEqual(request.jar());
+    it('should set a new cookie jar if no cookies are provided', function () {
+      var jar;
+
+      jar = request.jar();
+      http._cookieJar.should.be.eql(jar);
     });
 
     it('should start with an empty log', function () {
-      expect(http._log).toEqual([]);
-    });
-  });
-
-  describe('#_interceptResponse', function () {
-    it('should call pushToLog', function () {
-      var fakeResponse = {fake: 'response'};
-      var fakeBody = {fake: 'body'};
-      var fakeCb = function () {};
-      spyOn(http, '_pushToLog');
-      http._interceptResponse.bind({
-        callback: fakeCb,
-        _this: http
-      })(null, fakeResponse, fakeBody);
-      expect(http._pushToLog).toHaveBeenCalledWith({response: fakeResponse, body: fakeBody});
-    });
-
-    it('should call the callback with response data', function () {
-      var test = {callback: function () {}};
-      spyOn(test, 'callback');
-      http._interceptResponse.bind({callback: test.callback, _this: http})(1, 2, 3);
-      expect(test.callback).toHaveBeenCalledWith(1, 2, 3);
-    });
-  });
-
-  describe('#_pushToLog', function () {
-    it('it should push response data to log', function () {
-      var data = {response: 1, body: 2};
-      http._pushToLog(data);
-      expect(http._log).toEqual([data]);
-    });
-  });
-
-  describe('#_initRequestParams', function () {
-    it('should return an object', function () {
-      expect(typeof http._initRequestParams('asd', {asd: 'asd'}) === 'object').toBe(true);
-    });
-
-    it('should return request parameters properly', function () {
-      var cb = function () {return 1;};
-      var uri = 'http://www.test.com';
-      var opts = {uri: uri};
-      var res = http._initRequestParams(uri, cb);
-      var expectedRes = {uri: uri, options: {uri: uri}, callback: cb};
-      expect(res).toEqual(expectedRes);
-      res = http._initRequestParams(opts, cb);
-      expect(res).toEqual(expectedRes);
-      res = http._initRequestParams(uri, opts, cb);
-      expect(res).toEqual(expectedRes);
+      http._log.should.be.eql([]);
     });
   });
 
   describe('Request delegators', function () {
-    var uri, opts, cb;
+    var cb, opts, uri;
 
     beforeEach(function () {
-      uri = 'fakeUri';
+      uri = 'http://www.fake.com/';
       opts = {a: 1};
       cb = function () {};
     });
 
-    describe('#del', function () {
-      it('should call with correct parameters', function () {
-        spyOn(http._request, 'del');
-        http.del(uri, opts, cb);
-        expect(http._request.del).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
-      });
-
-      it('should log requests', function () {
-        expect(http._log.length).toBe(0);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(1);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(2);
-      });
-    });
-
     describe('#get', function () {
       it('should call with correct parameters', function () {
-        spyOn(http._request, 'get');
+        // Fix this usage of sinon
+        sinon.spy(http._request, 'get');
         http.get(uri, opts, cb);
-        expect(http._request.get).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
+        http._request.get.should.have.been.calledWith(uri, opts, cb);
       });
-
-      it('should log requests', function () {
-        expect(http._log.length).toBe(0);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(1);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(2);
-      });
-    });
-
-    describe('#head', function () {
-      it('should call with correct parameters', function () {
-        spyOn(http._request, 'head');
-        http.head(uri, opts, cb);
-        expect(http._request.head).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
-      });
-
-      it('should log requests', function () {
-        expect(http._log.length).toBe(0);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(1);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(2);
-      });
-    });
-
-    describe('#patch', function () {
-      it('should call with correct parameters', function () {
-        spyOn(http._request, 'patch');
-        http.patch(uri, opts, cb);
-        expect(http._request.patch).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
-      });
-
-      it('should log requests', function () {
-        expect(http._log.length).toBe(0);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(1);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(2);
-      });
-    });
-
-    describe('#post', function () {
-      it('should call with correct parameters', function () {
-        spyOn(http._request, 'post');
-        http.post(uri, opts, cb);
-        expect(http._request.post).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
-      });
-
-      it('should log requests', function () {
-        expect(http._log.length).toBe(0);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(1);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(2);
-      });
-    });
-
-    describe('#put', function () {
-      it('should call with correct parameters', function () {
-        spyOn(http._request, 'put');
-        http.put(uri, opts, cb);
-        expect(http._request.put).toHaveBeenCalledWith(uri, opts, jasmine.any(Function));
-      });
-
-      it('should log requests', function () {
-        expect(http._log.length).toBe(0);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(1);
-        http.del(uri, opts, cb);
-        expect(http._log.length).toBe(2);
-      });
-    });
-
-  });
-
-  describe('#getCookieJar', function () {
-    it('should return the cookie jar', function () {
-      var newCookieJar = request.jar();
-      var newHttp = new Http(newCookieJar);
-      expect(newHttp.getCookieJar()).toEqual(newCookieJar);
-    });
-  });
-
-  describe('#getLog', function () {
-    it('should return the log', function () {
-      var log = http.getLog();
-      expect(log).toBe(http._log);
     });
   });
 });
