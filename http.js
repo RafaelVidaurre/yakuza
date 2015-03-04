@@ -6,10 +6,11 @@
 
 'use strict';
 
-var request, _;
+var CookieJar, _, request;
 
 request = require('request');
 _ = require('lodash');
+CookieJar = require('tough-cookie').CookieJar;
 
 /**
 * @class
@@ -44,12 +45,16 @@ function Http (defaultCookies) {
 * @param {function} callback Callback to be executed
 * @private
 */
-Http.prototype._interceptResponse = function (err, res, body) {
-  // TODO: Push better log entry with cookies and stuff
-  this._this._pushToLog({response: res, body: body});
+Http.prototype._interceptResponse = function (err, res, body, callback) {
+  var cookieHost, cookieString;
 
-  if (_.isFunction(this.callback)) {
-    this.callback(err, res, body);
+  cookieHost = res.request.uri.protocol + '//' + res.request.uri.hostname;
+  cookieString = this._cookieJar.getCookieString(cookieHost);
+
+  this._pushToLog({response: res, body: body, cookies: cookieString, request: res.request});
+
+  if (_.isFunction(callback)) {
+    callback(err, res, body);
   }
 };
 
@@ -103,13 +108,14 @@ Http.prototype.getCookieJar = function () {
 * @param param3 Third parameter callback method
 */
 Http.prototype.del = function (param1, param2, param3) {
-  var params, boundInterceptor;
+  var _this, params;
 
+  _this = this;
   params = this._initRequestParams(param1, param2, param3);
-  // Bind callback method to the incerceptor so that it can be referenced on response
-  boundInterceptor = this._interceptResponse.bind({callback: params.callback, _this: this});
 
-  this._request.del(params.uri, params.options, boundInterceptor);
+  this._request.del(params.uri, params.options, function (err, res, body) {
+    _this._interceptResponse(err, res, body, params.callback);
+  });
 };
 
 /**
@@ -119,13 +125,14 @@ Http.prototype.del = function (param1, param2, param3) {
 * @param param3 Third parameter callback method
 */
 Http.prototype.get = function (param1, param2, param3) {
-  var params, boundInterceptor;
+  var _this, params;
 
+  _this = this;
   params = this._initRequestParams(param1, param2, param3);
-  // Bind callback method to the incerceptor so that it can be referenced on response
-  boundInterceptor = this._interceptResponse.bind({callback: params.callback, _this: this});
 
-  this._request.get(params.uri, params.options, boundInterceptor);
+  this._request.get(params.uri, params.options, function (err, res, body) {
+    _this._interceptResponse(err, res, body, params.callback);
+  });
 };
 
 /**
@@ -135,13 +142,14 @@ Http.prototype.get = function (param1, param2, param3) {
 * @param param3 Third parameter callback method
 */
 Http.prototype.head = function (param1, param2, param3) {
-  var params, boundInterceptor;
+  var _this, params;
 
+  _this = this;
   params = this._initRequestParams(param1, param2, param3);
-  // Bind callback method to the incerceptor so that it can be referenced on response
-  boundInterceptor = this._interceptResponse.bind({callback: params.callback, _this: this});
 
-  this._request.head(params.uri, params.options, boundInterceptor);
+  this._request.head(params.uri, params.options, function (err, res, body) {
+    _this._interceptResponse(err, res, body, params.callback);
+  });
 };
 
 /**
@@ -151,13 +159,14 @@ Http.prototype.head = function (param1, param2, param3) {
 * @param param3 Third parameter callback method
 */
 Http.prototype.patch = function (param1, param2, param3) {
-  var params, boundInterceptor;
+  var _this, params;
 
+  _this = this;
   params = this._initRequestParams(param1, param2, param3);
-  // Bind callback method to the incerceptor so that it can be referenced on response
-  boundInterceptor = this._interceptResponse.bind({callback: params.callback, _this: this});
 
-  this._request.patch(params.uri, params.options, boundInterceptor);
+  this._request.patch(params.uri, params.options, function (err, res, body) {
+    _this._interceptResponse(err, res, body, params.callback);
+  });
 };
 
 /**
@@ -167,13 +176,14 @@ Http.prototype.patch = function (param1, param2, param3) {
 * @param param3 Third parameter callback method
 */
 Http.prototype.post = function (param1, param2, param3) {
-  var params, boundInterceptor;
+  var _this, params;
 
+  _this = this;
   params = this._initRequestParams(param1, param2, param3);
-  // Bind callback method to the incerceptor so that it can be referenced on response
-  boundInterceptor = this._interceptResponse.bind({callback: params.callback, _this: this});
 
-  this._request.post(params.uri, params.options, boundInterceptor);
+  this._request.post(params.uri, params.options, function (err, res, body) {
+    _this._interceptResponse(err, res, body, params.callback);
+  });
 };
 
 /**
@@ -183,13 +193,14 @@ Http.prototype.post = function (param1, param2, param3) {
 * @param param3 Third parameter callback method
 */
 Http.prototype.put = function (param1, param2, param3) {
-  var params, boundInterceptor;
+  var _this, params;
 
+  _this = this;
   params = this._initRequestParams(param1, param2, param3);
-  // Bind callback method to the incerceptor so that it can be referenced on response
-  boundInterceptor = this._interceptResponse.bind({callback: params.callback, _this: this});
 
-  this._request.put(params.uri, params.options, boundInterceptor);
+  this._request.put(params.uri, params.options, function (err, res, body) {
+    _this._interceptResponse(err, res, body, params.callback);
+  });
 };
 
 /**
