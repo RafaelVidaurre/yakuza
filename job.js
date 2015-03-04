@@ -202,7 +202,7 @@ Job.prototype._applyPlan = function () {
 * @return a clone of the current cookie jar
 */
 Job.prototype._cloneCookieJar = function (cookieJar) {
-  return {_jar: new CookieJar(_.cloneDeep(cookieJar._jar.store))};
+  return Http.cloneCookieJar(cookieJar);
 };
 
 /**

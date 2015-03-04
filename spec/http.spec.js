@@ -1,19 +1,22 @@
 'use strict';
 
-var Http, chai, nock, request, sinon, sinonChai;
+var CookieJar, Http, _, chai, nock, request, sinon, sinonChai;
 
+_ = require('lodash');
 nock = require('nock');
 Http = require('../http');
 request = require('request');
 sinonChai = require('sinon-chai');
 sinon = require('sinon');
 chai = require('chai');
+CookieJar = require('tough-cookie').CookieJar;
+
 chai.should();
 chai.use(sinonChai);
 nock.disableNetConnect();
 
 describe('Http', function () {
-  var body1, body2, headers1, headers2, http;
+  var body1, body2, headers1, headers2, headersS1, http;
 
   beforeEach(function () {
     http = new Http();
@@ -28,6 +31,9 @@ describe('Http', function () {
     headers2 = {
       'Set-Cookie': 'b=2'
     };
+    headersS1 = {
+      'Set-Cookie': 'c=3'
+    };
 
     nock('http://www.1.com')
       .delete('/').reply(200, body1, headers1)
@@ -39,6 +45,12 @@ describe('Http', function () {
 
     nock('http://www.2.com')
       .get('/').reply(200, body2, headers2);
+
+    nock('http://www.no-cookies.com')
+      .get('/').reply(200, 'Body');
+
+    nock('https://www.s1.com')
+      .get('/').reply(200, 'BodyS1', headersS1);
   });
 
   describe('#Http', function () {
@@ -134,10 +146,9 @@ describe('Http', function () {
 
     describe('request interception', function () {
       it('should save request data in the log', function (done) {
-        var jar, newHttp;
+        var newHttp;
 
-        jar = request.jar();
-        newHttp = new Http(jar);
+        newHttp = new Http(request.jar());
 
         newHttp.get('http://www.1.com/', function () {
           newHttp.getLog()[0].cookies.should.eql('a=1');
@@ -146,8 +157,42 @@ describe('Http', function () {
             newHttp.getLog()[0].cookies.should.eql('a=1');
             newHttp.getLog()[1].cookies.should.eql('b=2');
 
-            done();
+            newHttp.get('https://www.s1.com/', function () {
+              newHttp.getLog()[0].cookies.should.eql('a=1');
+              newHttp.getLog()[1].cookies.should.eql('b=2');
+              newHttp.getLog()[2].cookies.should.eql('c=3');
+              done();
+            });
           });
+        });
+      });
+
+      it('should not fail on empty cookies', function (done) {
+        var newHttp = new Http();
+        newHttp.get('http://www.no-cookies.com', function () {
+          done();
+        });
+      });
+
+      it('should not fail with a cloned jar', function (done) {
+        var clonedJar, newHttp;
+
+        clonedJar = Http.cloneCookieJar(request.jar());
+        newHttp = new Http(clonedJar);
+
+        newHttp.get('http://www.1.com', function () {
+          done();
+        });
+      });
+
+      it('should not fail with a request jar', function (done) {
+        var requestJar, newHttp;
+
+        requestJar = request.jar();
+        newHttp = new Http(requestJar);
+
+        newHttp.get('http://www.1.com', function () {
+          done();
         });
       });
     });

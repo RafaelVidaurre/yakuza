@@ -48,6 +48,11 @@ function Http (defaultCookies) {
 Http.prototype._interceptResponse = function (err, res, body, callback) {
   var cookieHost, cookieString;
 
+  if (err) {
+    callback(err, null, null);
+    return;
+  }
+
   cookieHost = res.request.uri.protocol + '//' + res.request.uri.hostname;
   cookieString = this._cookieJar.getCookieString(cookieHost);
 
@@ -209,6 +214,31 @@ Http.prototype.put = function (param1, param2, param3) {
 */
 Http.prototype.getLog = function () {
   return this._log;
+};
+
+/**
+* Clones a Mikeal's request jar, it is cloned this way because of the hideous way request's jar
+* class is implemented
+*/
+Http.cloneCookieJar = function (cookieJar) {
+  var newJar, cookieString, cookieStore, domains, domainPaths, cookieUrl;
+
+  newJar = request.jar();
+  cookieStore = cookieJar._jar.store.idx;
+  domains = _.keys(cookieStore);
+
+  _.each(domains, function (domain) {
+    domainPaths = _.keys(cookieStore[domain]);
+
+    _.each(domainPaths, function (domainPath) {
+      cookieUrl = 'http://' + domain + domainPath;
+      cookieString = cookieJar.getCookieString(cookieUrl);
+
+      newJar.setCookie(cookieString, cookieUrl);
+    });
+  });
+
+  return newJar;
 };
 
 module.exports = Http;
