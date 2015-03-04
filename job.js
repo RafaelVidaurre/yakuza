@@ -5,7 +5,7 @@
 
 'use strict';
 
-var _, Events, Q, Http, CookieJar, utils, tough, request;
+var CookieJar, Events, Http, Q, _, request, tough, utils;
 
 _ = require('lodash');
 Events = require('eventemitter2').EventEmitter2;
@@ -166,7 +166,7 @@ Job.prototype._setUid = function (argUid) {
 * @private
 */
 Job.prototype._applyPlan = function () {
-  var _this, executionPlan, newExecutionPlan, newTaskGroup, matchIdx, groupTaskIds;
+  var _this, executionPlan, groupTaskIds, matchIdx, newExecutionPlan, newTaskGroup;
 
   _this = this;
 
@@ -212,7 +212,7 @@ Job.prototype._cloneCookieJar = function (cookieJar) {
 * @return {array} an array of Tasks
 */
 Job.prototype._buildTask = function (taskSpecs) {
-  var _this, errMsg, taskDefinition, builderParams, buildResponse, clonedCookieJar;
+  var _this, buildResponse, builderParams, clonedCookieJar, errMsg, taskDefinition;
 
   _this = this;
 
@@ -247,7 +247,7 @@ Job.prototype._buildTask = function (taskSpecs) {
 * // [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
 Job.prototype._buildExecutionBlock = function (planGroup) {
-  var _this, executionBlock, executionObject, tasks, previousObject;
+  var _this, executionBlock, executionObject, previousObject, tasks;
 
   _this = this;
 
@@ -292,7 +292,7 @@ Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
   var finalPromises;
 
   function retrieveTaskSpecPromises (taskSpec) {
-    var promises, currentTask;
+    var currentTask, promises;
 
     currentTask = taskSpec.task;
     promises = [];
@@ -329,7 +329,7 @@ Job.prototype._saveCookieJar = function (cookieJar) {
 * @private
 */
 Job.prototype._runTask = function (taskSpec) {
-  var _this, taskRunning, thisTask, nextTaskSpec;
+  var _this, nextTaskSpec, taskRunning, thisTask;
 
   _this = this;
 
@@ -622,7 +622,7 @@ Job.prototype._enqueuedTasksExist = function () {
 * @private
 */
 Job.prototype._findInShared = function (query) {
-  var taskId, key, splitQuery, result;
+  var key, result, splitQuery, taskId;
 
   if (!_.isString(query)) {
     console.log('ERROR: The shared method key passed is invalid');
