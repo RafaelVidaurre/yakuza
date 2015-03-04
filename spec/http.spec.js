@@ -1,15 +1,13 @@
 'use strict';
 
-var CookieJar, Http, _, chai, nock, request, sinon, sinonChai;
+var Http, chai, nock, request, sinon, sinonChai;
 
-_ = require('lodash');
 nock = require('nock');
 Http = require('../http');
 request = require('request');
 sinonChai = require('sinon-chai');
 sinon = require('sinon');
 chai = require('chai');
-CookieJar = require('tough-cookie').CookieJar;
 
 chai.should();
 chai.use(sinonChai);
