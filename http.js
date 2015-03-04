@@ -6,11 +6,10 @@
 
 'use strict';
 
-var CookieJar, _, request;
+var _, request;
 
 request = require('request');
 _ = require('lodash');
-CookieJar = require('tough-cookie').CookieJar;
 
 /**
 * @class
@@ -219,6 +218,8 @@ Http.prototype.getLog = function () {
 /**
 * Clones a Mikeal's request jar, it is cloned this way because of the hideous way request's jar
 * class is implemented
+* @return cookie jar clone
+* @static
 */
 Http.cloneCookieJar = function (cookieJar) {
   var newJar, cookieString, cookieStore, domains, domainPaths, cookieUrl;
