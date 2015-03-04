@@ -5,7 +5,7 @@
 
 'use strict';
 
-var Q, Http, _;
+var Http, Q, _;
 
 Q = require('q');
 Http = require('./http');
@@ -116,7 +116,7 @@ Task.prototype._onFinish = function () {
 * @private
 */
 Task.prototype._onShare = function (key, value, options) {
-  var shareMethod, shareMethodFunction, current;
+  var current, shareMethod, shareMethodFunction;
 
   if (options) {
     shareMethod = options.method;
@@ -154,7 +154,7 @@ Task.prototype._onShare = function (key, value, options) {
 * @private
 */
 Task.prototype._onSuccess = function (data) {
-  var response, hookMessage, stopJob;
+  var hookMessage, response, stopJob;
 
   stopJob = false;
 
