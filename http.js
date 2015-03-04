@@ -55,7 +55,8 @@ Http.prototype._interceptResponse = function (err, res, body, callback) {
   cookieHost = res.request.uri.protocol + '//' + res.request.uri.hostname;
   cookieString = this._cookieJar.getCookieString(cookieHost);
 
-  this._pushToLog({response: res, body: body, cookies: cookieString, request: res.request});
+  this._pushToLog({response: res, body: body, cookies: cookieString, request: res.request,
+    url: res.request.href});
 
   if (_.isFunction(callback)) {
     callback(err, res, body);

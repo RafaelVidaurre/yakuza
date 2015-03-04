@@ -144,21 +144,40 @@ describe('Http', function () {
 
     describe('request interception', function () {
       it('should save request data in the log', function (done) {
-        var newHttp;
+        var newHttp, log;
 
         newHttp = new Http(request.jar());
 
-        newHttp.get('http://www.1.com/', function () {
-          newHttp.getLog()[0].cookies.should.eql('a=1');
+        newHttp.get('http://www.1.com/', function (_err, res) {
+          log = newHttp.getLog();
+          log[0].cookies.should.eql('a=1');
+          log[0].url.should.eql('http://www.1.com/');
+          log[0].response.should.eql(res);
+          log[0].request.should.eql(res.request);
 
-          newHttp.get('http://www.2.com/', function () {
-            newHttp.getLog()[0].cookies.should.eql('a=1');
-            newHttp.getLog()[1].cookies.should.eql('b=2');
+          newHttp.get('http://www.2.com/', function (_err2, res2) {
+            log[0].cookies.should.eql('a=1');
+            log[1].cookies.should.eql('b=2');
+            log[0].url.should.eql('http://www.1.com/');
+            log[1].url.should.eql('http://www.2.com/');
+            log[0].response.should.eql(res);
+            log[1].response.should.eql(res2);
+            log[0].request.should.eql(res.request);
+            log[1].request.should.eql(res2.request);
 
-            newHttp.get('https://www.s1.com/', function () {
-              newHttp.getLog()[0].cookies.should.eql('a=1');
-              newHttp.getLog()[1].cookies.should.eql('b=2');
-              newHttp.getLog()[2].cookies.should.eql('c=3');
+            newHttp.get('https://www.s1.com/', function (_err3, res3) {
+              log[0].cookies.should.eql('a=1');
+              log[1].cookies.should.eql('b=2');
+              log[2].cookies.should.eql('c=3');
+              log[0].url.should.eql('http://www.1.com/');
+              log[1].url.should.eql('http://www.2.com/');
+              log[2].url.should.eql('https://www.s1.com/');
+              log[0].response.should.eql(res);
+              log[1].response.should.eql(res2);
+              log[2].response.should.eql(res3);
+              log[0].request.should.eql(res.request);
+              log[1].request.should.eql(res2.request);
+              log[2].request.should.eql(res3.request);
               done();
             });
           });

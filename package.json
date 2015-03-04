@@ -4,7 +4,7 @@
   "description": "",
   "main": "yakuza.js",
   "scripts": {
-    "test": "jasmine-node spec"
+    "test": "mocha spec"
   },
   "keywords": [
     "scraping",
