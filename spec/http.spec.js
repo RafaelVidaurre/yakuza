@@ -128,6 +128,24 @@ describe('Http', function () {
     });
   });
 
+  describe('#getCookieJar', function () {
+    beforeEach(function () {
+      http.get(('http://www.1.com'));
+    });
+
+    it('should return the current cookie jar', function () {
+      http.getCookieJar().should.eql({a: 1});
+    });
+
+    it('should clone the object', function () {
+      var clonedJar;
+
+      clonedJar = http.getCookieJar();
+      clonedJar.b = 2;
+      http.getCookieJar().should.not.have.property('b');
+    });
+  });
+
   describe('request delegators', function () {
     var requestMock;
 

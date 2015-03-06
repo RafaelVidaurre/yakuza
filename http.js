@@ -204,10 +204,18 @@ Http.prototype.put = function (param1, param2) {
 
 /**
 * Returns the current request log as an array
-* @returns {array} current request log
+* @return {array} current request log
 */
 Http.prototype.getLog = function () {
   return this._log;
+};
+
+/**
+* Returns a clone of the current cookie jar
+* @return current cookie jar clone
+*/
+Http.prototype.getCookieJar = function () {
+  return _.cloneDeep(this._cookieJar);
 };
 
 module.exports = Http;

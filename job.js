@@ -130,7 +130,7 @@ function Job (uid, scraper, agent, params) {
   * Cookie jar to be used in the next execution block
   * @private
   */
-  this._cookieJar = request.jar();
+  this._cookieJar = {};
 
   /**
   * Determines wether the job's components have been applied or not
@@ -202,7 +202,7 @@ Job.prototype._applyPlan = function () {
 * @return a clone of the current cookie jar
 */
 Job.prototype._cloneCookieJar = function (cookieJar) {
-  return Http.cloneCookieJar(cookieJar);
+  return _.cloneDeep(cookieJar);
 };
 
 /**
