@@ -129,20 +129,22 @@ describe('Http', function () {
   });
 
   describe('#getCookieJar', function () {
-    beforeEach(function () {
-      http.get(('http://www.1.com'));
+    it('should return the current cookie jar', function (done) {
+      http.get('http://www.1.com', function () {
+        http.getCookieJar().should.eql({a: '1'});
+        done();
+      });
     });
 
-    it('should return the current cookie jar', function () {
-      http.getCookieJar().should.eql({a: 1});
-    });
-
-    it('should clone the object', function () {
+    it('should clone the object', function (done) {
       var clonedJar;
 
-      clonedJar = http.getCookieJar();
-      clonedJar.b = 2;
-      http.getCookieJar().should.not.have.property('b');
+      http.get('http://www.1.com', function () {
+        clonedJar = http.getCookieJar();
+        clonedJar.b = '2';
+        http.getCookieJar().should.not.have.property('b');
+        done();
+      });
     });
   });
 

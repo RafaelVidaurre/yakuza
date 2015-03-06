@@ -39,9 +39,11 @@ function Http (defaultCookies) {
 * @private
 */
 Http.prototype._interceptResponse = function (err, res, body, url, callback) {
-  var entry, resCookieString, _this;
+  var entry, resCookieString, _this, cb, noop;
 
   _this = this;
+  noop = function () {};
+  cb = callback || noop;
 
   if (err) {
     callback(err, null, null);
@@ -73,9 +75,8 @@ Http.prototype._interceptResponse = function (err, res, body, url, callback) {
       body: body
     }
   };
-
   this._pushToLog(entry);
-  callback(err, res, body);
+  cb(err, res, body);
 };
 
 /**
