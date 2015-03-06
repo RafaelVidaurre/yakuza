@@ -6,9 +6,9 @@
 
 'use strict';
 
-var _, request;
+var _, needle;
 
-request = require('request');
+needle = require('needle');
 _ = require('lodash');
 
 /**
@@ -21,13 +21,7 @@ function Http (defaultCookies) {
   * Cookie jar for the Http instance
   * @private
   */
-  this._cookieJar = defaultCookies || request.jar();
-
-  /**
-  * Instance of mikeal's request API with a default cookie jar set
-  * @private
-  */
-  this._request = request.defaults({jar: this._cookieJar});
+  this._cookieJar = defaultCookies || {};
 
   /**
   * Array of requests logged
@@ -39,28 +33,49 @@ function Http (defaultCookies) {
 /**
 * Pushes a response object to the request log and responds to passed callback
 * @param {object} err Error object, is null if no error is present
-* @param {object} res Request's response
-* @param {string} body Request's response body only, is null if an error is present
+* @param {object} res Needle's response
+* @param {string} body Needle's response body only, is null if an error is present
 * @param {function} callback Callback to be executed
 * @private
 */
-Http.prototype._interceptResponse = function (err, res, body, callback) {
-  var cookieHost, cookieString;
+Http.prototype._interceptResponse = function (err, res, body, url, callback) {
+  var entry, resCookieString, _this;
+
+  _this = this;
 
   if (err) {
     callback(err, null, null);
     return;
   }
 
-  cookieHost = res.request.uri.protocol + '//' + res.request.uri.hostname;
-  cookieString = this._cookieJar.getCookieString(cookieHost);
+  resCookieString = '';
+  _.each(res.cookies, function (value, key) {
+    // Update our cookie jar
+    _this._cookieJar[key] = value;
 
-  this._pushToLog({response: res, body: body, cookies: cookieString, request: res.request,
-    url: res.request.href});
+    // Build cookie string for logging
+    if (resCookieString) {
+      resCookieString += ' ';
+    }
+    resCookieString += key + '=' + value + ';';
+  });
 
-  if (_.isFunction(callback)) {
-    callback(err, res, body);
-  }
+  entry = {
+    request: {
+      headers: res.req._headers,
+      cookies: res.req._headers.cookie || '',
+      url: url
+    },
+    response: {
+      cookies: resCookieString,
+      headers: res.headers,
+      statusCode: res.statusCode,
+      body: body
+    }
+  };
+
+  this._pushToLog(entry);
+  callback(err, res, body);
 };
 
 /**
@@ -71,141 +86,120 @@ Http.prototype._pushToLog = function (logEntry) {
   this._log.push(logEntry);
 };
 
-/**
-* Pattern-matches parameters for request calls
-* @param param1 First parameter (required)
-* @param param2 Second parameter
-* @param param3 Third parameter
-* @return {object} parameters assigned to proper keys
-* @private
-*/
-Http.prototype._initRequestParams = function (param1, param2, param3) {
-  var callback, options, uri;
+Http.prototype._buildParams = function (param1, param2) {
+  var params;
 
-  if (_.isFunction(param2) && !param3) {
-    callback = param2;
-  }
+  params = {
+    opts: {},
+    callback: undefined
+  };
+  params.callback = param2;
 
-  if (_.isObject(param2) && !_.isFunction(param2)) {
-    options = param2;
-    options.uri = param1;
-    uri = param1;
-    callback = param3;
-  } else if (_.isString(param1)) {
-    uri = param1;
-    options = {uri: uri};
+  if (_.isString(param1)) {
+    params.opts.url = param1;
   } else {
-    options = param1;
-    uri = options.uri;
+    params.opts = param1;
   }
 
-  return {uri: uri, options: options, callback: callback};
+  return params;
 };
 
-Http.prototype.getCookieJar = function () {
-  return this._cookieJar;
+Http.prototype.request = function (method, opts, callback) {
+  var _this, data, url, finalOpts;
+
+  _this = this;
+
+  if (!opts.url) {
+    throw new Error('Url is not set');
+  }
+
+  url = opts.url;
+  data = opts.data || null;
+
+  finalOpts = _.omit(opts, ['data', 'url']);
+  finalOpts.cookies = _.extend(this._cookieJar, finalOpts.cookies);
+
+  needle.request(method, url, data, finalOpts, function (err, res, body) {
+    _this._interceptResponse(err, res, body, opts.url, callback);
+  });
 };
 
 /**
 * Delegate to request's `del` method
-* @param param1 First parameter (required) can be options object or URI string
-* @param param2 Second parameter can be options object or callback
-* @param param3 Third parameter callback method
 */
-Http.prototype.del = function (param1, param2, param3) {
-  var _this, params;
+Http.prototype.del = function (param1, param2) {
+  var opts, params, callback;
 
-  _this = this;
-  params = this._initRequestParams(param1, param2, param3);
+  params = this._buildParams(param1, param2);
+  opts = params.opts;
+  callback = params.callback;
 
-  this._request.del(params.uri, params.options, function (err, res, body) {
-    _this._interceptResponse(err, res, body, params.callback);
-  });
+  this.request('delete', opts, callback);
 };
 
 /**
 * Delegate to request's `get` method
-* @param param1 First parameter (required) can be options object or URI string
-* @param param2 Second parameter can be options object or callback
-* @param param3 Third parameter callback method
 */
-Http.prototype.get = function (param1, param2, param3) {
-  var _this, params;
+Http.prototype.get = function (param1, param2) {
+  var opts, params, callback;
 
-  _this = this;
-  params = this._initRequestParams(param1, param2, param3);
+  params = this._buildParams(param1, param2);
+  opts = params.opts;
+  callback = params.callback;
 
-  this._request.get(params.uri, params.options, function (err, res, body) {
-    _this._interceptResponse(err, res, body, params.callback);
-  });
+  this.request('get', opts, callback);
 };
 
 /**
 * Delegate to request's `head` method
-* @param param1 First parameter (required) can be options object or URI string
-* @param param2 Second parameter can be options object or callback
-* @param param3 Third parameter callback method
 */
-Http.prototype.head = function (param1, param2, param3) {
-  var _this, params;
+Http.prototype.head = function (param1, param2) {
+  var opts, params, callback;
 
-  _this = this;
-  params = this._initRequestParams(param1, param2, param3);
+  params = this._buildParams(param1, param2);
+  opts = params.opts;
+  callback = params.callback;
 
-  this._request.head(params.uri, params.options, function (err, res, body) {
-    _this._interceptResponse(err, res, body, params.callback);
-  });
+  this.request('head', opts, callback);
 };
 
 /**
 * Delegate to request's `patch` method
-* @param param1 First parameter (required) can be options object or URI string
-* @param param2 Second parameter can be options object or callback
-* @param param3 Third parameter callback method
 */
-Http.prototype.patch = function (param1, param2, param3) {
-  var _this, params;
+Http.prototype.patch = function (param1, param2) {
+  var opts, params, callback;
 
-  _this = this;
-  params = this._initRequestParams(param1, param2, param3);
+  params = this._buildParams(param1, param2);
+  opts = params.opts;
+  callback = params.callback;
 
-  this._request.patch(params.uri, params.options, function (err, res, body) {
-    _this._interceptResponse(err, res, body, params.callback);
-  });
+  this.request('patch', opts, callback);
 };
 
 /**
 * Delegate to request's `post` method
-* @param param1 First parameter (required) can be options object or URI string
-* @param param2 Second parameter can be options object or callback
-* @param param3 Third parameter callback method
 */
-Http.prototype.post = function (param1, param2, param3) {
-  var _this, params;
+Http.prototype.post = function (param1, param2) {
+  var opts, params, callback;
 
-  _this = this;
-  params = this._initRequestParams(param1, param2, param3);
+  params = this._buildParams(param1, param2);
+  opts = params.opts;
+  callback = params.callback;
 
-  this._request.post(params.uri, params.options, function (err, res, body) {
-    _this._interceptResponse(err, res, body, params.callback);
-  });
+  this.request('post', opts, callback);
 };
 
 /**
 * Delegate to request's `put` method
-* @param param1 First parameter (required) can be options object or URI string
-* @param param2 Second parameter can be options object or callback
-* @param param3 Third parameter callback method
 */
-Http.prototype.put = function (param1, param2, param3) {
-  var _this, params;
+Http.prototype.put = function (param1, param2) {
+  var opts, params, callback;
 
-  _this = this;
-  params = this._initRequestParams(param1, param2, param3);
+  params = this._buildParams(param1, param2);
+  opts = params.opts;
+  callback = params.callback;
 
-  this._request.put(params.uri, params.options, function (err, res, body) {
-    _this._interceptResponse(err, res, body, params.callback);
-  });
+  this.request('put', opts, callback);
 };
 
 /**
@@ -214,33 +208,6 @@ Http.prototype.put = function (param1, param2, param3) {
 */
 Http.prototype.getLog = function () {
   return this._log;
-};
-
-/**
-* Clones a Mikeal's request jar, it is cloned this way because of the hideous way request's jar
-* class is implemented
-* @return cookie jar clone
-* @static
-*/
-Http.cloneCookieJar = function (cookieJar) {
-  var newJar, cookieString, cookieStore, domains, domainPaths, cookieUrl;
-
-  newJar = request.jar();
-  cookieStore = cookieJar._jar.store.idx;
-  domains = _.keys(cookieStore);
-
-  _.each(domains, function (domain) {
-    domainPaths = _.keys(cookieStore[domain]);
-
-    _.each(domainPaths, function (domainPath) {
-      cookieUrl = 'http://' + domain + domainPath;
-      cookieString = cookieJar.getCookieString(cookieUrl);
-
-      newJar.setCookie(cookieString, cookieUrl);
-    });
-  });
-
-  return newJar;
 };
 
 module.exports = Http;

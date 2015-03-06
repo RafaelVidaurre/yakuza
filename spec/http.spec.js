@@ -4,7 +4,6 @@ var Http, chai, nock, request, sinon, sinonChai;
 
 nock = require('nock');
 Http = require('../http');
-request = require('request');
 sinonChai = require('sinon-chai');
 sinon = require('sinon');
 chai = require('chai');
@@ -23,14 +22,17 @@ describe('Http', function () {
   beforeEach(function () {
     body1 = 'Body1';
     headers1 = {
-      'Set-Cookie': 'a=1'
+      'Set-Cookie': 'a=1;',
+      'content-type': 'text/html'
     };
     body2 = 'Body2';
     headers2 = {
-      'Set-Cookie': 'b=2'
+      'Set-Cookie': 'b=2',
+      'content-type': 'text/html'
     };
     headersS1 = {
-      'Set-Cookie': 'c=3'
+      'Set-Cookie': 'c=3',
+      'content-type': 'text/html'
     };
 
     nock('http://www.1.com')
@@ -55,17 +57,17 @@ describe('Http', function () {
     it('should set default cookies if provided', function () {
       var jar, newHttp;
 
-      jar = request.jar();
+      jar = {
+        a: 1
+      };
+
       newHttp = new Http(jar);
 
       newHttp._cookieJar.should.be.eql(jar);
     });
 
     it('should set a new cookie jar if no cookies are provided', function () {
-      var jar;
-
-      jar = request.jar();
-      http._cookieJar.should.be.eql(jar);
+      http._cookieJar.should.be.eql({});
     });
 
     it('should start with an empty log', function () {
@@ -73,142 +75,117 @@ describe('Http', function () {
     });
   });
 
-  describe('Request delegators', function () {
-    var cb, opts, uri;
+  describe('request interception', function () {
+    it('should save request data in the log', function (done) {
+      var newHttp, log;
 
-    beforeEach(function () {
-      uri = 'http://www.1.com/';
-      opts = {a: 1};
-      cb = function () {};
+      newHttp = new Http({});
+      newHttp.get({url: 'http://www.1.com/', cookies: {test: 1}}, function (_err, res, body) {
+        log = newHttp.getLog();
+        log[0].request.cookies.should.contain('test=1');
+        log[0].request.url.should.eql('http://www.1.com/');
+        log[0].request.headers.should.eql(res.req._headers);
+        log[0].response.cookies.should.contain('a=1');
+        log[0].response.headers.should.eql(res.headers);
+        log[0].response.statusCode.should.eql(res.statusCode);
+        log[0].response.body.should.eql(body);
+
+        newHttp.get('http://www.2.com/', function (_err2, res2, bodyb) {
+          log = newHttp.getLog();
+          log[1].request.cookies.should.contain('test=1');
+          log[1].request.cookies.should.contain('a=1');
+          log[1].request.url.should.eql('http://www.2.com/');
+          log[1].request.headers.should.eql(res2.req._headers);
+          log[1].response.cookies.should.contain('b=2');
+          log[1].response.headers.should.eql(res2.headers);
+          log[1].response.statusCode.should.eql(res2.statusCode);
+          log[1].response.body.should.eql(bodyb);
+
+          newHttp.get({url: 'https://www.s1.com/', cookies: {test: 2}}, function (_err3, res3, body3) {
+            log = newHttp.getLog();
+            log[2].request.cookies.should.contain('test=2', 'a=1', 'b=2');
+            log[2].request.url.should.eql('https://www.s1.com/');
+            log[2].request.headers.should.eql(res3.req._headers);
+            log[2].response.cookies.should.contain('c=3');
+            log[2].response.headers.should.eql(res3.headers);
+            log[2].response.statusCode.should.eql(res3.statusCode);
+            log[2].response.body.should.eql(body3);
+            done();
+          });
+        });
+      });
+    });
+
+    it('should save cookies from requests in jar', function () {
+      var newHttp;
+
+      newHttp = new Http({});
+      newHttp.get('http://www.1.com/', function () {
+        newHttp.get('http://www.2.com', function () {
+          newHttp.getLog()[1].request.cookies.should.contain('a=1');
+        });
+      });
+    });
+  });
+
+  describe('request delegators', function () {
+    var requestMock;
+
+    describe('#get', function () {
+      it('should make the call', function (done) {
+        requestMock = nock('http://www.mock.com').get('/').times(1).reply(200);
+        http.get('http://www.mock.com/', function () {
+          requestMock.done();
+          done();
+        });
+      });
     });
 
     describe('#del', function () {
-      it('should call with correct parameters', function () {
-        sinon.spy(http._request, 'del');
-        http.del(uri, opts, cb);
-        http._request.del.getCall(0).args[0].should.equal(uri);
-        http._request.del.getCall(0).args[1].should.equal(opts);
-        http._request.del.getCall(0).args[2].should.be.a('function');
-      });
-    });
-
-    describe('#get', function () {
-      it('should call with correct parameters', function () {
-        sinon.spy(http._request, 'get');
-        http.get(uri, opts, cb);
-        http._request.get.getCall(0).args[0].should.equal(uri);
-        http._request.get.getCall(0).args[1].should.equal(opts);
-        http._request.get.getCall(0).args[2].should.be.a('function');
-      });
-    });
-
-    describe('#head', function () {
-      it('should call with correct parameters', function () {
-        sinon.spy(http._request, 'head');
-        http.head(uri, opts, cb);
-        http._request.head.getCall(0).args[0].should.equal(uri);
-        http._request.head.getCall(0).args[1].should.equal(opts);
-        http._request.head.getCall(0).args[2].should.be.a('function');
-      });
-    });
-
-    describe('#patch', function () {
-      it('should call with correct parameters', function () {
-        sinon.spy(http._request, 'patch');
-        http.patch(uri, opts, cb);
-        http._request.patch.getCall(0).args[0].should.equal(uri);
-        http._request.patch.getCall(0).args[1].should.equal(opts);
-        http._request.patch.getCall(0).args[2].should.be.a('function');
-      });
-    });
-
-    describe('#post', function () {
-      it('should call with correct parameters', function () {
-        sinon.spy(http._request, 'post');
-        http.post(uri, opts, cb);
-        http._request.post.getCall(0).args[0].should.equal(uri);
-        http._request.post.getCall(0).args[1].should.equal(opts);
-        http._request.post.getCall(0).args[2].should.be.a('function');
+      it('should make the call', function (done) {
+        requestMock = nock('http://www.mock.com').delete('/').times(1).reply(200);
+        http.del('http://www.mock.com/', function () {
+          requestMock.done();
+          done();
+        });
       });
     });
 
     describe('#put', function () {
-      it('should call with correct parameters', function () {
-        sinon.spy(http._request, 'put');
-        http.put(uri, opts, cb);
-        http._request.put.getCall(0).args[0].should.equal(uri);
-        http._request.put.getCall(0).args[1].should.equal(opts);
-        http._request.put.getCall(0).args[2].should.be.a('function');
+      it('should make the call', function (done) {
+        requestMock = nock('http://www.mock.com').put('/').times(1).reply(200);
+        http.put('http://www.mock.com/', function () {
+          requestMock.done();
+          done();
+        });
       });
     });
 
-    describe('request interception', function () {
-      it('should save request data in the log', function (done) {
-        var newHttp, log;
-
-        newHttp = new Http(request.jar());
-
-        newHttp.get('http://www.1.com/', function (_err, res) {
-          log = newHttp.getLog();
-          log[0].cookies.should.eql('a=1');
-          log[0].url.should.eql('http://www.1.com/');
-          log[0].response.should.eql(res);
-          log[0].request.should.eql(res.request);
-
-          newHttp.get('http://www.2.com/', function (_err2, res2) {
-            log[0].cookies.should.eql('a=1');
-            log[1].cookies.should.eql('b=2');
-            log[0].url.should.eql('http://www.1.com/');
-            log[1].url.should.eql('http://www.2.com/');
-            log[0].response.should.eql(res);
-            log[1].response.should.eql(res2);
-            log[0].request.should.eql(res.request);
-            log[1].request.should.eql(res2.request);
-
-            newHttp.get('https://www.s1.com/', function (_err3, res3) {
-              log[0].cookies.should.eql('a=1');
-              log[1].cookies.should.eql('b=2');
-              log[2].cookies.should.eql('c=3');
-              log[0].url.should.eql('http://www.1.com/');
-              log[1].url.should.eql('http://www.2.com/');
-              log[2].url.should.eql('https://www.s1.com/');
-              log[0].response.should.eql(res);
-              log[1].response.should.eql(res2);
-              log[2].response.should.eql(res3);
-              log[0].request.should.eql(res.request);
-              log[1].request.should.eql(res2.request);
-              log[2].request.should.eql(res3.request);
-              done();
-            });
-          });
-        });
-      });
-
-      it('should not fail on empty cookies', function (done) {
-        var newHttp = new Http();
-        newHttp.get('http://www.no-cookies.com', function () {
+    describe('#post', function () {
+      it('should make the call', function (done) {
+        requestMock = nock('http://www.mock.com').post('/').times(1).reply(200);
+        http.post('http://www.mock.com/', function () {
+          requestMock.done();
           done();
         });
       });
+    });
 
-      it('should not fail with a cloned jar', function (done) {
-        var clonedJar, newHttp;
-
-        clonedJar = Http.cloneCookieJar(request.jar());
-        newHttp = new Http(clonedJar);
-
-        newHttp.get('http://www.1.com', function () {
+    describe('#patch', function () {
+      it('should make the call', function (done) {
+        requestMock = nock('http://www.mock.com').patch('/').times(1).reply(200);
+        http.patch('http://www.mock.com/', function () {
+          requestMock.done();
           done();
         });
       });
+    });
 
-      it('should not fail with a request jar', function (done) {
-        var requestJar, newHttp;
-
-        requestJar = request.jar();
-        newHttp = new Http(requestJar);
-
-        newHttp.get('http://www.1.com', function () {
+    describe('#head', function () {
+      it('should make the call', function (done) {
+        requestMock = nock('http://www.mock.com').head('/').times(1).reply(200);
+        http.head('http://www.mock.com/', function () {
+          requestMock.done();
           done();
         });
       });
