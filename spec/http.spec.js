@@ -1,11 +1,12 @@
 'use strict';
 
-var Http, chai, nock, request, sinon, sinonChai;
 
+var Http, chai, nock, sinonChai, sinon;
+
+sinon = require('sinon');
+sinonChai = require('sinon-chai');
 nock = require('nock');
 Http = require('../http');
-sinonChai = require('sinon-chai');
-sinon = require('sinon');
 chai = require('chai');
 
 chai.should();
