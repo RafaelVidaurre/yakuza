@@ -1,48 +1,31 @@
 Yakuza
 ======
+Yakuza is a heavy-weight, highly-scalable framework for scraping projects.
+Wether you are building small to massive scrapers yakuza will keep your code under control
 
-Scraper
-=======
-Group of agents which achieve the same goals via different logic
+Installation
+------------
+`npm install yakuza`
 
-Agent
-=====
-Usually represents scraping logic for one particular website, inherits (but can override) its
-scraper's configuration
+Concepts
+========
+Yakuza introduces several concepts to help you build your scrapers
 
-TaskDefinition
-==============
-All agents per scraper should have the same amount of taskDefinitions, with the same `task_id`s,
-but each taskDefinition is different per agent
+Task
+----
+A task is the smallest unit in any scraper, it determines one specific goal for the scraper to
+achieve, such as **logging in** or **retrieving a list of articles**. Some task names examples:
+*getArticleList*, *getUserProfile*, *login*, *getLinks*.
 
-Builder
--------
-A builder defines the criteria by which a task is instanced. By default tasks have a builder where
-the task is only instanced once and with no parameters.
-By using `Task.builder()` you can override this default behaviour.
+Each task can run after another one, or in parallel, tasks can even be instanced multiple times for
+a single job to be performed. For example, if we wanted to create a scraper that comments random
+stuff in a blog which needed a logged in user to comment, then *login* should always run before a
+*createComment* task. Though maybe we want to create multiple comments for different blog posts at
+the same time. Yakuza allows us to do something like this:
 
-Hooks
------
-Hooks are callbacks that are executed at certain points of a Task's life. These are defined at
-definition level, can interrupt a Job's execution and modify a Task's returned data.
+1.- Login
+2.- Get list of blog posts
+3.- Comment random gibberish in all blog posts found in parallel.
 
-Job
-===
-A job is a set of tasks from a specific agent run with a specific set of parameters. Each instance
-is run only once and then disposed of.
-
-Event listeners
----------------
-Events listeners related to the Job, they cannot modify its execution and are read-only functions
-which are the main method of communication between the Job and the app using it.
-
-Execution Plan
-==============
-Represent an array of arrays of objects which hold a task_id and other configuration variables
-where each sub-array contains all tasks that can run in parallel (based on task config)
-
-
-
-// TODO: Tidy up
-parameters:
-  - selfSync: Self syncronous, doesn't run concurrently with itself
+The criteria which defines how a task is run and how many times it is instanced has to do with
+something called `builders`. But we will get into that later in this document.
