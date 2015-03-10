@@ -184,11 +184,59 @@ pattern matched and can be:
   - res: response object, contains all response and request details provided by [needle](https://github.com/tomas/needle)
   - body: body of the response as supported by [needle](https://github.com/tomas/needle)
 
+Each task **must** at some point call either `task.success` or `task.fail` for the scraper to work correctly. If both are called by the same task an error will be raised
 
+Some examples:
+```javascript
+var cheerio = require('cheerio');
 
+Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, params, http) {
+  http.get('www.foo.com', function (err, res, body) {
+    var $, articleLinks;
+    
+    if (err) {
+      task.fail(err, 'Request returned an error');
+      return; // we return so that the task stops running
+    }
+    
+    $ = cheerio.load(body);
+    
+    $('a.article').each(function ($article) {
+      articleLinks.push($article.attr('href'));
+    });
+    
+    task.success(articleLinks); // Successfully return all article links found
+  });
+});
+```
 
+Using parameters
 ```javascript
 Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, params, http) {
-
+  var username, password, opts;
+  
+  username = params.username;
+  password = params.password;
+  opts = {
+    url: 'http://www.loginexample.com',
+    data: {
+      username: username,
+      pass: password
+    }
+  };
+  
+  http.post(opts, function (err, res, body) {
+    if (err) {
+      task.fail(err, 'Error in request');
+      return;
+    }
+    
+    if (body === 'logged in') {
+      task.success('loggedIn');
+      return;
+    }
+    
+    task.success('wrongPassword'); // Still not an error though, we correctly detected password was wrong
+  });
 });
 ```
