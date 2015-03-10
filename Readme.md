@@ -23,9 +23,9 @@ stuff in a blog which needed a logged in user to comment, then *login* should al
 *createComment* task. Though maybe we want to create multiple comments for different blog posts at
 the same time. Yakuza allows us to do something like this:
 
-1.- Login
-2.- Get list of blog posts
-3.- Comment random gibberish in all blog posts found in parallel.
+1. Login
+2. Get list of blog posts
+3. Comment random gibberish in all blog posts found in parallel.
 
 The criteria which defines how a task is run and how many times it is instanced has to do with
 something called `builders`. But we will get into that later in this document.
