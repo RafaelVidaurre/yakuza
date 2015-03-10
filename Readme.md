@@ -212,7 +212,7 @@ Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, pa
 
 Using parameters
 ```javascript
-Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, params, http) {
+Yakuza.task('foo', 'loginExampleCom', 'login').main(function (task, params, http) {
   var username, password, opts;
   
   username = params.username;
@@ -240,3 +240,50 @@ Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, pa
   });
 });
 ```
+
+Jobs
+----
+Jobs are not part of the scraper structure itself but rather a product of it. Jobs are a one-time use you are giving to your scraper. Jobs can receive parameters which can later be passed all the way down to the tasks
+
+Creating a job:
+```javascript
+  // At this point our scrapers/agents/tasks are completely defined
+  
+  // Here we create a job that will use the agent 'techCrunch' from our 'articles' scraper
+  var job = Yakuza.job('articles', 'techCrunch');
+  
+  // .. At this point the job still doesn't know what to do. We can do either
+  // this:
+  job.enqueue('login`, `getArticlesList`);
+  // or if we had defined a `routine` we could do
+  job.routine('onlyArticlesList');
+```
+
+At this point the job is almost ready to run, just one thing is missing: `events`, we need some way to listen to what's happening inside our job so we can make use of the data retrieved and be able to react to errors.
+
+List of events:
+
+`job:success`: When the job finished successfully
+arguments:
+- `response`: For now this is undefined, this may in the future return statistics of the job or other useful data
+
+`job:finish`: When the job finished, wether by fail or success
+- `response`: Same as `job:success`
+
+`job:fail`: When the job failed
+arguments:
+- `response.task`: Instance of the task that failed
+- `response.error`: Error returned via `task.fail()`, (to get the stack use `response.error.stack`)
+- `response.requestLog`: Array of all requests and responses that lead to the failure
+
+`task:<taskName>:success`: When a task finishes successfuly
+- `response.task`: Instance of the task that succeeded
+- `response.data`: Data provided via the `task.success()` method
+
+`task:<taskName>:fail`: When a task finishes on fail
+- `response.task`: Instance of the task that failed
+- `response.error`: Error returned via `task.fail()`, (to get the stack use `response.error.stack`)
+- `response.requestLog`: Array of all requests and responses that lead to the failure
+
+Events support wildcards, meaning you can do things like: `task:*:fail` to listen to any task which fails or `job:*` to listen to all events about the job itself
+
