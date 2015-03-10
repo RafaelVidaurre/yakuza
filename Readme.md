@@ -116,3 +116,46 @@ Yakuza.agent('articles', 'techCrunch').setup(function (config) {
 });
 ```
 
+Agents also can define something called `routines` which define a set of tasks to be run. For example you could want to define three routines:
+**onlyArticlesList**, **onlyUsersList**, **usersListAndArticlesList**
+
+They would be defined like this:
+
+```javascript
+Yakuza.agent('articles', 'techCrunch').routine('onlyArticlesList', ['login', 'getArticlesList']);
+Yakuza.agent('articles', 'techCrunch').routine('onlyUsersList', ['login', 'getUsersList']);
+Yakuza.agent('articles', 'techCrunch').routine('usersListAndArticlesList', ['login', 'getUsersList', 'getArticlesList']);
+```
+
+Dont worry, routines will make more sense after we understand how to run a scraper
+
+
+Tasks
+-----
+Tasks are where you are going to spend most of your time. They hold the scraping logic and basically do all the dirty work.
+
+```javascript
+// Creating a task
+Yakuza.task('articles', 'techCrunch', 'getArticlesList');
+```
+
+Tasks have two important concepts, the `main` method, and the `builder`. First lets start with the builder, as we mentioned previously, the builder is a method which defines how a `task` will be instanced. Tasks come with a default builder which simply instances them once.
+
+The task being built will be instanced depending on what the builder method returns:
+- If it returns an array, it will instance the Task as many times as elements are present inside the array returned.
+- If it is not an array, it will instance the Task once.
+** Note that if an empty array is returned, the task will be skipped ** 
+
+Also, what is returned by the builder will be provided to the Task instances.
+
+A builder method is defined as follows (mind the name "job" in the method's parameter, as jobs will be explained right after this section):
+
+```javascript
+// Job is an accessor to some properties provided by the current job that is running
+Yakuza.task('articles', 'techCrunch', 'getArticlesList').builder(function (job) {
+  return [1, 2, 3]; // Instances the task three times, one with each number as parameter
+  return []; // Skips the task completely
+  return [{a: 1}, {a: 2}]; // Instances the task twice with each object as parameter
+  return true; // Instances the task once (this is the default)
+});
+```
