@@ -11,8 +11,8 @@ Concepts
 ========
 Yakuza introduces several concepts to help you build your scrapers
 
-Task
-----
+Tasks
+-----
 A task is the smallest unit in any scraper, it determines one specific goal for the scraper to
 achieve, such as **logging in** or **retrieving a list of articles**. Some task names examples:
 *getArticleList*, *getUserProfile*, *login*, *getLinks*.
@@ -29,3 +29,19 @@ the same time. Yakuza allows us to do something like this:
 
 The criteria which defines how a task is run and how many times it is instanced has to do with
 something called `builders`. But we will get into that later in this document.
+
+
+Agents
+------
+All tasks belong to an agent and it is the agent itself which determines the order in which tasks run and also how they run. Agents usually represent a website. So in the case we were scraping multiple blogs, some agent names could be *techCrunch* or *hackerNews*.
+
+All agents usually have the same tasks with different implementations, for example, both *techCrunch* and *hackerNews* will have a *getArticleList* task.
+
+Agents have a `plan` which determines which tasks will run in parallel and which will run sequentially. This is defined per agent as in some cases the syncrony required among tasks may vary depending on the website being scraped.
+
+
+Scrapers
+--------
+Scrapers hold `agents` together, in most projects you will have one scraper, as scrapers represent all the websites you will scrape and how you will scrape them (via its `agents` and their `tasks`).
+
+Following the previous example, we would create a scraper called *articles* which purpose is to scrape articles from different blog sites.
