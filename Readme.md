@@ -7,9 +7,9 @@ Installation
 ------------
 `npm install yakuza`
 
-Concepts
-========
-Yakuza introduces several concepts to help you build your scrapers
+Scraper structure
+=================
+Yakuza introduces several concepts to help you build your scraper's structure
 
 Tasks
 -----
@@ -45,3 +45,21 @@ Scrapers
 Scrapers hold `agents` together, in most projects you will have one scraper, as scrapers represent all the websites you will scrape and how you will scrape them (via its `agents` and their `tasks`).
 
 Following the previous example, we would create a scraper called *articles* which purpose is to scrape articles from different blog sites.
+
+Structure
+---------
+Summing up, the structure in which Yakuza works is as follows:
+
+- Scraper1
+  - Agent1
+    - Task1
+    - Task2
+  - Agent2
+    - Task1
+    - Task2
+- Scraper2
+  - Agent3
+    - Task3
+
+
+
