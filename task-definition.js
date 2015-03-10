@@ -82,6 +82,10 @@ TaskDefinition.prototype._build = function (builderParams, cookieJar, job) {
   return tasks;
 };
 
+/**
+* Applies the current task setup
+* @private
+*/
 TaskDefinition.prototype._applySetup = function () {
   if (this._applied) {
     return;
