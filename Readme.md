@@ -151,11 +151,44 @@ Also, what is returned by the builder will be provided to the Task instances.
 A builder method is defined as follows (mind the name "job" in the method's parameter, as jobs will be explained right after this section):
 
 ```javascript
-// Job is an accessor to some properties provided by the current job that is running
+// Job is an accessor to some properties provided by the current job running
 Yakuza.task('articles', 'techCrunch', 'getArticlesList').builder(function (job) {
   return [1, 2, 3]; // Instances the task three times, one with each number as parameter
   return []; // Skips the task completely
   return [{a: 1}, {a: 2}]; // Instances the task twice with each object as parameter
   return true; // Instances the task once (this is the default)
+});
+```
+
+The second and most important concept is the `main` method, which defines the scraping logic itself.
+The main method receives the following arguments:
+
+**task** has the following methods:
+- `success(data)` which marks the task successfull and emits a success event with the data passed to it
+- `fail(error, errorMessage)` which marks the task as failed, stops the current job and emits a fail event with the error object and error message passed
+
+**params** passes whatever value was used from the builder's response to instance this task.
+For example, if the builder returned `[1, 2, 3]` then three tasks would be instanced with params being the values `1`, `2` and `3` (one for each)
+
+**http** wrapper over [needle](https://github.com/tomas/needle) which is used for http requests. Other tools can be used instead of http, though it is recommended since it will log your requests improve errors emitted and provide you with some utilities that might be useful.
+It was the following utility methods:
+`getLog()`: Provides a log of the current requests made by the task instance
+`get`, `post`, `put`, `patch`, `head`: Generate http requests with the corresponding http verb, arguments are
+pattern matched and can be:
+- an options object: Which can have the same properties as [needle](https://github.com/tomas/needle) but also accepts:
+  - url: 'url to which the request should be made'
+  - data: 'data to be sent to the url (will be stringified in querystring format if called by `get` and will be used as form data if called by `post`
+- an url string: If and url is provided then no options should be passed.
+- callback: Callback method to be called when the request is finished, parameters received are:
+  - err: error object, `null` if no error is present
+  - res: response object, contains all response and request details provided by [needle](https://github.com/tomas/needle)
+  - body: body of the response as supported by [needle](https://github.com/tomas/needle)
+
+
+
+
+```javascript
+Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, params, http) {
+
 });
 ```
