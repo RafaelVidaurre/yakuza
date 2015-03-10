@@ -46,8 +46,8 @@ Scrapers hold `agents` together, in most projects you will have one scraper, as 
 
 Following the previous example, we would create a scraper called *articles* which purpose is to scrape articles from different blog sites.
 
-Structure
----------
+Structure summary
+-----------------
 Summing up, the structure in which Yakuza works is as follows:
 
 - Scraper1
@@ -61,5 +61,19 @@ Summing up, the structure in which Yakuza works is as follows:
   - Agent3
     - Task3
 
+
+API
+===
+Now lets get our hands dirty by looking at Yakuza's API
+
+Yakuza
+------
+To use Yakuza we must first require it in our code:
+
+```javascript
+var Yakuza = require('yakuza');
+```
+
+It is important to point out that Yakuza is a **singleton** and therefore all `requires` of Yakuza will point to the **same instance**. The idea behind this is to allow the developer to define file structure freely, wether it is one file for the whole project or multiple files for each task, agent and scraper used.
 
 
