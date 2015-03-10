@@ -76,4 +76,43 @@ var Yakuza = require('yakuza');
 
 It is important to point out that Yakuza is a **singleton** and therefore all `requires` of Yakuza will point to the **same instance**. The idea behind this is to allow the developer to define file structure freely, wether it is one file for the whole project or multiple files for each task, agent and scraper used.
 
+Scrapers
+--------
+The first step is to create a scraper, as all other pieces of our structure should be associated to one.
+
+```javascript
+Yakuza.scraper('articles');
+```
+
+Agents
+------
+We can now start creating our agents
+
+```javascript
+Yakuza.agent('articles', 'techCrunch');
+```
+
+Remember the `plan` property we mentioned before? Now is a good time to use that. The `plan` property is an array of task names, each element in the array runs after the previous one. If an array is placed inside the `plan` array, all tasks inside it will run in parallel.
+
+This plan runs `login`and `getArticlesList` sequentially:
+
+```javascript
+Yakuza.agent('articles', 'techCrunch').setup(function (config) {
+  config.plan = [
+    'login',
+    'getArticlesList'
+  ];
+});
+```
+
+This one runs `login` before the other tasks, but runs `getArticlesList` and `getUsersList` in parallel as they are in the same sub-array:
+
+```javascript
+Yakuza.agent('articles', 'techCrunch').setup(function (config) {
+  config.plan = [
+    'login',
+    ['getArticlesList', 'getUsersList']
+  ];
+});
+```
 
