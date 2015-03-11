@@ -412,6 +412,23 @@ Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData')
   });
 ```
 
+Running task instances sequentally
+----------------------------------
+Sometimes because of server limitations, we might want several instances of the same task. Take our previous example about articles were we instanced `getArticleData` multiple times. Lets say the server doesn't allow us to view multiple articles in parallel because god knows why. We would need to change the default behavior of task instances and run them one after the other.
+
+This can be achieved in the agent plan by changing the `selfSync` property:
+```javascript
+Yakuza.agent('articles', 'fooBlog').setup(function (config) {
+  config.plan = [
+    'getArticlesList',
+    {taskId: 'getArticleData', selfSync: true}
+  ];
+});
+```
+
+Saving cookies
+--------------
+
 
 Glossary
 ========
