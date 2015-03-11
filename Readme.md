@@ -289,8 +289,8 @@ arguments:
 Events support wildcards, meaning you can do things like: `task:*:fail` to listen to any task which fails or `job:*` to listen to all events about the job itself.
 
 
-Extras
-======
+Advanced
+========
 If you reached this section, then you should already be able to use Yakuza's basic features and create a working scraper.
 The following are other important features Yakuza provides which help you with more complex stuff in your scrapers.
 
@@ -428,7 +428,19 @@ Yakuza.agent('articles', 'fooBlog').setup(function (config) {
 
 Saving cookies
 --------------
+A lot of times we need to preserve cookies so that they exist for other tasks. This can be achieved by a method called `saveCookies()`.
 
+Example:
+```javascript
+Yakuza.task('scraper', 'agent', 'login').main(function (task, http, params) {
+  // .. Send a login form
+  task.saveCookies();
+  // .. Do more stuff
+  task.success('authorized');
+});
+```
+
+Any new task will now have its `http` object initialized with the cookies that were present at the time `saveCookies` was called. Notice that only task from the next **execution block** will be afected.
 
 Glossary
 ========
