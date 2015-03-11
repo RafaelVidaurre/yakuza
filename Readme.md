@@ -164,8 +164,9 @@ The second and most important concept is the `main` method, which defines the sc
 The main method receives the following arguments:
 
 **task** has the following methods:
-- `success(data)` which marks the task successfull and emits a success event with the data passed to it
-- `fail(error, errorMessage)` which marks the task as failed, stops the current job and emits a fail event with the error object and error message passed
+- `success(data)`: which marks the task successfull and emits a success event with the data passed to it
+- `fail(error, errorMessage)`: which marks the task as failed, stops the current job and emits a fail event with the error object and error message passed
+- `share(key, value [, options])`: Shares a value to tasks in the next execution block
 
 **params** passes whatever value was used from the builder's response to instance this task.
 For example, if the builder returned `[1, 2, 3]` then three tasks would be instanced with params being the values `1`, `2` and `3` (one for each)
@@ -243,7 +244,7 @@ Yakuza.task('foo', 'loginExampleCom', 'login').main(function (task, params, http
 
 Jobs
 ----
-Jobs are not part of the scraper structure itself but rather a product of it. Jobs are a one-time use you are giving to your scraper. Jobs can receive parameters which can later be passed all the way down to the tasks
+Jobs are not part of the scraper structure itself but rather a product of it. Jobs are a one-time use you are giving to your scraper, so each time you want to scrape, you create a job. Jobs can receive parameters which can later be passed all the way down to the tasks, thus customizing the task's behavior (explained in the extras section).
 
 Creating a job:
 ```javascript
@@ -285,5 +286,73 @@ arguments:
 - `response.error`: Error returned via `task.fail()`, (to get the stack use `response.error.stack`)
 - `response.requestLog`: Array of all requests and responses that lead to the failure
 
-Events support wildcards, meaning you can do things like: `task:*:fail` to listen to any task which fails or `job:*` to listen to all events about the job itself
+Events support wildcards, meaning you can do things like: `task:*:fail` to listen to any task which fails or `job:*` to listen to all events about the job itself.
 
+
+Extras
+======
+If you reached this section, then you should already be able to use Yakuza's basic features and create a working scraper.
+The following are other important features Yakuza provides which help you more complex stuff in your scrapers.
+
+Job parameters
+--------------
+Job parameters are specific information you want to pass to specific tasks in your code to customize their behaviour or allow them to work in a more generic fashion.
+
+Passing parameters to a job:
+```javascript
+  var job = Yakuza.job('someScraper', 'someAgent', {search: 'peanuts'});
+```
+
+Job parameters can now be passed to tasks via the builder method in the following way:
+```javascript
+Yakuza.task('someScraper', 'someAgent', 'searchTheNews')
+  .builder(function (job) {
+    return job.params.search; // Instances the task ONCE with params = 'peanuts'
+  })
+  .main(function (task, http, params) {
+    var opts = {
+      url: 'http://www.some-search-site.com',
+      data: {
+        search: params
+      }
+    };
+    
+    // The following request will be: GET http://www.some-search-site.com?search=peanuts
+    http.get(opts, function (err, res, body) {
+      // Do stuff ..
+      task.success(result);
+    });
+  });
+```
+
+Sharing between tasks
+---------------------
+Very frequently you need a certain task to access something from a previous task.
+Exposing values from a task:
+```javascripts
+Yakuza.task('articlesScraper', 'fooBlog', function (task, http, params) {
+  // ... Get list of articles from fooBlog here
+  task.share('articleUrlList', articleUrls); // Exposes retrieved list of article urls to the other tasks
+  // ... Do other stuff
+});
+```
+At this point, all tasks from the **next execution blocks** will have access to the values shared. 
+
+
+Glossary
+========
+
+Execution Block
+---------------
+An execution block is a set of tasks that run in parallel. For example, take the following plan:
+```javascript
+Yakuza.agent('scraper', 'agent').setup(function (config) {
+  config.plan = [
+    'task1', // Execution block 1
+    ['task2', 'task3'], // Execution block 2
+    'task4' // Execution block 3
+  ];
+});
+```
+Execution blocks run sequentially, meaning one execution block will only run when the previous block was run or **skipped**.
+\* Tasks are skipped if not `enqueued` or if their builders return empty arrays. Execution blocks are skipped if all tasks inside it are skipped aswel
