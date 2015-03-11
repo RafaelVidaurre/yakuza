@@ -22,7 +22,7 @@
     "spaced-line-comment": [1, "always"],
     "func-style": [2, "declaration"],
     "quote-props": [2, "as-needed"],
-    "camelcase": 0
+    "camelcase": 1
   },
   "env": {
     "node": true,

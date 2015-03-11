@@ -144,7 +144,7 @@ Tasks have two important concepts, the `main` method, and the `builder`. First l
 The task being built will be instanced depending on what the builder method returns:
 - If it returns an array, it will instance the Task as many times as elements are present inside the array returned.
 - If it is not an array, it will instance the Task once.
-** Note that if an empty array is returned, the task will be skipped ** 
+** Note that if an empty array is returned, the task will be skipped **
 
 Also, what is returned by the builder will be provided to the Task instances.
 
@@ -194,18 +194,18 @@ var cheerio = require('cheerio');
 Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, params, http) {
   http.get('www.foo.com', function (err, res, body) {
     var $, articleLinks;
-    
+
     if (err) {
       task.fail(err, 'Request returned an error');
       return; // we return so that the task stops running
     }
-    
+
     $ = cheerio.load(body);
-    
+
     $('a.article').each(function ($article) {
       articleLinks.push($article.attr('href'));
     });
-    
+
     task.success(articleLinks); // Successfully return all article links found
   });
 });
@@ -215,7 +215,7 @@ Using parameters
 ```javascript
 Yakuza.task('foo', 'loginExampleCom', 'login').main(function (task, params, http) {
   var username, password, opts;
-  
+
   username = params.username;
   password = params.password;
   opts = {
@@ -225,18 +225,18 @@ Yakuza.task('foo', 'loginExampleCom', 'login').main(function (task, params, http
       pass: password
     }
   };
-  
+
   http.post(opts, function (err, res, body) {
     if (err) {
       task.fail(err, 'Error in request');
       return;
     }
-    
+
     if (body === 'logged in') {
       task.success('loggedIn');
       return;
     }
-    
+
     task.success('wrongPassword'); // Still not an error though, we correctly detected password was wrong
   });
 });
@@ -249,10 +249,10 @@ Jobs are not part of the scraper structure itself but rather a product of it. Jo
 Creating a job:
 ```javascript
   // At this point our scrapers/agents/tasks are completely defined
-  
+
   // Here we create a job that will use the agent 'techCrunch' from our 'articles' scraper
   var job = Yakuza.job('articles', 'techCrunch');
-  
+
   // .. At this point the job still doesn't know what to do. We can do either
   // this:
   job.enqueue('login`, `getArticlesList`);
@@ -316,7 +316,7 @@ Yakuza.task('someScraper', 'someAgent', 'searchTheNews')
         search: params
       }
     };
-    
+
     // The following request will be: GET http://www.some-search-site.com?search=peanuts
     http.get(opts, function (err, res, body) {
       // Do stuff ..
@@ -343,7 +343,7 @@ You can access shared variables in your tasks' builders like this:
 Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData')
   .builder(function (job) {
     var urls = job.shared('getArticleUrls.articleUrlList'); // <task that shared the value>.<key of the value>
-    
+
     return urls; // Will instance the `getArticleData` task once for each url retrieved
   })
   .main(function (task, http, params) { // Here params = some article url
@@ -386,7 +386,7 @@ Yakuza.scraper('articlesScraper')
     if (current === undefined) {
       current = [];
     }
-    
+
     current.push(newValue);
     return current; // Shared value will always be an array
   });
@@ -462,3 +462,39 @@ Execution blocks run sequentially, meaning one execution block will only run whe
 \* Tasks are skipped if not `enqueued` or if their builders return empty arrays. Execution blocks are skipped if all tasks inside it are skipped as well.
 
 
+Contribution
+============
+At this time, Yakuza is in its early days, for this reason all contributions and issues are more than welcome, they are needed. Yakuza is a very ambitious project that requires a lot of real-life usage to understand how it can be improved.
+
+Becuase of the size of this project, maintainability is an important concern. For that reason these guidelines **must** be followed for a pull request to be merged:
+
+Branch structure
+----------------
+Each pull request will come in its own branch and with a specific naming convention.
+
+Existing branches:
+`main`: Only for production-ready releases, commits in this code **are** part of a release
+`development`: This is the branch you will target your pull requests to. It contains the latest changes that will probably be part of a new release but are not yet available to the public.
+
+Branch naming convention:
+`hotfix/<branch name>`: For hotfix pull-requests, basically any quick fixes
+`style/<branch name>`: For fixes in code styling, (make linters pass)
+`feature/<branch name>`: For feature pull-requests, these are bigger and should **only** contain changes regarding the feature implemented
+`bug/<branch name>`: For bug fixes
+
+Requisites for a PR to be accepted
+----------------------------------
+- If it is a feature, it should follow what we think will help Yakuza go forward, this means trully usefull features that will help more people, and not something that only helps your use case.
+** We recommend creating a discussion about your idea before actually coding**
+- All tests must pass. Add tests to whatever you add to the framework (See testing guidelines below).
+- Merge conflicts should be fixed on your end
+- Please note your PR may be on discussion for a while, don't worry if it is heading the right way it will make it to the master branch
+
+Testing
+-------
+To test Yakuza run the following command:
+`npm test` and make use all tests pass.
+
+We use [Mocha](http://mochajs.org/) for as our test runner and [Chai](http://chaijs.com/) as our assertion library.
+
+We use ESLint as our linter.
