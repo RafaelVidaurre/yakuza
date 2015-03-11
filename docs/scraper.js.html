@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: scraper.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: scraper.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* @author Rafael Vidaurre
+* @module Scraper
+* @requires Agent
+*/
+
+'use strict';
+
+var _, utils, Agent;
+
+_ = require('lodash');
+utils = require('./utils');
+Agent = require('./agent');
+
+/**
+* @class
+*/
+function Scraper () {
+  /**
+  * Determines if the setup processes have been applied
+  */
+  this._applied = false;
+
+  /**
+  * Array of callbacks provided via config() which set the Scraper's configuration variables
+  * @private
+  */
+  this._configCallbacks = [];
+
+  /**
+  * Contains all agents associated with this Scraper
+  * @private
+  */
+  this._agents = {};
+
+  /**
+  * Config object, contains configuration data and is exposed via the setup() method
+  * @private
+  */
+  this._config = {};
+
+  /**
+  * Object which contains scraper-wide routine definitions, routines are set via the routine()
+  * method
+  */
+  this._routines = {};
+
+  /**
+  * Share methods available at scraper-level
+  * @private
+  */
+  this._shareMethods = {
+    replace: function (current, next) {
+      return next;
+    }
+  };
+
+  // Define the default sharing method
+  this._shareMethods.default = this._shareMethods.replace;
+}
+
+/**
+* Creates a new agent
+* @param {string} agentId unique agent identifier
+* @private
+*/
+Scraper.prototype._createAgent = function (agentId) {
+  this._agents[agentId] = new Agent(agentId);
+  return this._agents[agentId];
+};
+
+/**
+* Run functions passed via config(), thus applying their config logic
+* @private
+*/
+Scraper.prototype._applyConfigCallbacks = function () {
+  var _this = this;
+  _.each(_this._configCallbacks, function (configCallback) {
+    configCallback(_this._config);
+  });
+};
+
+/**
+* Applies all necessary processes regarding the setup stage of the scraper
+* @private
+*/
+Scraper.prototype._applySetup = function () {
+  if (this._applied) {
+    return;
+  }
+  this._applyConfigCallbacks();
+  this._applied = true;
+};
+
+/**
+* Used to configure the scraper, it enqueues each configuration function meaning it
+* allows a scraper to be configured in multiple different places
+* @param {function} cbConfig function which will modify config parameters
+*/
+Scraper.prototype.setup = function (cbConfig) {
+  if (!_.isFunction(cbConfig)) {
+    throw new Error('Config argument must be a function');
+  }
+
+  this._configCallbacks.push(cbConfig);
+
+  return Scraper;
+};
+
+/**
+* Creates or gets an agent based on the id passed
+* @param {string} agentId Id of the agent to retrieve/create
+* @returns {Agent} agent to be retrieved/created
+*/
+Scraper.prototype.agent = function (agentId) {
+  var thisAgent, agentExists;
+
+  if (!agentId || !_.isString(agentId)) {
+    throw new Error('Agent id must be a non-empty string');
+  }
+
+  agentExists = utils.hasKey(this._agents, agentId);
+  thisAgent = agentExists ? this._agents[agentId] : this._createAgent(agentId);
+  return thisAgent;
+};
+
+/**
+* Creates a scraper-wide routine which will be available for all agents
+* @param {string} routineName name of the routine
+* @param {array} array of taskIds which the routine will include
+*/
+Scraper.prototype.routine = function (routineName, taskIds) {
+  if (!_.isArray(taskIds)) {
+    throw new Error('An array of task Ids must be passed to the routine method');
+  }
+
+  if (!_.isString(routineName)) {
+    throw new Error('Routine name must be a string');
+  }
+
+  this._routines[routineName] = taskIds;
+
+  return this;
+};
+
+/**
+* Adds a new scraper-level share method, it will override framework-level methods
+* @params {string} methodName name of the share method
+* @params {string} shareFunction
+*/
+Scraper.prototype.addShareMethod = function (methodName, shareFunction) {
+  if (!_.isString(methodName)) {
+    throw new Error('Share method name must be a string');
+  }
+
+  if (!_.isFunction(shareFunction)) {
+    throw new Error('Share method must be a function')
+  }
+
+  this._shareMethods[methodName] = shareFunction;
+};
+
+module.exports = Scraper;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Agent.html">Agent</a></li><li><a href="module-Http.html">Http</a></li><li><a href="module-Job.html">Job</a></li><li><a href="module-Options.html">Options</a></li><li><a href="module-Scraper.html">Scraper</a></li><li><a href="module-Task.html">Task</a></li><li><a href="module-TaskDefinition.html">TaskDefinition</a></li><li><a href="module-Utils.html">Utils</a></li><li><a href="module-Yakuza.html">Yakuza</a></li><li><a href="module-YakuzaBase.html">YakuzaBase</a></li></ul><h3>Classes</h3><ul><li><a href="module-Agent-Agent.html">Agent</a></li><li><a href="module-Http-Http.html">Http</a></li><li><a href="module-Job-Job.html">Job</a></li><li><a href="module-Options-Options.html">Options</a></li><li><a href="module-Scraper-Scraper.html">Scraper</a></li><li><a href="module-TaskDefinition-TaskDefinition.html">TaskDefinition</a></li><li><a href="module-Task-Task.html">Task</a></li><li><a href="module-YakuzaBase-YakuzaBase.html">YakuzaBase</a></li></ul><h3>Global</h3><ul><li><a href="global.html#defaults">defaults</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta2</a> on Wed Mar 11 2015 18:10:11 GMT-0300 (CLST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

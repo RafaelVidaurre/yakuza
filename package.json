@@ -4,7 +4,8 @@
   "description": "",
   "main": "yakuza.js",
   "scripts": {
-    "test": "mocha spec"
+    "test": "mocha spec",
+    "jsdoc": "./node_modules/.bin/jsdoc . -c ./jsdocconfig.json"
   },
   "keywords": [
     "scraping",
