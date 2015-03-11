@@ -9,7 +9,7 @@ Installation
 
 Looking for the docs?
 ---------------------
-[Documentation](http://narzerus.github.io/)
+[Documentation](http://narzerus.github.io/yakuza)
 
 Scraper structure
 =================
