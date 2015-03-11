@@ -4,7 +4,8 @@
   "description": "",
   "main": "yakuza.js",
   "scripts": {
-    "test": "mocha spec"
+    "test": "mocha spec",
+    "docs": "./node_modules/.bin/jsdoc . -c ./jsdocconfig.json"
   },
   "keywords": [
     "scraping",
@@ -23,9 +24,7 @@
   },
   "devDependencies": {
     "chai": "^2.1.0",
-    "grunt": "^0.4.5",
-    "grunt-jsdoc": "^0.5.7",
-    "jasmine-node": "^1.14.5",
+    "jsdoc": "^3.3.0-beta2",
     "nock": "^1.0.0",
     "should": "^5.0.1",
     "sinon": "^1.12.2",

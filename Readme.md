@@ -481,6 +481,7 @@ Branch naming convention:
 `style/<branch name>`: For fixes in code styling, (make linters pass)
 `feature/<branch name>`: For feature pull-requests, these are bigger and should **only** contain changes regarding the feature implemented
 `bug/<branch name>`: For bug fixes
+`refactor/<branch name>`: For repo improvements and refactoring in general
 
 Requisites for a PR to be accepted
 ----------------------------------
