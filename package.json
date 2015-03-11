@@ -23,9 +23,6 @@
   },
   "devDependencies": {
     "chai": "^2.1.0",
-    "grunt": "^0.4.5",
-    "grunt-jsdoc": "^0.5.7",
-    "jasmine-node": "^1.14.5",
     "nock": "^1.0.0",
     "should": "^5.0.1",
     "sinon": "^1.12.2",
