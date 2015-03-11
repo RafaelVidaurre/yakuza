@@ -490,6 +490,10 @@ Requisites for a PR to be accepted
 - Merge conflicts should be fixed on your end
 - Please note your PR may be on discussion for a while, don't worry if it is heading the right way it will make it to the master branch
 
+JSDocs
+------
+JSDocs should be added for any new methods/classes you add to Yakuza.
+
 Testing
 -------
 To test Yakuza run the following command:
