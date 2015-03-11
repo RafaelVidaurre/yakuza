@@ -329,7 +329,7 @@ Sharing between tasks
 ---------------------
 Very frequently you need a certain task to access something from a previous task.
 Exposing values from a task:
-```javascripts
+```javascript
 Yakuza.task('articlesScraper', 'fooBlog', 'getArticleUrls', function (task, http, params) {
   // ... Get list of articles from fooBlog here
   task.share('articleUrlList', articleUrls); // Exposes retrieved list of article urls to the other tasks
