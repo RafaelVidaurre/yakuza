@@ -1,5 +1,5 @@
 node_modules
 .DS_STORE
-doc
+docs
 test.js
 lint-test.js
