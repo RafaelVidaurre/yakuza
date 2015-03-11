@@ -292,7 +292,7 @@ Events support wildcards, meaning you can do things like: `task:*:fail` to liste
 Extras
 ======
 If you reached this section, then you should already be able to use Yakuza's basic features and create a working scraper.
-The following are other important features Yakuza provides which help you more complex stuff in your scrapers.
+The following are other important features Yakuza provides which help you with more complex stuff in your scrapers.
 
 Job parameters
 --------------
@@ -330,13 +330,87 @@ Sharing between tasks
 Very frequently you need a certain task to access something from a previous task.
 Exposing values from a task:
 ```javascripts
-Yakuza.task('articlesScraper', 'fooBlog', function (task, http, params) {
+Yakuza.task('articlesScraper', 'fooBlog', 'getArticleUrls', function (task, http, params) {
   // ... Get list of articles from fooBlog here
   task.share('articleUrlList', articleUrls); // Exposes retrieved list of article urls to the other tasks
   // ... Do other stuff
 });
 ```
-At this point, all tasks from the **next execution blocks** will have access to the values shared. 
+At this point, all tasks from the next **execution blocks** will have access to the values shared. Tasks from the same **execution block** will not be able to access the variables since they run in parallel and it is uncertain if the value has been shared or not. So, if you need a value shared by a certain task, put that task in an earlier **execution block**.
+
+You can access shared variables in your tasks' builders like this:
+```javascript
+Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData')
+  .builder(function (job) {
+    var urls = job.shared('getArticleUrls.articleUrlList'); // <task that shared the value>.<key of the value>
+    
+    return urls; // Will instance the `getArticleData` task once for each url retrieved
+  })
+  .main(function (task, http, params) { // Here params = some article url
+    // ... Scrape article urls to get article data
+    task.success(data); // emit data to the outside
+  });
+```
+
+in the previous example we are instancing the `getArticleData` task once per url we got, and all of these are run in parallel. The only problem with this is that we will recieve one `task:getArticleData:success` event per instance, meaning we would have to join all the results in an array as we would get them separately.
+
+This might not be ideal depending on our use case, so we should create another task returns all our results from our `getArticleData` instances in one array
+
+First, we have a little problem... What happens when we share a value on a key which is already used by another instance of the same task? Well, by default the value gets overwritten.
+Say a task shares some value to the key `foo`, and there are two instances, then we wouldn't know which is the final value because it depends on which task finished last:
+```javascript
+  // instance1: value equals 1
+  // instance2: value equals 2
+  task.share('foo', value);
+```
+
+To fix this we need to change the way in which values are being shared. This can be done by adding an `options` object to the `share()` method.
+
+Current properties accepted in the `share` method:
+
+**method**: Can be a string or a function. If a string then Yakuza will search for the sharing methods it knows about, if a function is given Yakuza will use it as the sharing method.
+pre-built sharing methods *(More pre-built methods pending)*:
+  - `replace` (default): Replaces previous value with new value
+
+To define reusable custom sharing methods, you can use the scraper's `addShareMethod` which receives:
+- `methodName`: Name of your sharing method (the one you use in the `method` property in your `options` object)
+- `shareFunction`: The function which returns the new value of the shared value. Arguments for it are:
+  - `currentValue`: Current value saved, (undefined if nothing has been shared yet.
+  - `newValue`: New value that has been shared
+
+An example on a custom sharing method which would allow us to join all urls in an array:
+```javascript
+Yakuza.scraper('articlesScraper')
+  .addShareMethod('joinInArray', function (currentValue, newValue) {
+    var current = currentValue;
+    if (current === undefined) {
+      current = [];
+    }
+    
+    current.push(newValue);
+    return current; // Shared value will always be an array
+  });
+```
+
+Now we should share our results with our new sharing logic
+```javascript
+Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData').main(function (task, http, params) {
+  // Do stuff and get article data
+  task.share('allArticles', articleData, {method: 'joinInArray'});
+  // ...
+});
+```
+Perfect, our articles are all now in one single shared value. We should now retrieve it with a tiny final task, lets call it `getJoinedArticles`
+
+```javascript
+Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData')
+  .builder(function (job) {
+    return job.shared('getArticleData.allArticles'); // Retrieve array of articles
+  })
+  .main(function (task, http, params) {
+    task.success(params); // Simply expose the data to the outside
+  });
+```
 
 
 Glossary
@@ -354,5 +428,8 @@ Yakuza.agent('scraper', 'agent').setup(function (config) {
   ];
 });
 ```
+
 Execution blocks run sequentially, meaning one execution block will only run when the previous block was run or **skipped**.
-\* Tasks are skipped if not `enqueued` or if their builders return empty arrays. Execution blocks are skipped if all tasks inside it are skipped aswel
+\* Tasks are skipped if not `enqueued` or if their builders return empty arrays. Execution blocks are skipped if all tasks inside it are skipped as well.
+
+
