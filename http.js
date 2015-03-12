@@ -6,14 +6,16 @@
 
 'use strict';
 
-var _, needle, defaults;
+var OptionsTemplate, _, needle, defaults;
 
 needle = require('needle');
 _ = require('lodash');
+OptionsTemplate = require('./options-template');
+
 defaults = {
   follow_max: 0,
-  user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like Gecko)' +
-    'Chrome/41.0.2272.76 Safari/537.36'
+  user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like '
+  + 'Gecko) Chrome/41.0.2272.76 Safari/537.36'
 };
 
 needle.defaults(defaults);
@@ -224,6 +226,14 @@ Http.prototype.getLog = function () {
 */
 Http.prototype.getCookieJar = function () {
   return _.cloneDeep(this._cookieJar);
+};
+
+/**
+* Return a new options template instace
+* @param {object} POJO with base options
+*/
+Http.prototype.optionsTemplate = function (baseOptions) {
+  return new OptionsTemplate(baseOptions);
 };
 
 module.exports = Http;
