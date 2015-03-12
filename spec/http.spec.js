@@ -1,9 +1,9 @@
 'use strict';
 
 
-var Http, chai, nock, sinonChai, sinon;
+var Http, chai, nock, sinonChai;
 
-sinon = require('sinon');
+require('sinon');
 sinonChai = require('sinon-chai');
 nock = require('nock');
 Http = require('../http');
