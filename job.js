@@ -5,16 +5,13 @@
 
 'use strict';
 
-var CookieJar, Events, Http, Q, _, request, tough, utils;
+var Events, Http, Q, _, utils;
 
 _ = require('lodash');
 Events = require('eventemitter2').EventEmitter2;
 Q = require('q');
 Http = require('./http');
 utils = require('./utils');
-tough = require('tough-cookie');
-request = require('request');
-CookieJar = tough.CookieJar;
 
 /**
 * @class
