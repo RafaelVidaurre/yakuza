@@ -16,6 +16,12 @@ function OptionsTemplate (options) {
   }
 }
 
+/**
+* Returns the current base object deeply extended (merged) by the extender, this does not modify
+* the base object
+* @param {object} Object whose properties will be added to the base object
+* @return {object} POJO created by extending base object with extender
+*/
 OptionsTemplate.prototype.build = function (extender) {
   var ext;
 
@@ -28,6 +34,10 @@ OptionsTemplate.prototype.build = function (extender) {
   return _.merge(this._options, ext);
 };
 
+/**
+* Replaces the base object of the template for a new one
+* @param {object} new base object to be used
+*/
 OptionsTemplate.prototype.reset = function (options) {
   this._options = options || {};
 
@@ -35,5 +45,6 @@ OptionsTemplate.prototype.reset = function (options) {
     throw new Error('Options template must be initialized with an object');
   }
 };
+
 
 module.exports = OptionsTemplate;
