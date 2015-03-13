@@ -1,11 +1,15 @@
 Yakuza
 ======
 Yakuza is a heavy-weight, highly-scalable framework for scraping projects.
-Wether you are building small to massive scrapers yakuza will keep your code under control
+Whether you are building small or massive scrapers, yakuza will keep your code clean, ordered and under control.
 
 Installation
 ------------
 `npm install yakuza`
+
+Looking for the docs?
+---------------------
+[Documentation](http://narzerus.github.io/yakuza)
 
 Scraper structure
 =================
@@ -13,38 +17,38 @@ Yakuza introduces several concepts to help you build your scraper's structure
 
 Tasks
 -----
-A task is the smallest unit in any scraper, it determines one specific goal for the scraper to
-achieve, such as **logging in** or **retrieving a list of articles**. Some task names examples:
+A task is the smallest unit in any scraper. It determines one specific goal for the scraper to
+achieve, such as **logging in** or **retrieving a list of articles**. Some task name examples:
 *getArticleList*, *getUserProfile*, *login*, *getLinks*.
 
-Each task can run after another one, or in parallel, tasks can even be instanced multiple times for
-a single job to be performed. For example, if we wanted to create a scraper that comments random
-stuff in a blog which needed a logged in user to comment, then *login* should always run before a
-*createComment* task. Though maybe we want to create multiple comments for different blog posts at
+Tasks can run one after the other or in parallel. Tasks can even be instanced multiple times for
+a single job to be performed. For example, if we want to create a scraper that comments random
+stuff in a blog which needs a logged in user to comment, then *login* should always run before a
+*createComment* task. Maybe we want to create multiple comments for different blog posts at
 the same time. Yakuza allows us to do something like this:
 
 1. Login
 2. Get list of blog posts
-3. Comment random gibberish in all blog posts found in parallel.
+3. Comment random gibberish in all blog posts found in parallel
 
 The criteria which defines how a task is run and how many times it is instanced has to do with
-something called `builders`. But we will get into that later in this document.
+something called `builders`. We will get into that later in this document.
 
 
 Agents
 ------
-All tasks belong to an agent and it is the agent itself which determines the order in which tasks run and also how they run. Agents usually represent a website. So in the case we were scraping multiple blogs, some agent names could be *techCrunch* or *hackerNews*.
+All tasks belong to an agent and it is the agent itself that determines the order in which tasks run and how they run. An agent usually represents a website, so in the case where we were scraping multiple blogs, the agent names could be *techCrunch* or *hackerNews*.
 
-All agents usually have the same tasks with different implementations, for example, both *techCrunch* and *hackerNews* will have a *getArticleList* task.
+All agents usually have the same tasks with different implementations per agent. For example, both *techCrunch* and *hackerNews* will have a *getArticleList* task.
 
-Agents have a `plan` which determines which tasks will run in parallel and which will run sequentially. This is defined per agent as in some cases the syncrony required among tasks may vary depending on the website being scraped.
+Agents have a `plan` which determines which tasks will run in parallel and which will run sequentially. This is defined per agent as in some cases the synchrony required between tasks may vary depending on the website being scraped.
 
 
 Scrapers
 --------
-Scrapers hold `agents` together, in most projects you will have one scraper, as scrapers represent all the websites you will scrape and how you will scrape them (via its `agents` and their `tasks`).
+Scrapers hold `agents` together. In most projects you will have one scraper, since a scraper represents all the websites you will scrape and how you will scrape them (via its `agents` and their `tasks`).
 
-Following the previous example, we would create a scraper called *articles* which purpose is to scrape articles from different blog sites.
+Following the previous example, we would create a scraper called *articles* whose purpose is to scrape articles from different blog sites.
 
 Structure summary
 -----------------
@@ -64,7 +68,7 @@ Summing up, the structure in which Yakuza works is as follows:
 
 API
 ===
-Now lets get our hands dirty by looking at Yakuza's API
+Let's get our hands dirty by looking at Yakuza's API
 
 Yakuza
 ------
@@ -74,7 +78,7 @@ To use Yakuza we must first require it in our code:
 var Yakuza = require('yakuza');
 ```
 
-It is important to point out that Yakuza is a **singleton** and therefore all `requires` of Yakuza will point to the **same instance**. The idea behind this is to allow the developer to define file structure freely, wether it is one file for the whole project or multiple files for each task, agent and scraper used.
+It is important to point out that Yakuza is a **singleton** and therefore all `requires` of Yakuza will point to the **same instance**. The idea behind this is to allow the developer to define his file structure freely, whether it is one file for the whole project or multiple files for each task, agent and scraper used.
 
 Scrapers
 --------
@@ -92,7 +96,7 @@ We can now start creating our agents
 Yakuza.agent('articles', 'techCrunch');
 ```
 
-Remember the `plan` property we mentioned before? Now is a good time to use that. The `plan` property is an array of task names, each element in the array runs after the previous one. If an array is placed inside the `plan` array, all tasks inside it will run in parallel.
+Remember the `plan` property we mentioned before? Now is a good time to use that. The `plan` property is an array of task names. Each task in the array runs after the previous one. If an array is placed inside the `plan` array, all tasks inside it will run in parallel.
 
 This plan runs `login`and `getArticlesList` sequentially:
 
@@ -116,7 +120,7 @@ Yakuza.agent('articles', 'techCrunch').setup(function (config) {
 });
 ```
 
-Agents also can define something called `routines` which define a set of tasks to be run. For example you could want to define three routines:
+Agents can also define something called `routines` which in turn define a set of tasks to be run. For example you could want to define three routines:
 **onlyArticlesList**, **onlyUsersList**, **usersListAndArticlesList**
 
 They would be defined like this:
@@ -139,11 +143,11 @@ Tasks are where you are going to spend most of your time. They hold the scraping
 Yakuza.task('articles', 'techCrunch', 'getArticlesList');
 ```
 
-Tasks have two important concepts, the `main` method, and the `builder`. First lets start with the builder, as we mentioned previously, the builder is a method which defines how a `task` will be instanced. Tasks come with a default builder which simply instances them once.
+Tasks have two important concepts: the `main` method, and the `builder`. First, let's start with the builder. As we mentioned previously, the builder is a method which defines how a `task` will be instanced. Tasks come with a default builder which simply instances them once.
 
 The task being built will be instanced depending on what the builder method returns:
-- If it returns an array, it will instance the Task as many times as elements are present inside the array returned.
-- If it is not an array, it will instance the Task once.
+- If it returns an array, it will instance the Task as many times as there are elements present inside the array.
+- If it returns anything other than an array, it will instance the Task once.
 ** Note that if an empty array is returned, the task will be skipped **
 
 Also, what is returned by the builder will be provided to the Task instances.
@@ -164,28 +168,28 @@ The second and most important concept is the `main` method, which defines the sc
 The main method receives the following arguments:
 
 **task** has the following methods:
-- `success(data)`: which marks the task successfull and emits a success event with the data passed to it
-- `fail(error, errorMessage)`: which marks the task as failed, stops the current job and emits a fail event with the error object and error message passed
-- `share(key, value [, options])`: Shares a value to tasks in the next execution block
+- `success(data)`: marks the task as successful and emits a success event with the data passed to it
+- `fail(error, errorMessage)`: marks the task as failed, stops the current job and emits a fail event with the error object and error message passed
+- `share(key, value, [options])`: shares a value to tasks in the next execution block
 
-**params** passes whatever value was used from the builder's response to instance this task.
+**params** passes whatever value was returned by the builder to instance this task
 For example, if the builder returned `[1, 2, 3]` then three tasks would be instanced with params being the values `1`, `2` and `3` (one for each)
 
-**http** wrapper over [needle](https://github.com/tomas/needle) which is used for http requests. Other tools can be used instead of http, though it is recommended since it will log your requests improve errors emitted and provide you with some utilities that might be useful.
-It was the following utility methods:
-`getLog()`: Provides a log of the current requests made by the task instance
-`get`, `post`, `put`, `patch`, `head`: Generate http requests with the corresponding http verb, arguments are
+**http** wrapper over [needle](https://github.com/tomas/needle) which is used for http requests. Other tools can be used instead of http, though it is recommended since it will log your requests, improve emitted errors and provide you with some utilities that might be useful.
+It has the following utility methods:
+`getLog()`: provides a log of the current requests made by the task instance
+`get`, `post`, `put`, `patch`, `head`: generate http requests with the corresponding http verb, arguments are
 pattern matched and can be:
-- an options object: Which can have the same properties as [needle](https://github.com/tomas/needle) but also accepts:
+- an options object: It can have the same properties as [needle](https://github.com/tomas/needle) but also accepts:
   - url: 'url to which the request should be made'
-  - data: 'data to be sent to the url (will be stringified in querystring format if called by `get` and will be used as form data if called by `post`
-- an url string: If and url is provided then no options should be passed.
+  - data: 'data to be sent to the url (will be stringified in querystring format if passed to `get` and will be used as form data if passed to `post`
+- an url string: If an url is provided then no options should be passed.
 - callback: Callback method to be called when the request is finished, parameters received are:
   - err: error object, `null` if no error is present
   - res: response object, contains all response and request details provided by [needle](https://github.com/tomas/needle)
   - body: body of the response as supported by [needle](https://github.com/tomas/needle)
 
-Each task **must** at some point call either `task.success` or `task.fail` for the scraper to work correctly. If both are called by the same task an error will be raised
+Each task **must** at some point call either `task.success` or `task.fail` for the scraper to work correctly. If both are called by the same task instance, an error will be raised
 
 Some examples:
 ```javascript
@@ -201,6 +205,8 @@ Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, pa
     }
 
     $ = cheerio.load(body);
+
+    articleLinks = [];
 
     $('a.article').each(function ($article) {
       articleLinks.push($article.attr('href'));
@@ -237,7 +243,7 @@ Yakuza.task('foo', 'loginExampleCom', 'login').main(function (task, params, http
       return;
     }
 
-    task.success('wrongPassword'); // Still not an error though, we correctly detected password was wrong
+    task.success('wrongPassword'); // Still not an error though, we correctly detected that the password was wrong
   });
 });
 ```
@@ -255,12 +261,12 @@ Creating a job:
 
   // .. At this point the job still doesn't know what to do. We can do either
   // this:
-  job.enqueue('login`, `getArticlesList`);
-  // or if we had defined a `routine` we could do
+  job.enqueue('login', 'getArticlesList');
+  // or if we had defined a routine we could do
   job.routine('onlyArticlesList');
 ```
 
-At this point the job is almost ready to run, just one thing is missing: `events`, we need some way to listen to what's happening inside our job so we can make use of the data retrieved and be able to react to errors.
+At this point the job is almost ready to run, just one thing is missing: `events`. We need some way to listen to what's happening inside our job so we can make use of the data retrieved and be able to react to errors.
 
 List of events:
 
@@ -268,14 +274,14 @@ List of events:
 arguments:
 - `response`: For now this is undefined, this may in the future return statistics of the job or other useful data
 
-`job:finish`: When the job finished, wether by fail or success
+`job:finish`: When the job finished, whether by fail or success
 - `response`: Same as `job:success`
 
 `job:fail`: When the job failed
 arguments:
 - `response.task`: Instance of the task that failed
-- `response.error`: Error returned via `task.fail()`, (to get the stack use `response.error.stack`)
-- `response.requestLog`: Array of all requests and responses that lead to the failure
+- `response.error`: Error returned via `task.fail()`, (to get the error stack trace, use `response.error.stack`)
+- `response.requestLog`: Array of all requests and responses that led to the failure
 
 `task:<taskName>:success`: When a task finishes successfuly
 - `response.task`: Instance of the task that succeeded
@@ -283,20 +289,20 @@ arguments:
 
 `task:<taskName>:fail`: When a task finishes on fail
 - `response.task`: Instance of the task that failed
-- `response.error`: Error returned via `task.fail()`, (to get the stack use `response.error.stack`)
-- `response.requestLog`: Array of all requests and responses that lead to the failure
+- `response.error`: Error returned via `task.fail()`, (to get the error stack trace, use `response.error.stack`)
+- `response.requestLog`: Array of all requests and responses that led to the failure
 
-Events support wildcards, meaning you can do things like: `task:*:fail` to listen to any task which fails or `job:*` to listen to all events about the job itself.
+Events support wildcards, meaning you can do things like: `task:*:fail` to listen to any task which fails or `job:*` to listen to all events concerning the job itself.
 
 
 Advanced
 ========
 If you reached this section, then you should already be able to use Yakuza's basic features and create a working scraper.
-The following are other important features Yakuza provides which help you with more complex stuff in your scrapers.
+The following are other important features Yakuza provides which will help you with more complex stuff in your scrapers.
 
 Job parameters
 --------------
-Job parameters are specific information you want to pass to specific tasks in your code to customize their behaviour or allow them to work in a more generic fashion.
+Job parameters are specific information you want to pass to certain tasks in your code to customize their behaviour or allow them to work in a more generic fashion.
 
 Passing parameters to a job:
 ```javascript
@@ -374,11 +380,11 @@ pre-built sharing methods *(More pre-built methods pending)*:
 
 To define reusable custom sharing methods, you can use the scraper's `addShareMethod` which receives:
 - `methodName`: Name of your sharing method (the one you use in the `method` property in your `options` object)
-- `shareFunction`: The function which returns the new value of the shared value. Arguments for it are:
-  - `currentValue`: Current value saved, (undefined if nothing has been shared yet.
-  - `newValue`: New value that has been shared
+- `shareFunction`: A function that returns the new value of the shared value. Arguments for it are:
+  - `currentValue`: Current value saved, (undefined if nothing has been shared yet)
+  - `newValue`: New value to be shared
 
-An example on a custom sharing method which would allow us to join all urls in an array:
+An example of a custom sharing method which would allow us to join all urls in an array:
 ```javascript
 Yakuza.scraper('articlesScraper')
   .addShareMethod('joinInArray', function (currentValue, newValue) {
@@ -400,7 +406,7 @@ Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData').main(function (task,
   // ...
 });
 ```
-Perfect, our articles are all now in one single shared value. We should now retrieve it with a tiny final task, lets call it `getJoinedArticles`
+Perfect, our articles are now all in one single shared value. We should now retrieve it with a tiny final task. Let's call it `getJoinedArticles`
 
 ```javascript
 Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData')
@@ -412,9 +418,9 @@ Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData')
   });
 ```
 
-Running task instances sequentally
+Running task instances sequentially
 ----------------------------------
-Sometimes because of server limitations, we might want several instances of the same task. Take our previous example about articles were we instanced `getArticleData` multiple times. Lets say the server doesn't allow us to view multiple articles in parallel because god knows why. We would need to change the default behavior of task instances and run them one after the other.
+Sometimes because of server limitations, we might want several instances of the same task to run sequentially. Take our previous example about articles, where we instanced `getArticleData` multiple times. Let's say the server doesn't allow us to view multiple articles in parallel because god knows why. We would need to change the default behavior of task instances and run them one after the other.
 
 This can be achieved in the agent plan by changing the `selfSync` property:
 ```javascript
@@ -440,7 +446,7 @@ Yakuza.task('scraper', 'agent', 'login').main(function (task, http, params) {
 });
 ```
 
-Any new task will now have its `http` object initialized with the cookies that were present at the time `saveCookies` was called. Notice that only task from the next **execution block** will be afected.
+Any new task will now have its `http` object initialized with the cookies that were present at the time `saveCookies` was called. Notice that only tasks from the next **execution block** will be afected.
 
 Glossary
 ========
@@ -464,16 +470,16 @@ Execution blocks run sequentially, meaning one execution block will only run whe
 
 Contribution
 ============
-At this time, Yakuza is in its early days, for this reason all contributions and issues are more than welcome, they are needed. Yakuza is a very ambitious project that requires a lot of real-life usage to understand how it can be improved.
+At this time, Yakuza is in its early days. For this reason all contributions and issues are more than welcome, they are needed. Yakuza is a very ambitious project that requires a lot of real-life usage to understand how it can be improved.
 
-Becuase of the size of this project, maintainability is an important concern. For that reason these guidelines **must** be followed for a pull request to be merged:
+Because of the size of this project, maintainability is an important concern. For that reason these guidelines **must** be followed for a pull request to be merged:
 
 Branch structure
 ----------------
 Each pull request will come in its own branch and with a specific naming convention.
 
 Existing branches:
-`main`: Only for production-ready releases, commits in this code **are** part of a release
+`master`: Only for production-ready releases, commits in this code **are** part of a release
 `development`: This is the branch you will target your pull requests to. It contains the latest changes that will probably be part of a new release but are not yet available to the public.
 
 Branch naming convention:
@@ -485,11 +491,11 @@ Branch naming convention:
 
 Requisites for a PR to be accepted
 ----------------------------------
-- If it is a feature, it should follow what we think will help Yakuza go forward, this means trully usefull features that will help more people, and not something that only helps your use case.
+- If it is a feature, it should follow what we think will help Yakuza go forward, this means truly useful features that will help more people, and not something that only helps your use case.
 ** We recommend creating a discussion about your idea before actually coding**
 - All tests must pass. Add tests to whatever you add to the framework (See testing guidelines below).
-- Merge conflicts should be fixed on your end
-- Please note your PR may be on discussion for a while, don't worry if it is heading the right way it will make it to the master branch
+- Merge conflicts should be fixed on your end.
+- Please note that your PR may be on discussion for a while, but don't worry: if it is heading the right way it will make it to the master branch.
 
 JSDocs
 ------
@@ -500,6 +506,7 @@ Testing
 To test Yakuza run the following command:
 `npm test` and make use all tests pass.
 
-We use [Mocha](http://mochajs.org/) for as our test runner and [Chai](http://chaijs.com/) as our assertion library.
+We use [Mocha](http://mochajs.org/) as our test runner and [Chai](http://chaijs.com/) as our assertion library.
 
 We use ESLint as our linter.
+
