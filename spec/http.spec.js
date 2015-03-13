@@ -1,12 +1,13 @@
 'use strict';
 
 
-var Http, chai, nock, sinonChai;
+var Http, OptionsTemplate, chai, nock, sinonChai;
 
 require('sinon');
+Http = require('../http');
+OptionsTemplate = require('../options-template');
 sinonChai = require('sinon-chai');
 nock = require('nock');
-Http = require('../http');
 chai = require('chai');
 
 chai.should();
@@ -210,6 +211,12 @@ describe('Http', function () {
           done();
         });
       });
+    });
+  });
+
+  describe('#optionsTemplate', function () {
+    it('should return an OptionsTemplate instance', function () {
+      http.optionsTemplate().should.be.instanceof(OptionsTemplate);
     });
   });
 });
