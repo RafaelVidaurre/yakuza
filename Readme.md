@@ -268,6 +268,8 @@ Creating a job:
 
 At this point the job is almost ready to run, just one thing is missing: `events`. We need some way to listen to what's happening inside our job so we can make use of the data retrieved and be able to react to errors.
 
+To listen to events you must use the `job.on` method.
+
 List of events:
 
 `job:success`: When the job finished successfully
@@ -294,6 +296,28 @@ arguments:
 
 Events support wildcards, meaning you can do things like: `task:*:fail` to listen to any task which fails or `job:*` to listen to all events concerning the job itself.
 
+An example:
+```javascript
+  var job = Yakuza.job('someScraper', 'someAgent');
+  
+  job.on('job:fail', function (response) {
+    // Handle job failure
+  });
+  
+  job.on('task:*:fail', function (response) {
+    console.log(response.task.taskId + ' failed!');
+  });
+  
+  job.on('task:*:success', function (response) {
+    // Handle all successful tasks
+  });
+  
+  job.on('task:login:fail', function (response) {
+    console.log('Failed to log in');
+  });
+  
+  // Enqueue tasks and run job
+```
 
 Advanced
 ========
