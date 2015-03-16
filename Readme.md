@@ -261,7 +261,9 @@ Creating a job:
 
   // .. At this point the job still doesn't know what to do. We can do either
   // this:
-  job.enqueue('login', 'getArticlesList');
+  job.enqueue('login').enqueue('getArticlesList');
+  // or this
+  job.enqueueTaskArray(['login', 'getArticlesList']);
   // or if we had defined a routine we could do
   job.routine('onlyArticlesList');
 ```
