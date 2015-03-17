@@ -294,6 +294,14 @@ arguments:
 
 Events support wildcards, meaning you can do things like: `task:*:fail` to listen to any task which fails or `job:*` to listen to all events concerning the job itself.
 
+Running a Job:
+
+To run the job simply use the job.run() method, please keep in mind jobs are not reusable.
+
+```javascript
+  job.run(); // Job will start running
+```
+
 
 Advanced
 ========
