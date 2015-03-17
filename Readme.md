@@ -195,7 +195,7 @@ Some examples:
 ```javascript
 var cheerio = require('cheerio');
 
-Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, params, http) {
+Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, http, params) {
   http.get('www.foo.com', function (err, res, body) {
     var $, articleLinks;
 
@@ -219,7 +219,7 @@ Yakuza.task('articles', 'techCrunch', 'getArticlesList').main(function (task, pa
 
 Using parameters
 ```javascript
-Yakuza.task('foo', 'loginExampleCom', 'login').main(function (task, params, http) {
+Yakuza.task('foo', 'loginExampleCom', 'login').main(function (task, http, params) {
   var username, password, opts;
 
   username = params.username;
