@@ -53,6 +53,10 @@ YakuzaBase.prototype._createScraper = function (scraperId) {
 YakuzaBase.prototype.scraper = function (scraperId) {
   var thisScraper, scraperExists;
 
+  if (!scraperId || !_.isString(scraperId)) {
+    throw new Error('Scraper id must be passed');
+  }
+
   scraperExists = utils.hasKey(this._scrapers, scraperId);
   thisScraper = scraperExists ? this._scrapers[scraperId] : this._createScraper(scraperId);
 
@@ -66,10 +70,18 @@ YakuzaBase.prototype.scraper = function (scraperId) {
 * @return {Agent} agent instance
 */
 YakuzaBase.prototype.agent = function (scraperId, agentId) {
+  if (!agentId || !_.isString(agentId)) {
+    throw new Error('Agent id must be passed');
+  }
+
   return this.scraper(scraperId).agent(agentId);
 };
 
 YakuzaBase.prototype.task = function (scraperId, agentId, taskId) {
+  if (!taskId || !_.isString(taskId)) {
+    throw new Error('Task id must be passed');
+  }
+
   return this.agent(scraperId, agentId).task(taskId);
 };
 
@@ -82,11 +94,11 @@ YakuzaBase.prototype.task = function (scraperId, agentId, taskId) {
 YakuzaBase.prototype.job = function (scraperId, agentId, params) {
   var newId, scraper, agent, newJob;
 
-  if (!scraperId) {
+  if (!scraperId || !_.isString(scraperId)) {
     throw new Error('Scraper id must be passed');
   }
 
-  if (!agentId) {
+  if (!agentId || !_.isString(agentId)) {
     throw new Error('Agent id must be passed');
   }
 
@@ -95,7 +107,17 @@ YakuzaBase.prototype.job = function (scraperId, agentId, params) {
   }
 
   scraper = this._scrapers[scraperId];
+
+  if (!scraper) {
+    throw new Error('Scraper ' + scraperId + ' doesn\'t exist');
+  }
+
   agent = scraper._agents[agentId];
+
+  if (!agent) {
+    throw new Error('Agent ' + agentId + ' doesn\'t exist in scraper ' + scraperId);
+  }
+
   newId = shortId.generate();
   newJob = new Job(newId, scraper, agent, params);
   this._jobs[newId] = newJob;

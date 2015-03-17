@@ -321,6 +321,14 @@ An example:
   // Enqueue tasks and run job
 ```
 
+Running a Job:
+To run the job simply use the job.run() method, please keep in mind jobs are not reusable.
+
+```javascript
+  job.run(); // Job will start running
+```
+
+
 Advanced
 ========
 If you reached this section, then you should already be able to use Yakuza's basic features and create a working scraper.
