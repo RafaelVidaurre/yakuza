@@ -3,6 +3,10 @@
   "version": "0.0.2",
   "description": "",
   "main": "yakuza.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Narzerus/yakuza.git"
+  },
   "scripts": {
     "test": "mocha spec",
     "docs": "./node_modules/.bin/jsdoc . -c ./jsdocconfig.json"
