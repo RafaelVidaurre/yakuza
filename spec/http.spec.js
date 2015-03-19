@@ -163,7 +163,7 @@ describe('Http', function () {
       });
 
       it('should return a promise', function () {
-        http.get('http://www.mock.com/').should.be.instanceof(Q);
+
       });
     });
 

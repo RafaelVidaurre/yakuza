@@ -6,11 +6,12 @@
 
 'use strict';
 
-var OptionsTemplate, _, needle, defaults;
+var OptionsTemplate, Q, _, needle, defaults;
 
+OptionsTemplate = require('./options-template');
+Q = require('q');
 needle = require('needle');
 _ = require('lodash');
-OptionsTemplate = require('./options-template');
 
 defaults = {
   follow_max: 0,
