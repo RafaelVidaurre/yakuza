@@ -48,8 +48,8 @@ function Http (defaultCookies) {
 * @param {function} callback Callback to be executed
 * @private
 */
-Http.prototype._interceptResponse = function (err, res, body, url, callback) {
-  var entry, resCookieString, _this, cb, noop;
+Http.prototype._interceptResponse = function (err, res, body, url, callback, makeRequest) {
+  var entry, resCookieString, _this, cb, noop, promiseResponse;
 
   _this = this;
   noop = function () {};
@@ -57,10 +57,16 @@ Http.prototype._interceptResponse = function (err, res, body, url, callback) {
 
   if (err) {
     callback(err, null, null);
+    makeRequest.reject(err);
     return;
   }
 
+  promiseResponse = {
+    res: res,
+    body: body
+  };
   resCookieString = '';
+
   _.each(res.cookies, function (value, key) {
     // Update our cookie jar
     _this._cookieJar[key] = value;
@@ -87,6 +93,7 @@ Http.prototype._interceptResponse = function (err, res, body, url, callback) {
   };
   this._pushToLog(entry);
   cb(err, res, body);
+  makeRequest.resolve(promiseResponse);
 };
 
 /**
@@ -116,9 +123,10 @@ Http.prototype._buildParams = function (param1, param2) {
 };
 
 Http.prototype.request = function (method, opts, callback) {
-  var _this, data, url, finalOpts;
+  var _this, data, url, finalOpts, makeRequest;
 
   _this = this;
+  makeRequest = Q.defer();
 
   if (!opts.url) {
     throw new Error('Url is not set');
@@ -131,8 +139,10 @@ Http.prototype.request = function (method, opts, callback) {
   finalOpts.cookies = _.extend(this._cookieJar, finalOpts.cookies);
 
   needle.request(method, url, data, finalOpts, function (err, res, body) {
-    _this._interceptResponse(err, res, body, opts.url, callback);
+    _this._interceptResponse(err, res, body, opts.url, callback, makeRequest);
   });
+
+  return makeRequest.promise;
 };
 
 /**
@@ -145,7 +155,7 @@ Http.prototype.del = function (param1, param2) {
   opts = params.opts;
   callback = params.callback;
 
-  this.request('delete', opts, callback);
+  return this.request('delete', opts, callback);
 };
 
 /**
@@ -158,7 +168,7 @@ Http.prototype.get = function (param1, param2) {
   opts = params.opts;
   callback = params.callback;
 
-  this.request('get', opts, callback);
+  return this.request('get', opts, callback);
 };
 
 /**
@@ -171,7 +181,7 @@ Http.prototype.head = function (param1, param2) {
   opts = params.opts;
   callback = params.callback;
 
-  this.request('head', opts, callback);
+  return this.request('head', opts, callback);
 };
 
 /**
@@ -184,7 +194,7 @@ Http.prototype.patch = function (param1, param2) {
   opts = params.opts;
   callback = params.callback;
 
-  this.request('patch', opts, callback);
+  return this.request('patch', opts, callback);
 };
 
 /**
@@ -197,7 +207,7 @@ Http.prototype.post = function (param1, param2) {
   opts = params.opts;
   callback = params.callback;
 
-  this.request('post', opts, callback);
+  return this.request('post', opts, callback);
 };
 
 /**
@@ -210,7 +220,7 @@ Http.prototype.put = function (param1, param2) {
   opts = params.opts;
   callback = params.callback;
 
-  this.request('put', opts, callback);
+  return this.request('put', opts, callback);
 };
 
 /**
