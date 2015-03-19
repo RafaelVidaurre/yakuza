@@ -161,6 +161,10 @@ describe('Http', function () {
           done();
         });
       });
+
+      it('should return a promise', function () {
+        http.get('http://www.mock.com/').should.be.instanceof(Q);
+      });
     });
 
     describe('#del', function () {
