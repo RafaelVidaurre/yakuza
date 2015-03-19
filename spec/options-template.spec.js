@@ -105,6 +105,14 @@ describe('OptionsTemplate', function () {
 
       objOne.should.not.equal(objTwo);
     });
+
+    it('should not modify base object', function () {
+      var template;
+
+      template = new OptionsTemplate();
+      template.build({a: '1'});
+      template.build().should.not.eql({a: '1'});
+    });
   });
 
   describe('#reset', function () {
