@@ -42,6 +42,7 @@ describe('Http', function () {
     nock('http://www.1.com')
       .delete('/').reply(200, body1, headers1)
       .get('/').reply(200, body1, headers1)
+      .get('/?foo=bar').reply(200, body1, headers1)
       .head('/').reply(200)
       .patch('/').reply(200, body1, headers1)
       .post('/').reply(200, body1, headers1)
@@ -84,11 +85,13 @@ describe('Http', function () {
       var newHttp, log;
 
       newHttp = new Http({});
-      newHttp.get({url: 'http://www.1.com/', cookies: {test: 1}}, function (_err, res, body) {
+      newHttp.get({url: 'http://www.1.com/', cookies: {test: 1}, data: {foo: 'bar'}},
+        function (_err, res, body) {
         log = newHttp.getLog();
         log[0].request.cookies.should.contain('test=1');
         log[0].request.url.should.eql('http://www.1.com/');
         log[0].request.headers.should.eql(res.req._headers);
+        log[0].request.data.should.eql({foo: 'bar'});
         log[0].response.cookies.should.contain('a=1');
         log[0].response.headers.should.eql(res.headers);
         log[0].response.statusCode.should.eql(res.statusCode);
