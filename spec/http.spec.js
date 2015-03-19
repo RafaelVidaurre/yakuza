@@ -1,17 +1,19 @@
 'use strict';
 
 
-var Http, OptionsTemplate, chai, nock, sinonChai;
+var Http, OptionsTemplate, chai, nock, sinonChai, chaiAsPromised;
 
 require('sinon');
 Http = require('../http');
 OptionsTemplate = require('../options-template');
 sinonChai = require('sinon-chai');
+chaiAsPromised = require('chai-as-promised');
 nock = require('nock');
 chai = require('chai');
 
 chai.should();
 chai.use(sinonChai);
+chai.use(chaiAsPromised);
 nock.disableNetConnect();
 
 describe('Http', function () {
@@ -162,8 +164,26 @@ describe('Http', function () {
         });
       });
 
-      it('should return a promise', function () {
+      it('should resolve the promise with res and body if request is successful', function (done) {
+        requestMock = nock('http://www.promise.com').get('/').times(1).reply(200, 'works!', {
+          'content-type': 'text/html'
+        });
+        http.get('http://www.promise.com/').then(function (response) {
+          response.should.have.property('res');
+          response.should.have.property('body');
+          response.body.should.eql('works!');
+          done();
+        }).done();
+      });
 
+      it('should reject the promise with an error if request was unsuccessful', function (done) {
+        requestMock = nock('http://www.errorpromise.com').get('/').times(1).reply(500);
+        http.get('http://www.promise.com/').then(function () {
+          throw new Error('Should not resolve this!');
+        }, function (error) {
+          error.should.be.instanceof(Error);
+          done();
+        }).done();
       });
     });
 

@@ -48,7 +48,7 @@ function Http (defaultCookies) {
 * @param {function} callback Callback to be executed
 * @private
 */
-Http.prototype._interceptResponse = function (err, res, body, url, callback, makeRequest) {
+Http.prototype._interceptResponse = function (err, res, body, url, makeRequest, callback) {
   var entry, resCookieString, _this, cb, noop, promiseResponse;
 
   _this = this;
@@ -56,7 +56,7 @@ Http.prototype._interceptResponse = function (err, res, body, url, callback, mak
   cb = callback || noop;
 
   if (err) {
-    callback(err, null, null);
+    cb(err, null, null);
     makeRequest.reject(err);
     return;
   }
@@ -139,7 +139,7 @@ Http.prototype.request = function (method, opts, callback) {
   finalOpts.cookies = _.extend(this._cookieJar, finalOpts.cookies);
 
   needle.request(method, url, data, finalOpts, function (err, res, body) {
-    _this._interceptResponse(err, res, body, opts.url, callback, makeRequest);
+    _this._interceptResponse(err, res, body, opts.url, makeRequest, callback);
   });
 
   return makeRequest.promise;
