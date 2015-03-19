@@ -218,5 +218,14 @@ describe('Http', function () {
     it('should return an OptionsTemplate instance', function () {
       http.optionsTemplate().should.be.instanceof(OptionsTemplate);
     });
+
+    it('should return a new OptionsTemplate instance each time it is called', function () {
+      var template1, template2;
+
+      template1 = http.optionsTemplate();
+      template2 = http.optionsTemplate();
+
+      template1.should.not.equal(template2);
+    });
   });
 });
