@@ -95,6 +95,24 @@ describe('OptionsTemplate', function () {
         }
       });
     });
+
+    it('should not pass the object by reference', function () {
+      var template, objOne, objTwo;
+
+      template = new OptionsTemplate();
+      objOne = template.build({a: '1'});
+      objTwo = template.build({b: '2'});
+
+      objOne.should.not.equal(objTwo);
+    });
+
+    it('should not modify base object', function () {
+      var template;
+
+      template = new OptionsTemplate();
+      template.build({a: '1'});
+      template.build().should.not.eql({a: '1'});
+    });
   });
 
   describe('#reset', function () {

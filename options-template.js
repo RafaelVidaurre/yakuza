@@ -31,7 +31,7 @@ OptionsTemplate.prototype.build = function (extender) {
     throw new Error('Extender must be an object');
   }
 
-  return _.merge(this._options, ext);
+  return _.merge(_.cloneDeep(this._options), ext);
 };
 
 /**

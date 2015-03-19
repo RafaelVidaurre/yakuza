@@ -188,7 +188,7 @@ pattern matched and can be:
   - err: error object, `null` if no error is present
   - res: response object, contains all response and request details provided by [needle](https://github.com/tomas/needle)
   - body: body of the response as supported by [needle](https://github.com/tomas/needle)
-
+The `http` object's request methods return a promise implemented with [Q](https://github.com/kriskowal/q)
 Each task **must** at some point call either `task.success` or `task.fail` for the scraper to work correctly. If both are called by the same task instance, an error will be raised
 
 Some examples:

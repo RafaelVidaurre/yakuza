@@ -1,11 +1,12 @@
 'use strict';
 
 
-var Http, OptionsTemplate, chai, nock, sinonChai, chaiAsPromised;
+var Http, OptionsTemplate, Q, chai, nock, sinonChai, chaiAsPromised;
 
 require('sinon');
 Http = require('../http');
 OptionsTemplate = require('../options-template');
+Q = require('q');
 sinonChai = require('sinon-chai');
 chaiAsPromised = require('chai-as-promised');
 nock = require('nock');
@@ -43,6 +44,8 @@ describe('Http', function () {
       .delete('/').reply(200, body1, headers1)
       .get('/').reply(200, body1, headers1)
       .get('/?foo=bar').reply(200, body1, headers1)
+      .get('/?foo=one').reply(200, body1, headers1)
+      .get('/?foo=two').reply(200, body1, headers1)
       .head('/').reply(200)
       .patch('/').reply(200, body1, headers1)
       .post('/').reply(200, body1, headers1)
@@ -121,6 +124,22 @@ describe('Http', function () {
           });
         });
       });
+    });
+
+    it('should not mix parallel requests', function (done) {
+      var newHttp, getOne, getTwo;
+
+      newHttp = new Http();
+      getOne = newHttp.get({url: 'http://www.1.com/', data: {foo: 'one'}});
+      getTwo = newHttp.get({url: 'http://www.1.com/', data: {foo: 'two'}});
+
+      Q.all([getOne, getTwo]).then(function () {
+        var log;
+        log = newHttp.getLog();
+        log[0].request.data.should.eql({foo: 'one'});
+        log[1].request.data.should.eql({foo: 'two'});
+        done();
+      }).done();
     });
 
     it('should save cookies from requests in jar', function () {
