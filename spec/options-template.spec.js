@@ -95,6 +95,16 @@ describe('OptionsTemplate', function () {
         }
       });
     });
+
+    it('should not pass the object by reference', function () {
+      var template, objOne, objTwo;
+
+      template = new OptionsTemplate();
+      objOne = template.build({a: '1'});
+      objTwo = template.build({b: '2'});
+
+      objOne.should.not.equal(objTwo);
+    });
   });
 
   describe('#reset', function () {
