@@ -38,7 +38,7 @@ function Scraper () {
   * Object which contains scraper-wide routine definitions, routines are set via the routine()
   * method
   */
-  this.__routines = {};
+  this._routines = {};
 
   /**
   * Share methods available at scraper-level
@@ -138,7 +138,7 @@ Scraper.prototype.routine = function (routineName, taskIds) {
     throw new Error('Routine name must be a string');
   }
 
-  this.__routines[routineName] = taskIds;
+  this._routines[routineName] = taskIds;
 
   return this;
 };

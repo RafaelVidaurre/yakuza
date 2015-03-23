@@ -155,9 +155,25 @@ describe('Job', function () {
         job.routine('FakeRoutine');
       }).should.throw();
     });
+
     it('should not throw if routine exists', function () {
       yakuza.agent('Scraper', 'Parallel').routine('RealRoutine', ['Task1', 'Task3']);
       job.routine('RealRoutine');
+    });
+
+    it('should use scraper routine if it doesn\'t exist for agent', function () {
+      yakuza.scraper('Scraper').routine('Foo', ['Task1', 'Task2']);
+      sinon.stub(job, 'enqueueTaskArray');
+      job.routine('Foo');
+      job.enqueueTaskArray.getCall(0).args[0].should.eql(['Task1', 'Task2']);
+    });
+
+    it('should use agent routine if defined', function () {
+      yakuza.scraper('Scraper').routine('Foo', ['Task1', 'Task2']);
+      yakuza.agent('Scraper', 'Parallel').routine('Foo', ['Task3']);
+      sinon.stub(job, 'enqueueTaskArray');
+      job.routine('Foo');
+      job.enqueueTaskArray.getCall(0).args[0].should.eql(['Task3']);
     });
   });
 
