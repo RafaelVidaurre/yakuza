@@ -21,16 +21,16 @@ beforeEach(function () {
 describe('Yakuza', function () {
   describe('#scraper', function () {
     it('should create a scraper if it doesn\'t exist', function () {
-      _.keys(yakuza._scrapers).length.should.eql(0);
+      _.keys(yakuza.__scrapers).length.should.eql(0);
       yakuza.scraper('scraper');
-      _.keys(yakuza._scrapers).length.should.eql(1);
+      _.keys(yakuza.__scrapers).length.should.eql(1);
     });
 
     it('should not create a scraper if it exists', function () {
       yakuza.scraper('scraper');
-      _.keys(yakuza._scrapers).length.should.eql(1);
+      _.keys(yakuza.__scrapers).length.should.eql(1);
       yakuza.scraper('scraper');
-      _.keys(yakuza._scrapers).length.should.eql(1);
+      _.keys(yakuza.__scrapers).length.should.eql(1);
     });
 
     it('should return a scraper', function () {
