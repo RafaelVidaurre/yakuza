@@ -21,38 +21,38 @@ function Agent (id) {
   /**
   * Determines wether the agent's config has been applied or not
   */
-  this._applied = false;
+  this.__applied = false;
 
   /**
   * List of functions which modify the Agent's configuration (provided by setup())
   * @private
   */
-  this._configCallbacks = [];
-
-  /**
-  * Formatted execution plan created based on the agent's config object
-  * @private
-  */
-  this._plan = null;
+  this.__configCallbacks = [];
 
   /**
   * Set of task instances for this agent
   * @private
   */
-  this._taskDefinitions = {};
+  this.__taskDefinitions = {};
 
   /**
   * Agent's configuration object (set by running all configCallback functions)
   * @private
   */
-  this._config = {
+  this.__config = {
     plan: []
   };
 
   /**
   * Routines defined at agent-level, these override scraper-level routines
+  * @private
   */
-  this._routines = {};
+  this.__routines = {};
+
+  /**
+  * Formatted execution plan created based on the agent's config object
+  */
+  this._plan = null;
 
   /**
   * Id by which an agent is identified
@@ -64,10 +64,10 @@ function Agent (id) {
 * Run functions passed via config(), thus applying their config logic
 * @private
 */
-Agent.prototype._applyConfigCallbacks = function () {
+Agent.prototype.__applyConfigCallbacks = function () {
   var _this = this;
-  _.each(_this._configCallbacks, function (configCallback) {
-    configCallback(_this._config);
+  _.each(_this.__configCallbacks, function (configCallback) {
+    configCallback(_this.__config);
   });
 };
 
@@ -75,19 +75,19 @@ Agent.prototype._applyConfigCallbacks = function () {
 * Turns every element in the execution plan into an array for type consistency
 * @private
 */
-Agent.prototype._formatPlan = function () {
+Agent.prototype.__formatPlan = function () {
   var _this, formattedPlan, currentGroup, formattedGroup, formattedTaskObj;
 
   _this = this;
   formattedPlan = [];
 
-  if (_this._config.plan.length <= 0) {
+  if (_this.__config.plan.length <= 0) {
     throw new Error('Agent ' + _this.id + ' has no execution plan, use the config object provided' +
       ' by the setup method to define an execution plan');
   }
 
   // Turn each tier into an array
-  _.each(this._config.plan, function (taskGroup) {
+  _.each(this.__config.plan, function (taskGroup) {
     currentGroup = _.isArray(taskGroup) ? taskGroup : [taskGroup];
     formattedGroup = [];
 
@@ -114,24 +114,23 @@ Agent.prototype._formatPlan = function () {
 * Applies all task definitions
 * @private
 */
-Agent.prototype._applyTaskDefinitions = function () {
-  _.each(this._taskDefinitions, function (taskDefinition) {
+Agent.prototype.__applyTaskDefinitions = function () {
+  _.each(this.__taskDefinitions, function (taskDefinition) {
     taskDefinition._applySetup();
   });
 };
 
 /**
 * Applies all necessary processes regarding the setup stage of the agent
-* @private
 */
 Agent.prototype._applySetup = function () {
-  if (this._applied) {
+  if (this.__applied) {
     return;
   }
-  this._applyConfigCallbacks();
-  this._applyTaskDefinitions();
-  this._formatPlan();
-  this._applied = true;
+  this.__applyConfigCallbacks();
+  this.__applyTaskDefinitions();
+  this.__formatPlan();
+  this.__applied = true;
 };
 
 /**
@@ -143,7 +142,7 @@ Agent.prototype.setup = function (cbConfig) {
     throw new Error('Setup argument must be a function');
   }
 
-  this._configCallbacks.push(cbConfig);
+  this.__configCallbacks.push(cbConfig);
 
   return this;
 };
@@ -155,11 +154,11 @@ Agent.prototype.setup = function (cbConfig) {
 * @return {TaskDefinition}
 */
 Agent.prototype.task = function (taskId) {
-  if (!utils.hasKey(this._taskDefinitions, taskId)) {
-    this._taskDefinitions[taskId] = new TaskDefinition(taskId);
+  if (!utils.hasKey(this.__taskDefinitions, taskId)) {
+    this.__taskDefinitions[taskId] = new TaskDefinition(taskId);
   }
 
-  return this._taskDefinitions[taskId];
+  return this.__taskDefinitions[taskId];
 };
 
 /**
@@ -176,7 +175,7 @@ Agent.prototype.routine = function (routineName, taskIds) {
     throw new Error('Routine name must be a string');
   }
 
-  this._routines[routineName] = taskIds;
+  this.__routines[routineName] = taskIds;
 
   return this;
 };
