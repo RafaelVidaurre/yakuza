@@ -277,20 +277,38 @@ describe('Job', function () {
       someJob = yakuza.job('Scraper', 'Parallel');
     });
 
-    it('should not run twice', function (done) {
-      var startCount;
+    describe('starting', function () {
+      it('should not run twice', function (done) {
+        var startCount;
 
-      startCount = 0;
-      someJob.on('job:start', function () {
-        startCount += 1;
+        startCount = 0;
+        someJob.on('job:start', function () {
+          startCount += 1;
+          someJob.run();
+        });
+        someJob.on('job:finish', function () {
+          startCount.should.eql(1);
+          done();
+        });
         someJob.run();
       });
-      someJob.on('job:finish', function () {
-        startCount.should.eql(1);
-        done();
-      });
 
-      someJob.run();
+      it('should throw if enqueued tasks are not defined', function () {
+        var invalidJob;
+
+        yakuza.agent('Scraper', 'InvalidAgent').setup(function (config) {
+          config.plan = [
+            'FakeTask'
+          ];
+        });
+
+        invalidJob = yakuza.job('Scraper', 'InvalidAgent');
+        invalidJob.enqueue('FakeTask');
+
+        (function () {
+          invalidJob.run();
+        }).should.throw('One or more enqueued tasks are not defined');
+      });
     });
   });
 });
