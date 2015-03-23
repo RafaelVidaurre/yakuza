@@ -18,19 +18,6 @@ _ = require('lodash');
 */
 
 function Task (taskId, main, params, defaultCookies, config, job) {
-
-  /** Id of the task's task definition */
-  this.taskId = taskId;
-
-  /** Time at which the task started running */
-  this.startTime = null;
-
-  /** Time at which the task finished running */
-  this.endTime = null;
-
-  /** Time the task spent running */
-  this.elapsedTime = null;
-
   /**
   * Configuration object
   * @private
@@ -68,19 +55,6 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   this.__main = main;
 
   /**
-  * Storage for the task instance, this saves data which is exposed explicitly via emitter.share()
-  * method and is later on provided in the _onSuccess method as an argument of the task's promise's
-  * resolve method
-  */
-  this._sharedStorage = {};
-
-  /**
-  * Promise which exposes Task's running state
-  * @private
-  */
-  this._runningPromise = this.__runningDeferred.promise;
-
-  /**
   * Request object for this task instance
   */
   this.__http = null;
@@ -88,8 +62,33 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   /**
   * Jar to be saved by the task, if defined it will be used in the next execution block if this task
   * finishes successfully
+  * @private
   */
   this.__savedJar = null;
+
+  /**
+  * Promise which exposes Task's running state
+  */
+  this._runningPromise = this.__runningDeferred.promise;
+
+  /**
+  * Storage for the task instance, this saves data which is exposed explicitly via emitter.share()
+  * method and is later on provided in the __onSuccess method as an argument of the task's promise's
+  * resolve method
+  */
+  this._sharedStorage = {};
+
+  /** Id of the task's task definition */
+  this.taskId = taskId;
+
+  /** Time at which the task started running */
+  this.startTime = null;
+
+  /** Time at which the task finished running */
+  this.endTime = null;
+
+  /** Time the task spent running */
+  this.elapsedTime = null;
 
 
   this.__http = defaultCookies ? new Http(defaultCookies) : new Http();
@@ -99,7 +98,7 @@ function Task (taskId, main, params, defaultCookies, config, job) {
 * Method run when the task finishes running even if errors ocurred
 * @private
 */
-Task.prototype._onFinish = function () {
+Task.prototype.__onFinish = function () {
   this.endTime = Date.now();
   this.elapsedTime = this.endTime - this.startTime;
 };
@@ -112,7 +111,7 @@ Task.prototype._onFinish = function () {
 * @param {object} options Object of options for sharing
 * @private
 */
-Task.prototype._onShare = function (key, value, options) {
+Task.prototype.__onShare = function (key, value, options) {
   var current, shareMethod, shareMethodFunction;
 
   if (options) {
@@ -150,7 +149,7 @@ Task.prototype._onShare = function (key, value, options) {
 * @param response Data retrieved by the task
 * @private
 */
-Task.prototype._onSuccess = function (data) {
+Task.prototype.__onSuccess = function (data) {
   var hookMessage, response, stopJob;
 
   stopJob = false;
@@ -175,7 +174,7 @@ Task.prototype._onSuccess = function (data) {
     this.__config.hooks.onSuccess(hookMessage);
   }
 
-  this._onFinish();
+  this.__onFinish();
 
   if (stopJob) {
     this.__runningDeferred.reject(response);
@@ -189,7 +188,7 @@ Task.prototype._onSuccess = function (data) {
 * note that the cookies ONLY get applied if the task finishes successfully
 * @private
 */
-Task.prototype._onSaveCookies = function () {
+Task.prototype.__onSaveCookies = function () {
   // TODO: Accept custom jar as parameter
   var jar;
 
@@ -204,7 +203,7 @@ Task.prototype._onSaveCookies = function () {
 * @param {string} message Message explaining what failed
 * @private
 */
-Task.prototype._onFail = function (error, message) {
+Task.prototype.__onFail = function (error, message) {
   var response;
 
   response = {
@@ -215,21 +214,20 @@ Task.prototype._onFail = function (error, message) {
     requestLog: this.__http.getLog()
   };
 
-  this._onFinish();
+  this.__onFinish();
   this.__runningDeferred.reject(response);
 };
 
 /**
 * Run this task's main method by providing it needed parameters. This is where the scraping spends
 * most of its time
-* @private
 */
 Task.prototype._run = function () {
   var emitter = {
-    success: this._onSuccess.bind(this),
-    fail: this._onFail.bind(this),
-    share: this._onShare.bind(this),
-    saveCookies: this._onSaveCookies.bind(this)
+    success: this.__onSuccess.bind(this),
+    fail: this.__onFail.bind(this),
+    share: this.__onShare.bind(this),
+    saveCookies: this.__onSaveCookies.bind(this)
   };
 
   this.startTime = Date.now();
