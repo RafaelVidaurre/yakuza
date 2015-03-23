@@ -40,7 +40,7 @@ function YakuzaBase () {
 * @return {Scraper} scraper created
 * @private
 */
-YakuzaBase.prototype._createScraper = function (scraperId) {
+YakuzaBase.prototype.__createScraper = function (scraperId) {
   this.__scrapers[scraperId] = new Scraper();
   return this.__scrapers[scraperId];
 };
@@ -58,7 +58,7 @@ YakuzaBase.prototype.scraper = function (scraperId) {
   }
 
   scraperExists = utils.hasKey(this.__scrapers, scraperId);
-  thisScraper = scraperExists ? this.__scrapers[scraperId] : this._createScraper(scraperId);
+  thisScraper = scraperExists ? this.__scrapers[scraperId] : this.__createScraper(scraperId);
 
   return thisScraper;
 };
