@@ -8,7 +8,7 @@
     "url": "https://github.com/Narzerus/yakuza.git"
   },
   "scripts": {
-    "test": "mocha spec",
+    "test": "istanbul cover _mocha -- spec",
     "docs": "./node_modules/.bin/jsdoc . -c ./jsdocconfig.json"
   },
   "keywords": [
