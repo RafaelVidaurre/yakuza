@@ -133,42 +133,42 @@ Http.prototype.request = function(method, opts, callback) {
 /**
 * Delegate to request's `del` method
 */
-Http.prototype.del = function (param1, param2) {
+Http.prototype.del = function (opts, callback) {
   return this.request('delete', opts, callback);
 };
 
 /**
 * Delegate to request's `get` method
 */
-Http.prototype.get = function (param1, param2) {
+Http.prototype.get = function (opts, callback) {
   return this.request('get', opts, callback);
 };
 
 /**
 * Delegate to request's `head` method
 */
-Http.prototype.head = function (param1, param2) {
+Http.prototype.head = function (opts, callback) {
   return this.request('head', opts, callback);
 };
 
 /**
 * Delegate to request's `patch` method
 */
-Http.prototype.patch = function (param1, param2) {
+Http.prototype.patch = function (opts, callback) {
   return this.request('patch', opts, callback);
 };
 
 /**
 * Delegate to request's `post` method
 */
-Http.prototype.post = function (param1, param2) {
+Http.prototype.post = function (opts, callback) {
   return this.request('post', opts, callback);
 };
 
 /**
 * Delegate to request's `put` method
 */
-Http.prototype.put = function (param1, param2) {
+Http.prototype.put = function (opts, callback) {
   return this.request('put', opts, callback);
 };
 
