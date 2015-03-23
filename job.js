@@ -477,6 +477,7 @@ Job.prototype.__onTaskFail = function (response) {
 * @private
 */
 Job.prototype.__onJobStart = function () {
+  this.__publicEvents.emit('job:start');
   this.__prepareRun();
   this.__applyNextExecutionBlock();
 };

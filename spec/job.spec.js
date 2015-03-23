@@ -34,6 +34,12 @@ beforeEach(function () {
   yakuza.task('Scraper', 'Parallel', 'Task4').main(function (task) {
     task.success(4);
   });
+
+  yakuza.task('Scraper', 'Delayed', 'Task1').main(function (task) {
+    setTimeout(function () {
+      task.success();
+    }, 30);
+  });
 });
 
 describe('Job', function () {
@@ -224,6 +230,19 @@ describe('Job', function () {
       });
     });
 
+    describe('job:start', function () {
+      it('should be called when the job starts', function (done) {
+        var successJob;
+
+        successJob = newYakuza.job('FooScraper', 'FooAgent');
+        successJob.enqueue('SuccessTask');
+        successJob.on('job:start', function () {
+          done();
+        });
+        successJob.run();
+      });
+    });
+
     describe('task:*:fail', function () {
       it('should be called if a task fails', function (done) {
         var failJob;
@@ -248,6 +267,30 @@ describe('Job', function () {
         });
         successJob.run();
       });
+    });
+  });
+
+  describe('#run', function () {
+    var someJob;
+
+    beforeEach(function () {
+      someJob = yakuza.job('Scraper', 'Parallel');
+    });
+
+    it('should not run twice', function (done) {
+      var startCount;
+
+      startCount = 0;
+      someJob.on('job:start', function () {
+        startCount += 1;
+        someJob.run();
+      });
+      someJob.on('job:finish', function () {
+        startCount.should.eql(1);
+        done();
+      });
+
+      someJob.run();
     });
   });
 });
