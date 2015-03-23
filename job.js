@@ -372,7 +372,6 @@ Job.prototype.__runExecutionBlock = function (executionBlock) {
     _this.__events.emit('eq:blockContinue');
 
   }, function (response) {
-    // FIXME: After this runs an exception is thrown by Q for some reason
     if (response.status === 'fail') {
       _this.__failJob(response);
     }
@@ -634,7 +633,6 @@ Job.prototype.__findInShared = function (query) {
   key = splitQuery[1];
 
   if (!taskId || !key) {
-    console.log('ERROR: The shared method key passed is invalid');
     throw new Error('The shared method key passed is invalid');
   }
 
@@ -646,6 +644,29 @@ Job.prototype.__findInShared = function (query) {
 
   return this._getShared(taskId, key);
 };
+
+/**
+* Check wether a task is present on the job's agent's plan
+* @param {string} taskId task id of the task
+* @returns {boolean} true if the task is in the plan
+*/
+Job.prototype.__taskIsInPlan = function (taskId) {
+  var tasks;
+
+  this.__applyComponents();
+
+  return _.some(this.__agent._plan, function (planBlock) {
+    tasks = utils.arrayify(planBlock);
+
+    return _.some(tasks, function (taskObject) {
+      var planTaskId;
+
+      planTaskId = _.isString(taskObject) ? taskObject : taskObject.taskId;
+      return planTaskId === taskId;
+    });
+  });
+};
+
 
 /**
 * Gets a shared value belonging to a specific task and key
@@ -673,25 +694,11 @@ Job.prototype._setShared = function (taskId, key, value) {
 };
 
 /**
-* Check wether a task is present on the job's agent's plan
-* @param {string} taskId task id of the task
-* @returns {boolean} true if the task is in the plan
+* Gets job's params
+* @return {object} job's params
 */
-Job.prototype.__taskIsInPlan = function (taskId) {
-  var tasks;
-
-  this.__applyComponents();
-
-  return _.some(this.__agent._plan, function (planBlock) {
-    tasks = utils.arrayify(planBlock);
-
-    return _.some(tasks, function (taskObject) {
-      var planTaskId;
-
-      planTaskId = _.isString(taskObject) ? taskObject : taskObject.taskId;
-      return planTaskId === taskId;
-    });
-  });
+Job.prototype._getParams = function () {
+  return this.__params;
 };
 
 /**
@@ -749,6 +756,8 @@ Job.prototype.enqueue = function (taskId) {
 * @param {string} routineName Name of the routine
 */
 Job.prototype.routine = function (routineName) {
+  // TODO: Agent routines could inherit their scraper's routine if they don't have one of their
+  // own thus avoiding checking the scraper routines here
   if (this.__agent._routines[routineName]) {
     this.enqueueTaskArray(this.__agent._routines[routineName]);
   } else if (this.__scraper._routines[routineName]) {

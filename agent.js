@@ -45,9 +45,8 @@ function Agent (id) {
 
   /**
   * Routines defined at agent-level, these override scraper-level routines
-  * @private
   */
-  this.__routines = {};
+  this._routines = {};
 
   /**
   * Formatted execution plan created based on the agent's config object
@@ -175,7 +174,7 @@ Agent.prototype.routine = function (routineName, taskIds) {
     throw new Error('Routine name must be a string');
   }
 
-  this.__routines[routineName] = taskIds;
+  this._routines[routineName] = taskIds;
 
   return this;
 };

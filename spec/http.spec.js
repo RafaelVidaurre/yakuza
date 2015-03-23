@@ -200,9 +200,7 @@ describe('Http', function () {
 
       it('should reject the promise with an error if request was unsuccessful', function (done) {
         requestMock = nock('http://www.errorpromise.com').get('/').times(1).reply(500);
-        http.get('http://www.promise.com/').then(function () {
-          throw new Error('Should not resolve this!');
-        }, function (error) {
+        http.get('http://www.promise.com/').fail(function (error) {
           error.should.be.instanceof(Error);
           done();
         }).done();

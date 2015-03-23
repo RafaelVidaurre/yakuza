@@ -131,8 +131,15 @@ describe('Yakuza', function () {
       yakuza.job('scraper', 'agent').should.be.instanceof(Job);
     });
 
-    it('should throw if scraper or agent doesn\'t exist', function () {
+    it('should throw if scraper doesn\'t exist', function () {
       (function () {
+        yakuza.job('scraper', 'agent');
+      }).should.throw();
+    });
+
+    it('should throw if agent doesn\'t exist', function () {
+      (function () {
+        yakuza.scraper('scraper');
         yakuza.job('scraper', 'agent');
       }).should.throw();
     });
