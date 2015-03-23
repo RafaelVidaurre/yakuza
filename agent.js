@@ -30,18 +30,17 @@ function Agent (id) {
   this.__configCallbacks = [];
 
   /**
-  * Set of task instances for this agent
-  * @private
-  */
-  this.__taskDefinitions = {};
-
-  /**
   * Agent's configuration object (set by running all configCallback functions)
   * @private
   */
   this.__config = {
     plan: []
   };
+
+  /**
+  * Set of task instances for this agent
+  */
+  this._taskDefinitions = {};
 
   /**
   * Routines defined at agent-level, these override scraper-level routines
@@ -114,7 +113,7 @@ Agent.prototype.__formatPlan = function () {
 * @private
 */
 Agent.prototype.__applyTaskDefinitions = function () {
-  _.each(this.__taskDefinitions, function (taskDefinition) {
+  _.each(this._taskDefinitions, function (taskDefinition) {
     taskDefinition._applySetup();
   });
 };
@@ -153,11 +152,11 @@ Agent.prototype.setup = function (cbConfig) {
 * @return {TaskDefinition}
 */
 Agent.prototype.task = function (taskId) {
-  if (!utils.hasKey(this.__taskDefinitions, taskId)) {
-    this.__taskDefinitions[taskId] = new TaskDefinition(taskId);
+  if (!utils.hasKey(this._taskDefinitions, taskId)) {
+    this._taskDefinitions[taskId] = new TaskDefinition(taskId);
   }
 
-  return this.__taskDefinitions[taskId];
+  return this._taskDefinitions[taskId];
 };
 
 /**

@@ -51,6 +51,14 @@ describe('Job', function () {
       newJob = new Job('foo');
       newJob.uid.should.eql('foo');
     });
+
+    it('should throw if params are invalid', function () {
+      var newJob;
+
+      (function () {
+        newJob = new Job(123);
+      }).should.throw();
+    });
   });
 
   describe('#_setShared', function () {
@@ -144,6 +152,102 @@ describe('Job', function () {
     it('should not throw if routine exists', function () {
       yakuza.agent('Scraper', 'Parallel').routine('RealRoutine', ['Task1', 'Task3']);
       job.routine('RealRoutine');
+    });
+  });
+
+  describe('#on', function () {
+    var newYakuza;
+
+    beforeEach(function () {
+      newYakuza = new YakuzaBase();
+      newYakuza.agent('FooScraper', 'FooAgent').setup(function (config) {
+        config.plan = [
+          'FailTask',
+          'SuccessTask'
+        ];
+      });
+      newYakuza.task('FooScraper', 'FooAgent', 'FailTask').main(function (task) {
+        task.fail(new Error('Error!'));
+      });
+      newYakuza.task('FooScraper', 'FooAgent', 'SuccessTask').main(function (task) {
+        task.success();
+      });
+    });
+
+    describe('job:finish', function () {
+      it('should be called if job fails', function (done) {
+        var failJob;
+
+        failJob = newYakuza.job('FooScraper', 'FooAgent');
+        failJob.enqueue('FailTask');
+        failJob.on('job:finish', function () {
+          done();
+        });
+        failJob.run();
+      });
+
+      it('should be called if job is successful', function (done) {
+        var successJob;
+
+        successJob = newYakuza.job('FooScraper', 'FooAgent');
+        successJob.enqueue('SuccessTask');
+        successJob.on('job:finish', function () {
+          done();
+        });
+        successJob.run();
+      });
+    });
+
+    describe('job:fail', function () {
+      it('should be called if job fails', function (done) {
+        var failJob;
+
+        failJob = newYakuza.job('FooScraper', 'FooAgent');
+        failJob.enqueue('FailTask');
+        failJob.on('job:finish', function () {
+          done();
+        });
+        failJob.run();
+      });
+    });
+
+    describe('job:success', function () {
+      it('should be called if job is successful', function (done) {
+        var successJob;
+
+        successJob = newYakuza.job('FooScraper', 'FooAgent');
+        successJob.enqueue('SuccessTask');
+        successJob.on('job:finish', function () {
+          done();
+        });
+        successJob.run();
+      });
+    });
+
+    describe('task:*:fail', function () {
+      it('should be called if a task fails', function (done) {
+        var failJob;
+
+        failJob = newYakuza.job('FooScraper', 'FooAgent');
+        failJob.enqueue('FailTask');
+        failJob.on('task:FailTask:fail', function () {
+          done();
+        });
+        failJob.run();
+      });
+    });
+
+    describe('task:*:success', function () {
+      it('should be called if a task succeeds', function (done) {
+        var successJob;
+
+        successJob = newYakuza.job('FooScraper', 'FooAgent');
+        successJob.enqueue('SuccessTask');
+        successJob.on('task:SuccessTask:success', function () {
+          done();
+        });
+        successJob.run();
+      });
     });
   });
 });
