@@ -35,67 +35,64 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   * Configuration object
   * @private
   */
-  this._config = config;
+  this.__config = config;
 
   /**
   * Number of retries performed by the built task
   * @private
   */
-  this._retries = 0;
-
-  /**
-  * Deferred which controls task's _runningPromise resolution
-  * @private
-  */
-  this._runningDeferred = Q.defer();
-
-  /**
-  * Promise which exposes Task's running state
-  * @private
-  */
-  this._runningPromise = this._runningDeferred.promise;
-
-  /**
-  * Parameters which will be used by its main method
-  * @private
-  */
-  this._params = params;
-
-  /**
-  * Main method to be run
-  * @private
-  */
-  this._main = main;
-
-  /**
-  * Storage for the task instance, this saves data which is exposed explicitly via emitter.share()
-  * method and is later on provided in the _onSuccess method as an argument of the task's promise's
-  * resolve method
-  * @private
-  */
-  this._sharedStorage = {};
-
-  /**
-  * Request object for this task instance
-  * @private
-  */
-  this._http = null;
-
-  /**
-  * Jar to be saved by the task, if defined it will be used in the next execution block if this task
-  * finishes successfully
-  * @private
-  */
-  this._savedJar = null;
+  this.__retries = 0;
 
   /**
   * Reference to the job that instanced this task
   * @private
   */
-  this._job = job;
+  this.__job = job;
+
+  /**
+  * Deferred which controls task's _runningPromise resolution
+  * @private
+  */
+  this.__runningDeferred = Q.defer();
+
+  /**
+  * Parameters which will be used by its main method
+  * @private
+  */
+  this.__params = params;
+
+  /**
+  * Main method to be run
+  * @private
+  */
+  this.__main = main;
+
+  /**
+  * Storage for the task instance, this saves data which is exposed explicitly via emitter.share()
+  * method and is later on provided in the _onSuccess method as an argument of the task's promise's
+  * resolve method
+  */
+  this._sharedStorage = {};
+
+  /**
+  * Promise which exposes Task's running state
+  * @private
+  */
+  this._runningPromise = this.__runningDeferred.promise;
+
+  /**
+  * Request object for this task instance
+  */
+  this.__http = null;
+
+  /**
+  * Jar to be saved by the task, if defined it will be used in the next execution block if this task
+  * finishes successfully
+  */
+  this.__savedJar = null;
 
 
-  this._http = defaultCookies ? new Http(defaultCookies) : new Http();
+  this.__http = defaultCookies ? new Http(defaultCookies) : new Http();
 }
 
 /**
@@ -131,7 +128,7 @@ Task.prototype._onShare = function (key, value, options) {
   }
 
   if (_.isString(shareMethod)) {
-    shareMethodFunction = this._job._scraper._shareMethods[shareMethod];
+    shareMethodFunction = this.__job._scraper._shareMethods[shareMethod];
   } else {
     shareMethodFunction = shareMethod;
   }
@@ -144,8 +141,8 @@ Task.prototype._onShare = function (key, value, options) {
     throw new Error('Share method is not a function');
   }
 
-  current = this._job._getShared(this.taskId, key);
-  this._job._setShared(this.taskId, key, shareMethodFunction(current, value));
+  current = this.__job._getShared(this.taskId, key);
+  this.__job._setShared(this.taskId, key, shareMethodFunction(current, value));
 };
 
 /**
@@ -163,7 +160,7 @@ Task.prototype._onSuccess = function (data) {
     data: data,
     task: this,
     status: 'success',
-    savedCookieJar: this._savedJar
+    savedCookieJar: this.__savedJar
   };
 
   // Object passed to the hook for execution control and providing useful data
@@ -174,16 +171,16 @@ Task.prototype._onSuccess = function (data) {
     data: response.data
   };
 
-  if (_.isFunction(this._config.hooks.onSuccess)) {
-    this._config.hooks.onSuccess(hookMessage);
+  if (_.isFunction(this.__config.hooks.onSuccess)) {
+    this.__config.hooks.onSuccess(hookMessage);
   }
 
   this._onFinish();
 
   if (stopJob) {
-    this._runningDeferred.reject(response);
+    this.__runningDeferred.reject(response);
   } else {
-    this._runningDeferred.resolve(response);
+    this.__runningDeferred.resolve(response);
   }
 };
 
@@ -196,9 +193,9 @@ Task.prototype._onSaveCookies = function () {
   // TODO: Accept custom jar as parameter
   var jar;
 
-  jar = this._http.getCookieJar();
+  jar = this.__http.getCookieJar();
 
-  this._savedJar = jar;
+  this.__savedJar = jar;
 };
 
 /**
@@ -215,11 +212,11 @@ Task.prototype._onFail = function (error, message) {
     message: message,
     task: this,
     status: 'fail',
-    requestLog: this._http.getLog()
+    requestLog: this.__http.getLog()
   };
 
   this._onFinish();
-  this._runningDeferred.reject(response);
+  this.__runningDeferred.reject(response);
 };
 
 /**
@@ -238,7 +235,7 @@ Task.prototype._run = function () {
   this.startTime = Date.now();
 
   // TODO: Maybe handle the exception thrown by the onError method to control crashes
-  this._main(emitter, this._http, this._params);
+  this.__main(emitter, this.__http, this.__params);
 };
 
 
