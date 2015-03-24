@@ -105,7 +105,7 @@ Http.prototype._pushToLog = function (logEntry) {
   this._log.push(logEntry);
 };
 
-Http.prototype.request = function(method, opts, callback) {
+Http.prototype.request = function (method, opts, callback) {
   var _this, data, url, finalOpts, makeRequest;
 
   _this = this;
