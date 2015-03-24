@@ -113,7 +113,7 @@ Http.prototype.request = function(method, opts, callback) {
 
   url = _.isString(opts) ? opts : opts.url;
 
-  if (_.isUndefined(url)) {
+  if (_.isUndefined(url) || !_.isString(url)) {
     throw new Error('Url is not set');
   }
 
