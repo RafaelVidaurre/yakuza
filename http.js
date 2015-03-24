@@ -123,7 +123,7 @@ Http.prototype.request = function(method, opts, callback) {
   finalOpts = _.omit(opts, ['data', 'url']);
   finalOpts.cookies = _.extend(this._cookieJar, finalOpts.cookies);
 
-  needle.request(method, url, data, finalOpts, function(err, res, body) {
+  needle.request(method, url, data, finalOpts, function (err, res, body) {
     _this._interceptResponse(err, res, body, url, data, makeRequest, callback);
   });
 
