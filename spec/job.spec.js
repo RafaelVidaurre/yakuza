@@ -273,7 +273,6 @@ describe('Job', function () {
           response.taskId.should.eql('SuccessTask');
           response.params.should.eql({some: 'param'});
           startCalled = true;
-          console.log(response);
         });
         startJob.on('task:SuccessTask:success', function (response) {
           startCalled.should.eql(true);
