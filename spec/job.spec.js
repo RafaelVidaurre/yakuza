@@ -364,6 +364,13 @@ describe('Job', function () {
         .main(function (task, params) {
           task.success(params);
         });
+
+        yakuza.task('QueueTest', 'SyncTest', 'AsyncTask').builder(function () {
+          return [1, 2];
+        })
+        .main(function (task, params) {
+          task.success(params);
+        });
       });
 
       it('should run instances of the same task sequentially if selfSync is set', function (done) {
@@ -371,7 +378,6 @@ describe('Job', function () {
 
         successCount = 0;
         runningTasks = 0;
-
         syncJob = yakuza.job('QueueTest', 'SyncTest');
         syncJob.enqueue('SyncTask');
         syncJob.on('task:SyncTask:start', function () {
@@ -386,6 +392,31 @@ describe('Job', function () {
           }
         });
         syncJob.run();
+      });
+
+      it('should run non-selfsync tasks asyncronously', function (done) {
+        var asyncJob, runningTasks, ranInParallel, successCount;
+
+        successCount = 0;
+        runningTasks = 0;
+        ranInParallel = false;
+        asyncJob = yakuza.job('QueueTest', 'SyncTest');
+        asyncJob.enqueue('AsyncTask');
+        asyncJob.on('task:AsyncTask:start', function () {
+          runningTasks += 1;
+          if (runningTasks === 2) {
+            ranInParallel = true;
+          }
+        });
+        asyncJob.on('task:AsyncTask:success', function () {
+          runningTasks -= 1;
+          successCount += 1;
+          if (successCount === 2) {
+            ranInParallel.should.eql(true);
+            done();
+          }
+        });
+        asyncJob.run();
       });
     });
   });
