@@ -366,13 +366,26 @@ describe('Job', function () {
         });
       });
 
-      it('should run instances of the same task sequentially if selfSync is set', function () {
-        // var syncJob;
-        //
-        // syncJob = yakuza.job('QueueTest', 'SyncTest');
-        // syncJob.on('task:SyncTask:success', function (response) {
-        //   response.data;
-        // });
+      it('should run instances of the same task sequentially if selfSync is set', function (done) {
+        var syncJob, runningTasks, successCount;
+
+        successCount = 0;
+        runningTasks = 0;
+
+        syncJob = yakuza.job('QueueTest', 'SyncTest');
+        syncJob.enqueue('SyncTask');
+        syncJob.on('task:SyncTask:start', function () {
+          runningTasks += 1;
+          runningTasks.should.not.be.above(1);
+        });
+        syncJob.on('task:SyncTask:success', function () {
+          runningTasks -= 1;
+          successCount += 1;
+          if (successCount === 2) {
+            done();
+          }
+        });
+        syncJob.run();
       });
     });
   });
