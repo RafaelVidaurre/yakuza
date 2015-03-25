@@ -444,9 +444,12 @@ describe('Job', function () {
         asyncJob.run();
       });
 
-      it('should run task in the same execution block in parallel', function (done) {
-        var parallelJob, taskStatuses;
+      it('should run task in different execution blocks sequentially and tasks in the same block' +
+        'in parallel', function (done) {
+        var parallelJob, taskStatuses, parallelCount, ranInParallel;
 
+        ranInParallel = false;
+        parallelCount = 0;
         taskStatuses = {
           Task1: 'idle',
           Task2: 'idle',
@@ -461,7 +464,6 @@ describe('Job', function () {
           taskStatuses[response.task.taskId] = 'started';
         });
         parallelJob.on('task:*:finish', function (response) {
-          console.log('Task finishing!');
           taskStatuses[response.task.taskId] = 'finished';
         });
 
@@ -471,12 +473,26 @@ describe('Job', function () {
           taskStatuses.Task4.should.eql('idle');
         });
         parallelJob.on('task:Task2:start', function () {
+          parallelCount += 1;
           taskStatuses.Task1.should.eql('finished');
           taskStatuses.Task4.should.eql('idle');
+          if (parallelCount === 2) {
+            ranInParallel = true;
+          }
+        });
+        parallelJob.on('task:Task2:finish', function () {
+          parallelCount -= 1;
+        });
+        parallelJob.on('task:Task3:finish', function () {
+          parallelCount -= 1;
         });
         parallelJob.on('task:Task3:start', function () {
           taskStatuses.Task1.should.eql('finished');
           taskStatuses.Task4.should.eql('idle');
+          parallelCount += 1;
+          if (parallelCount === 2) {
+            ranInParallel = true;
+          }
         });
         parallelJob.on('task:Task4:start', function () {
           taskStatuses.Task1.should.eql('finished');
@@ -485,6 +501,7 @@ describe('Job', function () {
         });
 
         parallelJob.on('job:finish', function () {
+          ranInParallel.should.eql(true);
           done();
         });
 
