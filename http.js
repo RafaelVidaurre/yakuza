@@ -105,42 +105,26 @@ Http.prototype._pushToLog = function (logEntry) {
   this._log.push(logEntry);
 };
 
-Http.prototype._buildParams = function (param1, param2) {
-  var params;
-
-  params = {
-    opts: {},
-    callback: undefined
-  };
-  params.callback = param2;
-
-  if (_.isString(param1)) {
-    params.opts.url = param1;
-  } else {
-    params.opts = param1;
-  }
-
-  return params;
-};
-
 Http.prototype.request = function (method, opts, callback) {
   var _this, data, url, finalOpts, makeRequest;
 
   _this = this;
   makeRequest = Q.defer();
 
-  if (!opts.url) {
+  url = _.isString(opts) ? opts : opts.url;
+
+  if (_.isUndefined(url) || !_.isString(url)) {
     throw new Error('Url is not set');
   }
 
-  url = opts.url;
+  opts = _.isObject(opts) ? opts : {};
   data = opts.data || null;
 
   finalOpts = _.omit(opts, ['data', 'url']);
   finalOpts.cookies = _.extend(this._cookieJar, finalOpts.cookies);
 
   needle.request(method, url, data, finalOpts, function (err, res, body) {
-    _this._interceptResponse(err, res, body, opts.url, data, makeRequest, callback);
+    _this._interceptResponse(err, res, body, url, data, makeRequest, callback);
   });
 
   return makeRequest.promise;
@@ -149,78 +133,42 @@ Http.prototype.request = function (method, opts, callback) {
 /**
 * Delegate to request's `del` method
 */
-Http.prototype.del = function (param1, param2) {
-  var opts, params, callback;
-
-  params = this._buildParams(param1, param2);
-  opts = params.opts;
-  callback = params.callback;
-
+Http.prototype.del = function (opts, callback) {
   return this.request('delete', opts, callback);
 };
 
 /**
 * Delegate to request's `get` method
 */
-Http.prototype.get = function (param1, param2) {
-  var opts, params, callback;
-
-  params = this._buildParams(param1, param2);
-  opts = params.opts;
-  callback = params.callback;
-
+Http.prototype.get = function (opts, callback) {
   return this.request('get', opts, callback);
 };
 
 /**
 * Delegate to request's `head` method
 */
-Http.prototype.head = function (param1, param2) {
-  var opts, params, callback;
-
-  params = this._buildParams(param1, param2);
-  opts = params.opts;
-  callback = params.callback;
-
+Http.prototype.head = function (opts, callback) {
   return this.request('head', opts, callback);
 };
 
 /**
 * Delegate to request's `patch` method
 */
-Http.prototype.patch = function (param1, param2) {
-  var opts, params, callback;
-
-  params = this._buildParams(param1, param2);
-  opts = params.opts;
-  callback = params.callback;
-
+Http.prototype.patch = function (opts, callback) {
   return this.request('patch', opts, callback);
 };
 
 /**
 * Delegate to request's `post` method
 */
-Http.prototype.post = function (param1, param2) {
-  var opts, params, callback;
-
-  params = this._buildParams(param1, param2);
-  opts = params.opts;
-  callback = params.callback;
-
+Http.prototype.post = function (opts, callback) {
   return this.request('post', opts, callback);
 };
 
 /**
 * Delegate to request's `put` method
 */
-Http.prototype.put = function (param1, param2) {
-  var opts, params, callback;
-
-  params = this._buildParams(param1, param2);
-  opts = params.opts;
-  callback = params.callback;
-
+Http.prototype.put = function (opts, callback) {
   return this.request('put', opts, callback);
 };
 
