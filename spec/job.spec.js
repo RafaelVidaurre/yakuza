@@ -191,9 +191,13 @@ describe('Job', function () {
       newYakuza.task('FooScraper', 'FooAgent', 'FailTask').main(function (task) {
         task.fail(new Error('Error!'));
       });
-      newYakuza.task('FooScraper', 'FooAgent', 'SuccessTask').main(function (task) {
-        task.success();
-      });
+      newYakuza.task('FooScraper', 'FooAgent', 'SuccessTask')
+        .builder(function () {
+          return {some: 'param'};
+        })
+        .main(function (task) {
+          task.success();
+        });
     });
 
     describe('job:finish', function () {
@@ -259,6 +263,26 @@ describe('Job', function () {
       });
     });
 
+    describe('task:*:start', function () {
+      it('should be called when a task starts with correct response', function (done) {
+        var startJob, startCalled;
+
+        startJob = newYakuza.job('FooScraper', 'FooAgent');
+        startJob.enqueue('SuccessTask');
+        startJob.on('task:SuccessTask:start', function (response) {
+          response.taskId.should.eql('SuccessTask');
+          response.params.should.eql({some: 'param'});
+          startCalled = true;
+          console.log(response);
+        });
+        startJob.on('task:SuccessTask:success', function (response) {
+          startCalled.should.eql(true);
+          done();
+        });
+        startJob.run();
+      });
+    });
+
     describe('task:*:fail', function () {
       it('should be called if a task fails', function (done) {
         var failJob;
@@ -287,13 +311,13 @@ describe('Job', function () {
   });
 
   describe('#run', function () {
-    var someJob;
-
-    beforeEach(function () {
-      someJob = yakuza.job('Scraper', 'Parallel');
-    });
-
     describe('starting', function () {
+      var someJob;
+
+      beforeEach(function () {
+        someJob = yakuza.job('Scraper', 'Parallel');
+      });
+
       it('should not run twice', function (done) {
         var startCount;
 
@@ -324,6 +348,32 @@ describe('Job', function () {
         (function () {
           invalidJob.run();
         }).should.throw('One or more enqueued tasks are not defined');
+      });
+    });
+
+    describe('execution queue', function () {
+      beforeEach(function () {
+        yakuza.scraper('QueueTest').agent('SyncTest').setup(function (config) {
+          config.plan = [
+            {taskId: 'SyncTask', selfSync: true},
+            'AsyncTask'
+          ];
+        });
+        yakuza.task('QueueTest', 'SyncTest', 'SyncTask').builder(function () {
+          return [1, 2];
+        })
+        .main(function (task, params) {
+          task.success(params);
+        });
+      });
+
+      it('should run instances of the same task sequentially if selfSync is set', function () {
+        // var syncJob;
+        //
+        // syncJob = yakuza.job('QueueTest', 'SyncTest');
+        // syncJob.on('task:SyncTask:success', function (response) {
+        //   response.data;
+        // });
       });
     });
   });

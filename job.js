@@ -202,16 +202,11 @@ Job.prototype.__cloneCookieJar = function (cookieJar) {
 * @return {array} an array of Tasks
 */
 Job.prototype.__buildTask = function (taskSpecs) {
-  var _this, buildResponse, builderParams, clonedCookieJar, errMsg, taskDefinition;
+  var _this, buildResponse, builderParams, clonedCookieJar, taskDefinition;
 
   _this = this;
 
   taskDefinition = this.__agent._taskDefinitions[taskSpecs.taskId];
-  errMsg = 'Task with id ' + taskSpecs.taskId + ' does not exist in agent ' + this.__agent.id;
-
-  if (taskDefinition === undefined) {
-    throw new Error(errMsg);
-  }
 
   builderParams = {
     params: this.__params,
@@ -333,6 +328,7 @@ Job.prototype.__runTask = function (taskSpec) {
     }).done();
   }
 
+  _this.__events.emit('task:start', thisTask);
   thisTask._run();
 };
 
@@ -451,6 +447,23 @@ Job.prototype.__prepareCurrentExecutionBlock = function () {
 };
 
 /**
+* Event handler called on event task:start
+* @private
+*/
+Job.prototype.__onTaskStart = function (task) {
+  var taskId, response, params;
+
+  taskId = task.taskId;
+  params = task._params;
+  response = {
+    taskId: taskId,
+    params: params
+  };
+
+  this.__publicEvents.emit('task:' + taskId + ':start', response);
+};
+
+/**
 * Event handler called on event task:success
 * @private
 */
@@ -549,7 +562,10 @@ Job.prototype.__onEqBlockContinue = function () {
 Job.prototype.__setEventListeners = function () {
   var _this = this;
 
-  // When a task finishes without errors
+  this.__events.on('task:start', function (response) {
+    _this.__onTaskStart(response);
+  });
+
   this.__events.on('task:success', function (response) {
     _this.__onTaskSuccess(response);
   });

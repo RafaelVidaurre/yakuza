@@ -43,12 +43,6 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   this.__runningDeferred = Q.defer();
 
   /**
-  * Parameters which will be used by its main method
-  * @private
-  */
-  this.__params = params;
-
-  /**
   * Main method to be run
   * @private
   */
@@ -70,6 +64,11 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   * Promise which exposes Task's running state
   */
   this._runningPromise = this.__runningDeferred.promise;
+
+  /**
+  * Parameters which will be used by its main method
+  */
+  this._params = params;
 
   /**
   * Storage for the task instance, this saves data which is exposed explicitly via emitter.share()
@@ -233,7 +232,7 @@ Task.prototype._run = function () {
   this.startTime = Date.now();
 
   // TODO: Maybe handle the exception thrown by the onError method to control crashes
-  this.__main(emitter, this.__http, this.__params);
+  this.__main(emitter, this.__http, this._params);
 };
 
 
