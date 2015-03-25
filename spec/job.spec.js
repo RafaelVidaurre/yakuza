@@ -267,14 +267,15 @@ describe('Job', function () {
       it('should be called when a task starts with correct response', function (done) {
         var startJob, startCalled;
 
+        startCalled = false;
         startJob = newYakuza.job('FooScraper', 'FooAgent');
         startJob.enqueue('SuccessTask');
         startJob.on('task:SuccessTask:start', function (response) {
-          response.taskId.should.eql('SuccessTask');
+          response.task.taskId.should.eql('SuccessTask');
           response.params.should.eql({some: 'param'});
           startCalled = true;
         });
-        startJob.on('task:SuccessTask:success', function (response) {
+        startJob.on('task:SuccessTask:success', function () {
           startCalled.should.eql(true);
           done();
         });
@@ -305,6 +306,30 @@ describe('Job', function () {
           done();
         });
         successJob.run();
+      });
+    });
+
+    describe('task:*:finish', function () {
+      it('should be called if a task succeeds', function (done) {
+        var successJob;
+
+        successJob = newYakuza.job('FooScraper', 'FooAgent');
+        successJob.enqueue('SuccessTask');
+        successJob.on('task:SuccessTask:finish', function () {
+          done();
+        });
+        successJob.run();
+      });
+
+      it('should be called if a task fails', function (done) {
+        var failJob;
+
+        failJob = newYakuza.job('FooScraper', 'FooAgent');
+        failJob.enqueue('FailTask');
+        failJob.on('task:FailTask:finish', function () {
+          done();
+        });
+        failJob.run();
       });
     });
   });
@@ -417,6 +442,53 @@ describe('Job', function () {
           }
         });
         asyncJob.run();
+      });
+
+      it('should run task in the same execution block in parallel', function (done) {
+        var parallelJob, taskStatuses;
+
+        taskStatuses = {
+          Task1: 'idle',
+          Task2: 'idle',
+          Task3: 'idle',
+          Task4: 'idle'
+        };
+
+        parallelJob = yakuza.job('Scraper', 'Parallel');
+        parallelJob.enqueueTaskArray(['Task1', 'Task2', 'Task3', 'Task4']);
+
+        parallelJob.on('task:*:start', function (response) {
+          taskStatuses[response.task.taskId] = 'started';
+        });
+        parallelJob.on('task:*:finish', function (response) {
+          console.log('Task finishing!');
+          taskStatuses[response.task.taskId] = 'finished';
+        });
+
+        parallelJob.on('task:Task1:start', function () {
+          taskStatuses.Task2.should.eql('idle');
+          taskStatuses.Task3.should.eql('idle');
+          taskStatuses.Task4.should.eql('idle');
+        });
+        parallelJob.on('task:Task2:start', function () {
+          taskStatuses.Task1.should.eql('finished');
+          taskStatuses.Task4.should.eql('idle');
+        });
+        parallelJob.on('task:Task3:start', function () {
+          taskStatuses.Task1.should.eql('finished');
+          taskStatuses.Task4.should.eql('idle');
+        });
+        parallelJob.on('task:Task4:start', function () {
+          taskStatuses.Task1.should.eql('finished');
+          taskStatuses.Task2.should.eql('finished');
+          taskStatuses.Task3.should.eql('finished');
+        });
+
+        parallelJob.on('job:finish', function () {
+          done();
+        });
+
+        parallelJob.run();
       });
     });
   });

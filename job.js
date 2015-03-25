@@ -421,6 +421,9 @@ Job.prototype.__prepareRun = function () {
 
 /**
 * Hooks to the newly created tasks' promises to trigger events and save useful data
+* @fires task:success
+* @fires task:fail
+* @fires task:finish
 * @private
 */
 Job.prototype.__prepareCurrentExecutionBlock = function () {
@@ -439,9 +442,11 @@ Job.prototype.__prepareCurrentExecutionBlock = function () {
 
       // Emit event for successful task
       _this.__events.emit('task:success', response);
+      _this.__events.emit('task:finish', response);
 
     }, function (response) {
       _this.__events.emit('task:fail', response);
+      _this.__events.emit('task:finish', response);
     }).done();
   });
 };
@@ -451,16 +456,15 @@ Job.prototype.__prepareCurrentExecutionBlock = function () {
 * @private
 */
 Job.prototype.__onTaskStart = function (task) {
-  var taskId, response, params;
+  var response, params;
 
-  taskId = task.taskId;
   params = task._params;
   response = {
-    taskId: taskId,
+    task: task,
     params: params
   };
 
-  this.__publicEvents.emit('task:' + taskId + ':start', response);
+  this.__publicEvents.emit('task:' + task.taskId + ':start', response);
 };
 
 /**
@@ -483,6 +487,17 @@ Job.prototype.__onTaskFail = function (response) {
 
   taskId = response.task.taskId;
   this.__publicEvents.emit('task:' + taskId + ':fail', response);
+};
+
+/**
+* Event handler called on event task:fail
+* @private
+*/
+Job.prototype.__onTaskFinish = function (response) {
+  var taskId;
+
+  taskId = response.task.taskId;
+  this.__publicEvents.emit('task:' + taskId + ':finish', response);
 };
 
 /**
@@ -572,6 +587,10 @@ Job.prototype.__setEventListeners = function () {
 
   this.__events.on('task:fail', function (response) {
     _this.__onTaskFail(response);
+  });
+
+  this.__events.on('task:finish', function (response) {
+    _this.__onTaskFinish(response);
   });
 
   // When the job is started
