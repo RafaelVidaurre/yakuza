@@ -1,16 +1,22 @@
 'use strict';
 
-var Job, YakuzaBase, sinon, sinonChai, yakuza, chai;
+var YakuzaBase, sinonChai, yakuza, chai, nock;
 
+require('sinon');
 YakuzaBase = require('../yakuza-base');
-Job = require('../job');
-sinon = require('sinon');
+nock = require('nock');
 chai = require('chai');
 sinonChai = require('sinon-chai');
 chai.should();
 chai.use(sinonChai);
+nock.disableNetConnect();
 
 beforeEach(function () {
+  nock('http://www.fake.com').get('/').reply(200, '', {
+    'Set-Cookie': 'foo=bar'
+  });
+  nock('http://www.nocookies.com').get('/').reply(200);
+
   yakuza = new YakuzaBase();
   yakuza.scraper('Scraper');
   yakuza.agent('Scraper', 'Agent').setup(function (config) {
@@ -76,28 +82,54 @@ describe('Task', function () {
 
       newJob.run();
     });
+
+    it('should throw if sharing is not correctly done', function (done) {
+      var newJob;
+
+      yakuza.task('Scraper', 'Agent', 'Task1').main(function (task) {
+        (function () {
+          task.share('keyOnly');
+        }).should.throw('Missing key/value in share method call');
+        (function () {
+          task.share('key', 'value', {method: 'nonExistentMethod'});
+        }).should.throw('Share method doesn\'t exist.');
+        (function () {
+          task.share('key', 'value', {method: 1234});
+        }).should.throw('Share method is not a function');
+        done();
+        task.success();
+      });
+
+      newJob = yakuza.job('Scraper', 'Agent');
+      newJob.enqueue('Task1');
+
+      newJob.run();
+    });
   });
 
-  it('should throw if sharing is not correctly done', function (done) {
-    var newJob;
+  describe('saving cookies', function () {
+    it('should save cookies for next execution queue', function (done) {
+      var newJob;
 
-    yakuza.task('Scraper', 'Agent', 'Task1').main(function (task) {
-      (function () {
-        task.share('keyOnly');
-      }).should.throw('Missing key/value in share method call');
-      (function () {
-        task.share('key', 'value', {method: 'nonExistentMethod'});
-      }).should.throw('Share method doesn\'t exist.');
-      (function () {
-        task.share('key', 'value', {method: 1234});
-      }).should.throw('Share method is not a function');
-      done();
-      task.success();
+      yakuza.task('Scraper', 'Agent', 'Task1').main(function (task, http) {
+        http.get('http://www.fake.com/').then(function () {
+          task.saveCookies();
+          task.success();
+        }).done();
+      });
+
+      yakuza.task('Scraper', 'Agent', 'Task2').main(function (task, http) {
+        http.get('http://www.nocookies.com/').then(function () {
+          http.getLog()[0].request.cookies.should.eql('foo=bar');
+          task.success();
+          done();
+        }).done();
+      });
+
+      newJob = yakuza.job('Scraper', 'Agent');
+      newJob.enqueue('Task1').enqueue('Task2');
+
+      newJob.run();
     });
-
-    newJob = yakuza.job('Scraper', 'Agent');
-    newJob.enqueue('Task1');
-
-    newJob.run();
   });
 });
