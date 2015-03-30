@@ -221,6 +221,12 @@ describe('Http', function () {
           done();
         }).done();
       });
+
+      it('should throw if url is not passed', function () {
+        (function () {
+          http.get({}, function () {});
+        }).should.throw();
+      });
     });
 
     describe('#del', function () {

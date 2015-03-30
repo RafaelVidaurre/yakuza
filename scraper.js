@@ -44,7 +44,7 @@ function Scraper () {
   * Share methods available at scraper-level
   * @private
   */
-  this.__shareMethods = {
+  this._shareMethods = {
     replace: function (current, next) {
       return next;
     }
@@ -57,7 +57,7 @@ function Scraper () {
 
 
   // Define the default sharing method
-  this.__shareMethods.default = this.__shareMethods.replace;
+  this._shareMethods.default = this._shareMethods.replace;
 }
 
 /**
@@ -157,7 +157,7 @@ Scraper.prototype.addShareMethod = function (methodName, shareFunction) {
     throw new Error('Share method must be a function');
   }
 
-  this.__shareMethods[methodName] = shareFunction;
+  this._shareMethods[methodName] = shareFunction;
 };
 
 module.exports = Scraper;

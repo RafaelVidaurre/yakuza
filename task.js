@@ -90,7 +90,7 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   this.elapsedTime = null;
 
 
-  this.__http = defaultCookies ? new Http(defaultCookies) : new Http();
+  this.__http = new Http(defaultCookies);
 }
 
 /**

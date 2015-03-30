@@ -98,12 +98,6 @@ function Job (uid, scraper, agent, params) {
   this.__agent = agent;
 
   /**
-  * Reference to the Scraper instance being used by the Job
-  * @private
-  */
-  this.__scraper = scraper;
-
-  /**
   * Object containing shared storages of all tasks
   * @private
   */
@@ -126,6 +120,11 @@ function Job (uid, scraper, agent, params) {
   * @private
   */
   this.__componentsApplied = false;
+
+  /**
+  * Reference to the Scraper instance being used by the Job
+  */
+  this._scraper = scraper;
 
   /** Unique Job identifier */
   this.uid = null;
@@ -632,7 +631,7 @@ Job.prototype.__applyComponents = function () {
     return;
   }
 
-  this.__scraper._applySetup();
+  this._scraper._applySetup();
   this.__agent._applySetup();
 
   this.__componentsApplied = true;
@@ -796,8 +795,8 @@ Job.prototype.routine = function (routineName) {
   // own thus avoiding checking the scraper routines here
   if (this.__agent._routines[routineName]) {
     this.enqueueTaskArray(this.__agent._routines[routineName]);
-  } else if (this.__scraper._routines[routineName]) {
-    this.enqueueTaskArray(this.__scraper._routines[routineName]);
+  } else if (this._scraper._routines[routineName]) {
+    this.enqueueTaskArray(this._scraper._routines[routineName]);
   } else {
     throw new Error('No routine with name ' + routineName + ' was found');
   }
