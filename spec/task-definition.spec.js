@@ -37,6 +37,23 @@ describe('TaskDefinition', function () {
     });
   });
 
+  describe('#_build', function () {
+    it('should throw if no main method is set', function () {
+      var job;
+
+      yakuza.agent('Scraper', 'Agent').setup(function (config) {
+        config.plan = ['SomeTask'];
+      });
+      yakuza.task('Scraper', 'Agent', 'SomeTask');
+      job = yakuza.job('Scraper', 'Agent');
+      job.enqueue('SomeTask');
+
+      (function () {
+        job.run();
+      }).should.throw('Cannot build task with no main method set');
+    });
+  });
+
   describe('#setup', function () {
     it('should push config callbacks', function () {
       var calls;
@@ -51,6 +68,18 @@ describe('TaskDefinition', function () {
       yakuza.task('Scraper', 'Agent', 'Task')._applySetup();
 
       calls.should.eql(2);
+    });
+
+    it('should throw if argument is not a function', function () {
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').setup('foo');
+      }).should.throw();
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').setup(['foo']);
+      }).should.throw();
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').setup(123);
+      }).should.throw();
     });
   });
 
@@ -144,6 +173,34 @@ describe('TaskDefinition', function () {
 
         job.run();
       });
+    });
+  });
+
+  describe('#main', function () {
+    it('should throw if main method is not a function', function () {
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').main('foo');
+      }).should.throw();
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').main(['foo']);
+      }).should.throw();
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').main(123);
+      }).should.throw();
+    });
+  });
+
+  describe('#builder', function () {
+    it('should throw if builder is not a function', function () {
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').builder('foo');
+      }).should.throw();
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').builder(['foo']);
+      }).should.throw();
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'SomeTask').builder(123);
+      }).should.throw();
     });
   });
 });
