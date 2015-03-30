@@ -58,7 +58,8 @@ describe('TaskDefinition', function () {
     beforeEach(function () {
       yakuza.agent('Scraper', 'Agent').setup(function (config) {
         config.plan = [
-          'Task'
+          'Task',
+          'OtherTask'
         ];
       });
     });
@@ -85,6 +86,62 @@ describe('TaskDefinition', function () {
           done();
         });
         job.enqueue('Task');
+        job.run();
+      });
+    });
+
+    describe('onSuccess', function () {
+      it('should be called right before a task succeeds', function (done) {
+        var job, hookCalled;
+
+        hookCalled = false;
+
+        yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
+          config.hooks = {
+            onSuccess: function () {
+              hookCalled = true;
+            }
+          };
+        }).main(function (task) {
+          task.success();
+        });
+
+        job = yakuza.job('Scraper', 'Agent');
+        job.on('task:Task:success', function () {
+          hookCalled.should.eql(true);
+          done();
+        });
+
+        job.enqueue('Task');
+        job.run();
+      });
+
+      it('should finish the job if stopJob() is called', function (done) {
+        var job;
+
+        yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
+          config.hooks = {
+            onSuccess: function (event) {
+              event.stopJob();
+            }
+          };
+        }).main(function (task) {
+          task.success();
+        });
+        yakuza.task('Scraper', 'Agent', 'OtherTask').main(function (task) {
+          task.success();
+        });
+
+        job = yakuza.job('Scraper', 'Agent');
+
+        job.enqueue('Task').enqueue('OtherTask');
+        job.on('task:OtherTask:start', function () {
+          throw new Error('Task was called!');
+        });
+        job.on('job:finish', function () {
+          done();
+        });
+
         job.run();
       });
     });
