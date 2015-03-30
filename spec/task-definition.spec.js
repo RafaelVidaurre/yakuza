@@ -55,10 +55,12 @@ describe('TaskDefinition', function () {
   });
 
   describe('hooks', function () {
-    yakuza.task('Scraper', 'Agent').setup(function (config) {
-      config.plan = [
-        'Task'
-      ];
+    beforeEach(function () {
+      yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
+        config.plan = [
+          'Task'
+        ];
+      });
     });
 
     describe('onFail', function () {
