@@ -56,7 +56,7 @@ describe('TaskDefinition', function () {
 
   describe('hooks', function () {
     beforeEach(function () {
-      yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
+      yakuza.agent('Scraper', 'Agent').setup(function (config) {
         config.plan = [
           'Task'
         ];
@@ -64,8 +64,28 @@ describe('TaskDefinition', function () {
     });
 
     describe('onFail', function () {
-      it('should be called right before a task fails', function () {
+      it('should be called right before a task fails', function (done) {
+        var job, hookCalled;
 
+        hookCalled = false;
+
+        yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
+          config.hooks = {
+            onFail: function () {
+              hookCalled = true;
+            }
+          };
+        }).main(function (task) {
+          task.fail();
+        });
+
+        job = yakuza.job('Scraper', 'Agent');
+        job.on('task:Task:fail', function () {
+          hookCalled.should.eql(true);
+          done();
+        });
+        job.enqueue('Task');
+        job.run();
       });
     });
   });

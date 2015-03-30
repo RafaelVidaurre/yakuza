@@ -203,7 +203,7 @@ Task.prototype.__onSaveCookies = function () {
 * @private
 */
 Task.prototype.__onFail = function (error, message) {
-  var response;
+  var response, hookMessage;
 
   response = {
     error: error,
@@ -212,6 +212,14 @@ Task.prototype.__onFail = function (error, message) {
     status: 'fail',
     requestLog: this.__http.getLog()
   };
+
+  hookMessage = {
+    error: error
+  };
+
+  if (_.isFunction(this.__config.hooks.onFail)) {
+    this.__config.hooks.onFail(hookMessage);
+  }
 
   this.__onFinish();
   this.__runningDeferred.reject(response);
