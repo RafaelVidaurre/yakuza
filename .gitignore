@@ -5,3 +5,4 @@ test.js
 lint-test.js
 html-report
 coverage
+npm-debug.log
