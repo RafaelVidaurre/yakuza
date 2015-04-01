@@ -659,7 +659,6 @@ Job.prototype.__findInShared = function (query) {
   var key, result, splitQuery, taskId;
 
   if (!_.isString(query)) {
-    console.log('ERROR: The shared method key passed is invalid');
     throw new Error('The shared method key passed is invalid');
   }
 

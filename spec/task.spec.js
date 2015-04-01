@@ -22,7 +22,7 @@ beforeEach(function () {
   yakuza.agent('Scraper', 'Agent').setup(function (config) {
     config.plan = [
       'Task1',
-      'Task2'
+      {taskId: 'Task2'}
     ];
   });
 });
@@ -102,6 +102,42 @@ describe('Task', function () {
 
       newJob = yakuza.job('Scraper', 'Agent');
       newJob.enqueue('Task1');
+
+      newJob.run();
+    });
+
+    it('should throw if retrieving shared values is not done correctly', function (done) {
+      var newJob, keyError;
+
+      keyError = 'The shared method key passed is invalid';
+
+      yakuza.task('Scraper', 'Agent', 'Task1').main(function (task) {
+        task.share('foo', 'bar');
+        task.success();
+      });
+
+      yakuza.task('Scraper', 'Agent', 'Task2').builder(function (job) {
+        (function () {
+          job.shared(123);
+        }).should.throw(keyError);
+        (function () {
+          job.shared([1, 2]);
+        }).should.throw(keyError);
+        (function () {
+          job.shared('taskId');
+        }).should.throw(keyError);
+
+        (function () {
+          job.shared('NonExistentTask.foo');
+        }).should.throw('\'foo\' was never shared by task \'NonExistentTask\'');
+
+      }).main(function (task) {
+        task.success();
+        done();
+      });
+
+      newJob = yakuza.job('Scraper', 'Agent');
+      newJob.enqueueTaskArray(['Task1', 'Task2']);
 
       newJob.run();
     });
