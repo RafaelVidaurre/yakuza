@@ -25,13 +25,13 @@ function YakuzaBase () {
   * Set of scraper instances
   * @private
   */
-  this._scrapers = {};
+  this.__scrapers = {};
 
   /**
   * Set of job instances
   * @private
   */
-  this._jobs = {};
+  this.__jobs = {};
 }
 
 /**
@@ -40,9 +40,9 @@ function YakuzaBase () {
 * @return {Scraper} scraper created
 * @private
 */
-YakuzaBase.prototype._createScraper = function (scraperId) {
-  this._scrapers[scraperId] = new Scraper();
-  return this._scrapers[scraperId];
+YakuzaBase.prototype.__createScraper = function (scraperId) {
+  this.__scrapers[scraperId] = new Scraper();
+  return this.__scrapers[scraperId];
 };
 
 /**
@@ -57,8 +57,8 @@ YakuzaBase.prototype.scraper = function (scraperId) {
     throw new Error('Scraper id must be passed');
   }
 
-  scraperExists = utils.hasKey(this._scrapers, scraperId);
-  thisScraper = scraperExists ? this._scrapers[scraperId] : this._createScraper(scraperId);
+  scraperExists = utils.hasKey(this.__scrapers, scraperId);
+  thisScraper = scraperExists ? this.__scrapers[scraperId] : this.__createScraper(scraperId);
 
   return thisScraper;
 };
@@ -106,7 +106,7 @@ YakuzaBase.prototype.job = function (scraperId, agentId, params) {
     throw new Error('Params passed must be an object');
   }
 
-  scraper = this._scrapers[scraperId];
+  scraper = this.__scrapers[scraperId];
 
   if (!scraper) {
     throw new Error('Scraper ' + scraperId + ' doesn\'t exist');
@@ -120,7 +120,7 @@ YakuzaBase.prototype.job = function (scraperId, agentId, params) {
 
   newId = shortId.generate();
   newJob = new Job(newId, scraper, agent, params);
-  this._jobs[newId] = newJob;
+  this.__jobs[newId] = newJob;
 
   return newJob;
 };
@@ -130,7 +130,7 @@ YakuzaBase.prototype.job = function (scraperId, agentId, params) {
 * method) or lazy-load (by running a job).
 */
 YakuzaBase.prototype.ready = function () {
-  _.each(this._scrapers, function (scraper) {
+  _.each(this.__scrapers, function (scraper) {
     scraper._applySetup();
     _.each(scraper._agents, function (agent) {
       agent._applySetup();

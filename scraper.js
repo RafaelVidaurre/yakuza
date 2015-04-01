@@ -18,26 +18,21 @@ Agent = require('./agent');
 function Scraper () {
   /**
   * Determines if the setup processes have been applied
+  * @private
   */
-  this._applied = false;
+  this.__applied = false;
 
   /**
   * Array of callbacks provided via config() which set the Scraper's configuration variables
   * @private
   */
-  this._configCallbacks = [];
-
-  /**
-  * Contains all agents associated with this Scraper
-  * @private
-  */
-  this._agents = {};
+  this.__configCallbacks = [];
 
   /**
   * Config object, contains configuration data and is exposed via the setup() method
   * @private
   */
-  this._config = {};
+  this.__config = {};
 
   /**
   * Object which contains scraper-wide routine definitions, routines are set via the routine()
@@ -55,6 +50,12 @@ function Scraper () {
     }
   };
 
+  /**
+  * Contains all agents associated with this Scraper
+  */
+  this._agents = {};
+
+
   // Define the default sharing method
   this._shareMethods.default = this._shareMethods.replace;
 }
@@ -64,7 +65,7 @@ function Scraper () {
 * @param {string} agentId unique agent identifier
 * @private
 */
-Scraper.prototype._createAgent = function (agentId) {
+Scraper.prototype.__createAgent = function (agentId) {
   this._agents[agentId] = new Agent(agentId);
   return this._agents[agentId];
 };
@@ -73,23 +74,22 @@ Scraper.prototype._createAgent = function (agentId) {
 * Run functions passed via config(), thus applying their config logic
 * @private
 */
-Scraper.prototype._applyConfigCallbacks = function () {
+Scraper.prototype.__applyConfigCallbacks = function () {
   var _this = this;
-  _.each(_this._configCallbacks, function (configCallback) {
-    configCallback(_this._config);
+  _.each(_this.__configCallbacks, function (configCallback) {
+    configCallback(_this.__config);
   });
 };
 
 /**
 * Applies all necessary processes regarding the setup stage of the scraper
-* @private
 */
 Scraper.prototype._applySetup = function () {
-  if (this._applied) {
+  if (this.__applied) {
     return;
   }
-  this._applyConfigCallbacks();
-  this._applied = true;
+  this.__applyConfigCallbacks();
+  this.__applied = true;
 };
 
 /**
@@ -102,7 +102,7 @@ Scraper.prototype.setup = function (cbConfig) {
     throw new Error('Config argument must be a function');
   }
 
-  this._configCallbacks.push(cbConfig);
+  this.__configCallbacks.push(cbConfig);
 
   return Scraper;
 };
@@ -120,7 +120,7 @@ Scraper.prototype.agent = function (agentId) {
   }
 
   agentExists = utils.hasKey(this._agents, agentId);
-  thisAgent = agentExists ? this._agents[agentId] : this._createAgent(agentId);
+  thisAgent = agentExists ? this._agents[agentId] : this.__createAgent(agentId);
   return thisAgent;
 };
 
@@ -154,7 +154,7 @@ Scraper.prototype.addShareMethod = function (methodName, shareFunction) {
   }
 
   if (!_.isFunction(shareFunction)) {
-    throw new Error('Share method must be a function')
+    throw new Error('Share method must be a function');
   }
 
   this._shareMethods[methodName] = shareFunction;

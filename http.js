@@ -48,7 +48,7 @@ function Http (defaultCookies) {
 * @param {function} callback Callback to be executed
 * @private
 */
-Http.prototype._interceptResponse = function (err, res, body, url, data, makeRequest, callback) {
+Http.prototype.__interceptResponse = function (err, res, body, url, data, makeRequest, callback) {
   var entry, resCookieString, _this, cb, noop, promiseResponse;
 
   _this = this;
@@ -92,7 +92,7 @@ Http.prototype._interceptResponse = function (err, res, body, url, data, makeReq
       body: body
     }
   };
-  this._pushToLog(entry);
+  this.__pushToLog(entry);
   cb(err, res, body);
   makeRequest.resolve(promiseResponse);
 };
@@ -100,11 +100,38 @@ Http.prototype._interceptResponse = function (err, res, body, url, data, makeReq
 /**
 * Pushes an entry to the class log
 * @param {object} logEntry entry that represents a unit of the log
+* @private
 */
-Http.prototype._pushToLog = function (logEntry) {
+Http.prototype.__pushToLog = function (logEntry) {
   this._log.push(logEntry);
 };
 
+/**
+* Prepares params for request
+* @private
+*/
+Http.prototype.__buildParams = function (param1, param2) {
+  var params;
+
+  params = {
+    opts: {},
+    callback: undefined
+  };
+  params.callback = param2;
+
+  if (_.isString(param1)) {
+    params.opts.url = param1;
+  } else {
+    params.opts = param1;
+  }
+
+  return params;
+};
+
+/**
+* Does an http request
+* @return {promise} a promise that resolves with the request's response
+*/
 Http.prototype.request = function (method, opts, callback) {
   var _this, data, url, finalOpts, makeRequest;
 
@@ -124,7 +151,7 @@ Http.prototype.request = function (method, opts, callback) {
   finalOpts.cookies = _.extend(this._cookieJar, finalOpts.cookies);
 
   needle.request(method, url, data, finalOpts, function (err, res, body) {
-    _this._interceptResponse(err, res, body, url, data, makeRequest, callback);
+    _this.__interceptResponse(err, res, body, opts.url, data, makeRequest, callback);
   });
 
   return makeRequest.promise;

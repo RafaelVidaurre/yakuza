@@ -5,12 +5,11 @@
 
 'use strict';
 
-var Events, Http, Q, _, utils;
+var Events, Q, _, utils;
 
 _ = require('lodash');
 Events = require('eventemitter2').EventEmitter2;
 Q = require('q');
-Http = require('./http');
 utils = require('./utils');
 
 /**
@@ -21,32 +20,25 @@ utils = require('./utils');
 */
 function Job (uid, scraper, agent, params) {
   /**
-  * Instance of Http class in charge of recording requests/responses and providing a wapper around
-  * mikeal's request library
-  * @private
-  */
-  this._http = new Http();
-
-  /**
   * Whether the job has started or not
   * @private
   */
-  this._started = false;
+  this.__started = false;
 
   /**
-  * Configuration for _events property
+  * Configuration for __events property
   * @private
   */
-  this._eventsConfig = {
+  this.__eventsConfig = {
     wildcard: true,
     delimiter: ':'
   };
 
   /**
-  * Configuration for _publicEvents property
+  * Configuration for __publicEvents property
   * @private
   */
-  this._publicEventsConfig = {
+  this.__publicEventsConfig = {
     wildcard: true,
     delimiter: ':'
   };
@@ -55,95 +47,95 @@ function Job (uid, scraper, agent, params) {
   * Event handler object for private events
   * @private
   */
-  this._events = new Events(this._eventsConfig);
+  this.__events = new Events(this.__eventsConfig);
 
   /**
   * Event handler object for public events
   * @private
   */
-  this._publicEvents = new Events(this._publicEventsConfig);
+  this.__publicEvents = new Events(this.__publicEventsConfig);
 
   /**
   * Current execution plan group idx from which we will build the next execution queue
   * @private
   */
-  this._planIdx = -1;
+  this.__planIdx = -1;
 
   /**
   * Current execution queue group idx to run
   * @private
   */
-  this._executionQueueIdx = -1;
+  this.__executionQueueIdx = -1;
 
   /**
   * Parameters that will be provided to the Task instances
   * @private
   */
-  this._params = params || {};
+  this.__params = params || {};
 
   /**
   * Tasks enqueued via Job's API
   * @private
   */
-  this._enqueuedTasks = [];
+  this.__enqueuedTasks = [];
 
   /**
   * Represents enqueued tasks' sincrony and execution order
   * @private
   */
-  this._plan = null;
+  this.__plan = null;
 
   /**
   * Queue of tasks built in runtime defined by taskDefinition builders and execution plan
   * @private
   */
-  this._executionQueue = [];
+  this.__executionQueue = [];
 
   /**
   * Reference to the Agent instance being used by the Job
   * @private
   */
-  this._agent = agent;
-
-  /**
-  * Reference to the Scraper instance being used by the Job
-  * @private
-  */
-  this._scraper = scraper;
+  this.__agent = agent;
 
   /**
   * Object containing shared storages of all tasks
   * @private
   */
-  this._taskStorages = {};
+  this.__taskStorages = {};
 
   /**
   * Object with finished task references
   * @private
   */
-  this._finishedTasks = {};
+  this.__finishedTasks = {};
 
   /**
   * Cookie jar to be used in the next execution block
   * @private
   */
-  this._cookieJar = {};
+  this.__cookieJar = {};
 
   /**
   * Determines wether the job's components have been applied or not
   * @private
   */
+  this.__componentsApplied = false;
+
+  /**
+  * Reference to the Scraper instance being used by the Job
+  */
+  this._scraper = scraper;
 
   /** Unique Job identifier */
   this.uid = null;
 
   // Set job's uid
   if (uid !== undefined) {
-    this._setUid(uid);
+    this.__setUid(uid);
   }
 
   // Set event listeners
-  this._setEventListeners();
+  this.__setEventListeners();
 }
 
 /**
@@ -151,7 +143,7 @@ function Job (uid, scraper, agent, params) {
 * @param {string} argUid Uid which uniquely identifies the job
 * @private
 */
-Job.prototype._setUid = function (argUid) {
+Job.prototype.__setUid = function (argUid) {
   if (!argUid || !_.isString(argUid) || argUid.length <= 0) {
     throw new Error('Job uid must be a valid string');
   }
@@ -162,12 +154,12 @@ Job.prototype._setUid = function (argUid) {
 * Prepares execution groups to run based on plan and enqueued tasks
 * @private
 */
-Job.prototype._applyPlan = function () {
+Job.prototype.__applyPlan = function () {
   var _this, executionPlan, groupTaskIds, matchIdx, newExecutionPlan, newTaskGroup;
 
   _this = this;
 
-  executionPlan = this._agent._plan;
+  executionPlan = this.__agent._plan;
 
   newExecutionPlan = [];
   newTaskGroup = [];
@@ -177,7 +169,7 @@ Job.prototype._applyPlan = function () {
       return taskObj.taskId;
     });
 
-    _.each(_this._enqueuedTasks, function (enqueuedTask) {
+    _.each(_this.__enqueuedTasks, function (enqueuedTask) {
       matchIdx = groupTaskIds.indexOf(enqueuedTask);
       if (matchIdx >= 0) {
         newTaskGroup.push(executionGroup[matchIdx]);
@@ -190,7 +182,7 @@ Job.prototype._applyPlan = function () {
     }
   });
 
-  this._plan = newExecutionPlan;
+  this.__plan = newExecutionPlan;
 };
 
 /**
@@ -198,7 +190,7 @@ Job.prototype._applyPlan = function () {
 * @param cookieJar a cookie jar
 * @return a clone of the current cookie jar
 */
-Job.prototype._cloneCookieJar = function (cookieJar) {
+Job.prototype.__cloneCookieJar = function (cookieJar) {
   return _.cloneDeep(cookieJar);
 };
 
@@ -208,24 +200,19 @@ Job.prototype._cloneCookieJar = function (cookieJar) {
 * @private
 * @return {array} an array of Tasks
 */
-Job.prototype._buildTask = function (taskSpecs) {
-  var _this, buildResponse, builderParams, clonedCookieJar, errMsg, taskDefinition;
+Job.prototype.__buildTask = function (taskSpecs) {
+  var _this, buildResponse, builderParams, clonedCookieJar, taskDefinition;
 
   _this = this;
 
-  taskDefinition = this._agent._taskDefinitions[taskSpecs.taskId];
-  errMsg = 'Task with id ' + taskSpecs.taskId + ' does not exist in agent ' + this._agent.id;
-
-  if (taskDefinition === undefined) {
-    throw new Error(errMsg);
-  }
+  taskDefinition = this.__agent._taskDefinitions[taskSpecs.taskId];
 
   builderParams = {
-    params: this._params,
-    shared: this._findInShared.bind(_this)
+    params: this.__params,
+    shared: this.__findInShared.bind(_this)
   };
 
-  clonedCookieJar = this._cloneCookieJar(this._cookieJar);
+  clonedCookieJar = this.__cloneCookieJar(this.__cookieJar);
   buildResponse = taskDefinition._build(builderParams, clonedCookieJar, this);
 
   return buildResponse;
@@ -243,7 +230,7 @@ Job.prototype._buildTask = function (taskSpecs) {
 * // Output
 * // [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
-Job.prototype._buildExecutionBlock = function (planGroup) {
+Job.prototype.__buildExecutionBlock = function (planGroup) {
   var _this, executionBlock, executionObject, previousObject, tasks;
 
   _this = this;
@@ -251,7 +238,7 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
   executionBlock = [];
 
   _.each(planGroup, function (taskSpecs) {
-    tasks = _this._buildTask(taskSpecs);
+    tasks = _this.__buildTask(taskSpecs);
     previousObject = null;
 
     // Build all execution objects for a specific task and
@@ -285,7 +272,7 @@ Job.prototype._buildExecutionBlock = function (planGroup) {
 * // Input example
 * [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
-Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
+Job.prototype.__retrieveExecutionBlockPromises = function (executionBlock) {
   var finalPromises;
 
   function retrieveTaskSpecPromises (taskSpec) {
@@ -316,8 +303,8 @@ Job.prototype._retrieveExecutionBlockPromises = function (executionBlock) {
 * Saves the given cookie jar, to be used by the job in the execution blocks that follow
 * @private
 */
-Job.prototype._saveCookieJar = function (cookieJar) {
-  this._cookieJar = cookieJar;
+Job.prototype.__saveCookieJar = function (cookieJar) {
+  this.__cookieJar = cookieJar;
 };
 
 /**
@@ -325,7 +312,7 @@ Job.prototype._saveCookieJar = function (cookieJar) {
 * @param {object} taskSpec object with task specifications and the task itself
 * @private
 */
-Job.prototype._runTask = function (taskSpec) {
+Job.prototype.__runTask = function (taskSpec) {
   var _this, nextTaskSpec, taskRunning, thisTask;
 
   _this = this;
@@ -336,10 +323,11 @@ Job.prototype._runTask = function (taskSpec) {
 
   if (nextTaskSpec) {
     taskRunning.then(function () {
-      _this._runTask(nextTaskSpec);
+      _this.__runTask(nextTaskSpec);
     }).done();
   }
 
+  _this.__events.emit('task:start', thisTask);
   thisTask._run();
 };
 
@@ -348,8 +336,8 @@ Job.prototype._runTask = function (taskSpec) {
 * @fires job:fail
 * @fires fail
 */
-Job.prototype._failJob = function (response) {
-  this._events.emit('job:fail', response);
+Job.prototype.__failJob = function (response) {
+  this.__events.emit('job:fail', response);
 };
 
 /**
@@ -362,33 +350,32 @@ Job.prototype._failJob = function (response) {
 * //Input example
 * [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
-Job.prototype._runExecutionBlock = function (executionBlock) {
+Job.prototype.__runExecutionBlock = function (executionBlock) {
   var _this, runningTasks;
 
   _this = this;
-  runningTasks = this._retrieveExecutionBlockPromises(executionBlock);
+  runningTasks = this.__retrieveExecutionBlockPromises(executionBlock);
 
   Q.all(runningTasks).then(function (results) {
     // Set cookies of results
     _.each(results, function (result) {
       if (result.savedCookieJar) {
-        _this._saveCookieJar(result.savedCookieJar);
+        _this.__saveCookieJar(result.savedCookieJar);
       }
     });
 
-    _this._events.emit('eq:blockContinue');
+    _this.__events.emit('eq:blockContinue');
 
   }, function (response) {
-    // FIXME: After this runs an exception is thrown by Q for some reason
     if (response.status === 'fail') {
-      _this._failJob(response);
+      _this.__failJob(response);
     }
 
-    _this._events.emit('eq:blockStop');
+    _this.__events.emit('eq:blockStop');
   }).done();
 
   _.each(executionBlock, function (taskSpec) {
-    _this._runTask(taskSpec);
+    _this.__runTask(taskSpec);
   });
 };
 
@@ -396,8 +383,8 @@ Job.prototype._runExecutionBlock = function (executionBlock) {
 * Runs execution block placed in current executionQueueIdx
 * @private
 */
-Job.prototype._runCurrentExecutionBlock = function () {
-  this._runExecutionBlock(this._executionQueue[this._executionQueueIdx]);
+Job.prototype.__runCurrentExecutionBlock = function () {
+  this.__runExecutionBlock(this.__executionQueue[this.__executionQueueIdx]);
 };
 
 /**
@@ -406,85 +393,120 @@ Job.prototype._runCurrentExecutionBlock = function () {
 * @fires eq:blockApply
 * @private
 */
-Job.prototype._applyNextExecutionBlock = function () {
+Job.prototype.__applyNextExecutionBlock = function () {
   var executionBlock;
 
-  this._planIdx += 1;
-  this._executionQueueIdx += 1;
+  this.__planIdx += 1;
+  this.__executionQueueIdx += 1;
 
-  if (!this._plan[this._planIdx]) {
-    this._events.emit('job:success');
+  if (!this.__plan[this.__planIdx]) {
+    this.__events.emit('job:success');
     return;
   }
 
-  executionBlock = this._buildExecutionBlock(this._plan[this._planIdx]);
-  this._executionQueue.push(executionBlock);
-  this._events.emit('eq:blockApply');
+  executionBlock = this.__buildExecutionBlock(this.__plan[this.__planIdx]);
+  this.__executionQueue.push(executionBlock);
+  this.__events.emit('eq:blockApply');
 };
 
 /**
 * Does necessary stuff needed before running can occur
 * @private
 */
-Job.prototype._prepareRun = function () {
-  this._applyComponents();
-  this._applyPlan();
+Job.prototype.__prepareRun = function () {
+  this.__applyComponents();
+  this.__applyPlan();
 };
 
 /**
 * Hooks to the newly created tasks' promises to trigger events and save useful data
+* @fires task:success
+* @fires task:fail
+* @fires task:finish
 * @private
 */
-Job.prototype._prepareCurrentExecutionBlock = function () {
+Job.prototype.__prepareCurrentExecutionBlock = function () {
   var _this, promises;
 
   _this = this;
-  promises = this._retrieveExecutionBlockPromises(this._executionQueue[this._executionQueueIdx]);
+  promises = this.__retrieveExecutionBlockPromises(this.__executionQueue[this.__executionQueueIdx]);
 
   _.each(promises, function (promise) {
     promise.then(function (response) {
       var task = response.task;
 
       // Save task in its corresponding finished task array
-      _this._finishedTasks[task.taskId] = _this._finishedTasks[task.taskId] || [];
-      _this._finishedTasks[task.taskId].push(task);
+      _this.__finishedTasks[task.taskId] = _this.__finishedTasks[task.taskId] || [];
+      _this.__finishedTasks[task.taskId].push(task);
 
       // Emit event for successful task
-      _this._events.emit('task:success', response);
+      _this.__events.emit('task:success', response);
+      _this.__events.emit('task:finish', response);
 
     }, function (response) {
-      _this._events.emit('task:fail', response);
+      _this.__events.emit('task:fail', response);
+      _this.__events.emit('task:finish', response);
     }).done();
   });
 };
 
 /**
-* Event handler called on event task:success
+* Event handler called on event task:start
+* @private
 */
-Job.prototype._onTaskSuccess = function (response) {
+Job.prototype.__onTaskStart = function (task) {
+  var response, params;
+
+  params = task._params;
+  response = {
+    task: task,
+    params: params
+  };
+
+  this.__publicEvents.emit('task:' + task.taskId + ':start', response);
+};
+
+/**
+* Event handler called on event task:success
+* @private
+*/
+Job.prototype.__onTaskSuccess = function (response) {
   var taskId;
 
   taskId = response.task.taskId;
-  this._publicEvents.emit('task:' + taskId + ':success', response);
+  this.__publicEvents.emit('task:' + taskId + ':success', response);
 };
 
 /**
 * Event handler called on event task:fail
+* @private
 */
-Job.prototype._onTaskFail = function (response) {
+Job.prototype.__onTaskFail = function (response) {
   var taskId;
 
   taskId = response.task.taskId;
-  this._publicEvents.emit('task:' + taskId + ':fail', response);
+  this.__publicEvents.emit('task:' + taskId + ':fail', response);
+};
+
+/**
+* Event handler called on event task:fail
+* @private
+*/
+Job.prototype.__onTaskFinish = function (response) {
+  var taskId;
+
+  taskId = response.task.taskId;
+  this.__publicEvents.emit('task:' + taskId + ':finish', response);
 };
 
 /**
 * Event handler called on event job:start
 * @private
 */
-Job.prototype._onJobStart = function () {
-  this._prepareRun();
-  this._applyNextExecutionBlock();
+Job.prototype.__onJobStart = function () {
+  this.__publicEvents.emit('job:start');
+  this.__prepareRun();
+  this.__applyNextExecutionBlock();
 };
 
 /**
@@ -495,27 +517,35 @@ Job.prototype._onJobStart = function () {
 * @fires success
 * @fires finish
 */
-Job.prototype._onJobSuccess = function () {
-  this._publicEvents.emit('job:success');
-  this._publicEvents.emit('job:finish');
-  this._publicEvents.emit('success');
-  this._publicEvents.emit('finish');
+Job.prototype.__onJobSuccess = function () {
+  this.__publicEvents.emit('job:success');
+  this.__publicEvents.emit('job:finish');
+  this.__publicEvents.emit('success');
+  this.__publicEvents.emit('finish');
 };
 
-Job.prototype._onJobFail = function (response) {
-  this._publicEvents.emit('job:fail', response);
-  this._publicEvents.emit('fail', response);
+/**
+* Event handler called on event job:fail
+* @private
+* @fires job:fail
+* @fires job:finish
+* @fires fail
+* @fires finish
+*/
+Job.prototype.__onJobFail = function (response) {
+  this.__publicEvents.emit('job:fail', response);
+  this.__publicEvents.emit('fail', response);
 };
 
 /**
 * Event handler called on event eq:blockApply
 * @private
 */
-Job.prototype._onEqBlockApply = function () {
+Job.prototype.__onEqBlockApply = function () {
   // Set the new built tasks' events and listens to their promises
-  this._prepareCurrentExecutionBlock();
+  this.__prepareCurrentExecutionBlock();
   // Run the new execution block
-  this._runCurrentExecutionBlock();
+  this.__runCurrentExecutionBlock();
 };
 
 /**
@@ -524,10 +554,10 @@ Job.prototype._onEqBlockApply = function () {
 * @fires job:finish
 * @fires finish
 */
-Job.prototype._onEqBlockStop = function () {
+Job.prototype.__onEqBlockStop = function () {
   // Finish is triggered when the job fails or succeeds, Basically when it stops running
-  this._publicEvents.emit('job:finish');
-  this._publicEvents.emit('finish');
+  this.__publicEvents.emit('job:finish');
+  this.__publicEvents.emit('finish');
 };
 
 /**
@@ -535,53 +565,60 @@ Job.prototype._onEqBlockStop = function () {
 * otherwise finishes the job
 * @private
 */
-Job.prototype._onEqBlockContinue = function () {
-  this._applyNextExecutionBlock();
+Job.prototype.__onEqBlockContinue = function () {
+  this.__applyNextExecutionBlock();
 };
 
 /**
 * Sets all the job's event listeners
 * @private
 */
-Job.prototype._setEventListeners = function () {
+Job.prototype.__setEventListeners = function () {
   var _this = this;
 
-  // When a task finishes without errors
-  this._events.on('task:success', function (response) {
-    _this._onTaskSuccess(response);
+  this.__events.on('task:start', function (response) {
+    _this.__onTaskStart(response);
   });
 
-  this._events.on('task:fail', function (response) {
-    _this._onTaskFail(response);
+  this.__events.on('task:success', function (response) {
+    _this.__onTaskSuccess(response);
+  });
+
+  this.__events.on('task:fail', function (response) {
+    _this.__onTaskFail(response);
+  });
+
+  this.__events.on('task:finish', function (response) {
+    _this.__onTaskFinish(response);
   });
 
   // When the job is started
-  this._events.once('job:start', function () {
-    _this._onJobStart();
+  this.__events.once('job:start', function () {
+    _this.__onJobStart();
   });
 
   // When the job finishes without errors
-  this._events.once('job:success', function () {
-    _this._onJobSuccess();
+  this.__events.once('job:success', function () {
+    _this.__onJobSuccess();
   });
 
   // When the job finishes with errors
-  this._events.once('job:fail', function (response) {
-    _this._onJobFail(response);
+  this.__events.once('job:fail', function (response) {
+    _this.__onJobFail(response);
   });
 
   // When the next execution block is applied
-  this._events.on('eq:blockApply', function () {
-    _this._onEqBlockApply();
+  this.__events.on('eq:blockApply', function () {
+    _this.__onEqBlockApply();
   });
 
   // When a task from the current execution block fails
-  this._events.on('eq:blockStop', function () {
-    _this._onEqBlockStop();
+  this.__events.on('eq:blockStop', function () {
+    _this.__onEqBlockStop();
   });
 
-  this._events.on('eq:blockContinue', function () {
-    _this._onEqBlockContinue();
+  this.__events.on('eq:blockContinue', function () {
+    _this.__onEqBlockContinue();
   });
 };
 
@@ -589,15 +626,15 @@ Job.prototype._setEventListeners = function () {
 * Applies required scraping components as they need to be ready to run by the job
 * @private
 */
-Job.prototype._applyComponents = function () {
-  if (this._componentsApplied) {
+Job.prototype.__applyComponents = function () {
+  if (this.__componentsApplied) {
     return;
   }
 
   this._scraper._applySetup();
-  this._agent._applySetup();
+  this.__agent._applySetup();
 
-  this._componentsApplied = true;
+  this.__componentsApplied = true;
 };
 
 /**
@@ -605,10 +642,10 @@ Job.prototype._applyComponents = function () {
 * @returns {boolean} true if all enqueued tasks exist
 * @private
 */
-Job.prototype._enqueuedTasksExist = function () {
+Job.prototype.__enqueuedTasksExist = function () {
   var _this = this;
-  return _.every(this._enqueuedTasks, function (enqueuedTask) {
-    return !!_this._agent._taskDefinitions[enqueuedTask];
+  return _.every(this.__enqueuedTasks, function (enqueuedTask) {
+    return !!_this.__agent._taskDefinitions[enqueuedTask];
   });
 };
 
@@ -618,11 +655,10 @@ Job.prototype._enqueuedTasksExist = function () {
 * @return The value if found, otherwise undefined
 * @private
 */
-Job.prototype._findInShared = function (query) {
+Job.prototype.__findInShared = function (query) {
   var key, result, splitQuery, taskId;
 
   if (!_.isString(query)) {
-    console.log('ERROR: The shared method key passed is invalid');
     throw new Error('The shared method key passed is invalid');
   }
 
@@ -631,7 +667,6 @@ Job.prototype._findInShared = function (query) {
   key = splitQuery[1];
 
   if (!taskId || !key) {
-    console.log('ERROR: The shared method key passed is invalid');
     throw new Error('The shared method key passed is invalid');
   }
 
@@ -645,14 +680,37 @@ Job.prototype._findInShared = function (query) {
 };
 
 /**
+* Check wether a task is present on the job's agent's plan
+* @param {string} taskId task id of the task
+* @returns {boolean} true if the task is in the plan
+*/
+Job.prototype.__taskIsInPlan = function (taskId) {
+  var tasks;
+
+  this.__applyComponents();
+
+  return _.some(this.__agent._plan, function (planBlock) {
+    tasks = utils.arrayify(planBlock);
+
+    return _.some(tasks, function (taskObject) {
+      var planTaskId;
+
+      planTaskId = _.isString(taskObject) ? taskObject : taskObject.taskId;
+      return planTaskId === taskId;
+    });
+  });
+};
+
+
+/**
 * Gets a shared value belonging to a specific task and key
 * @params {string} taskId Task id of the task containing the value shared
 * @params {string} key Key to which the value is assigned
 * @returns the value found, or undefined
 */
 Job.prototype._getShared = function (taskId, key) {
-  if (this._taskStorages[taskId] && this._taskStorages[taskId][key] !== undefined) {
-    return this._taskStorages[taskId][key];
+  if (this.__taskStorages[taskId] && this.__taskStorages[taskId][key] !== undefined) {
+    return this.__taskStorages[taskId][key];
   }
 
   return undefined;
@@ -665,36 +723,21 @@ Job.prototype._getShared = function (taskId, key) {
 * @param value value to set
 */
 Job.prototype._setShared = function (taskId, key, value) {
-  this._taskStorages[taskId] = this._taskStorages[taskId] || {};
-  this._taskStorages[taskId][key] = value;
+  this.__taskStorages[taskId] = this.__taskStorages[taskId] || {};
+  this.__taskStorages[taskId][key] = value;
 };
 
 /**
-* Check wether a task is present on the job's agent's plan
-* @param {string} taskId task id of the task
-* @returns {boolean} true if the task is in the plan
+* Gets job's params
+* @return {object} job's params
 */
-Job.prototype._taskIsInPlan = function (taskId) {
-  var tasks;
-
-  this._applyComponents();
-
-  return _.some(this._agent._plan, function (planBlock) {
-    tasks = utils.arrayify(planBlock);
-
-    return _.some(tasks, function (taskObject) {
-      var planTaskId;
-
-      planTaskId = _.isString(taskObject) ? taskObject : taskObject.taskId;
-      return planTaskId === taskId;
-    });
-  });
+Job.prototype._getParams = function () {
+  return this.__params;
 };
 
 /**
 * Enqueues all tasks present in the array
 * @param {Array} taskArray array of task Ids
-* @public
 */
 Job.prototype.enqueueTaskArray = function (taskArray) {
   var _this = this;
@@ -717,7 +760,7 @@ Job.prototype.params = function (paramsObj) {
     throw new Error('Params must be an object');
   }
 
-  _.extend(this._params, paramsObj);
+  _.extend(this.__params, paramsObj);
 
   return this;
 };
@@ -731,12 +774,12 @@ Job.prototype.enqueue = function (taskId) {
     throw new Error('Enqueue params isn\'t a valid string');
   }
 
-  if (!this._taskIsInPlan(taskId)) {
-    throw new Error('Enqueued task ' + taskId + ' is not in the agent ' + this._agent.id +
+  if (!this.__taskIsInPlan(taskId)) {
+    throw new Error('Enqueued task ' + taskId + ' is not in the agent ' + this.__agent.id +
       '\'s plan' + ' add it to the agent\'s config array via the .setup method');
   }
 
-  this._enqueuedTasks.push(taskId);
+  this.__enqueuedTasks.push(taskId);
 
   return this;
 };
@@ -747,8 +790,10 @@ Job.prototype.enqueue = function (taskId) {
 * @param {string} routineName Name of the routine
 */
 Job.prototype.routine = function (routineName) {
-  if (this._agent._routines[routineName]) {
-    this.enqueueTaskArray(this._agent._routines[routineName]);
+  // TODO: Agent routines could inherit their scraper's routine if they don't have one of their
+  // own thus avoiding checking the scraper routines here
+  if (this.__agent._routines[routineName]) {
+    this.enqueueTaskArray(this.__agent._routines[routineName]);
   } else if (this._scraper._routines[routineName]) {
     this.enqueueTaskArray(this._scraper._routines[routineName]);
   } else {
@@ -761,16 +806,16 @@ Job.prototype.routine = function (routineName) {
 * @fires job:start
 */
 Job.prototype.run = function () {
-  if (this._started) {
+  if (this.__started) {
     return;
   }
 
-  if (!this._enqueuedTasksExist()) {
+  if (!this.__enqueuedTasksExist()) {
     throw new Error('One or more enqueued tasks are not defined');
   }
 
-  this._started = true;
-  this._events.emit('job:start');
+  this.__started = true;
+  this.__events.emit('job:start');
 };
 
 /**
@@ -779,7 +824,7 @@ Job.prototype.run = function () {
 * @param {function} callback Callback function to be run when the event fires
 */
 Job.prototype.on = function (eventName, callback) {
-  this._publicEvents.on(eventName, callback);
+  this.__publicEvents.on(eventName, callback);
 };
 
 
