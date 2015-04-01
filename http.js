@@ -92,6 +92,7 @@ Http.prototype.__interceptResponse = function (err, res, body, url, data, makeRe
       body: body
     }
   };
+
   this.__pushToLog(entry);
   cb(err, res, body);
   makeRequest.resolve(promiseResponse);
@@ -151,7 +152,7 @@ Http.prototype.request = function (method, opts, callback) {
   finalOpts.cookies = _.extend(this._cookieJar, finalOpts.cookies);
 
   needle.request(method, url, data, finalOpts, function (err, res, body) {
-    _this.__interceptResponse(err, res, body, opts.url, data, makeRequest, callback);
+    _this.__interceptResponse(err, res, body, url, data, makeRequest, callback);
   });
 
   return makeRequest.promise;
