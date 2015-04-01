@@ -108,28 +108,6 @@ Http.prototype.__pushToLog = function (logEntry) {
 };
 
 /**
-* Prepares params for request
-* @private
-*/
-Http.prototype.__buildParams = function (param1, param2) {
-  var params;
-
-  params = {
-    opts: {},
-    callback: undefined
-  };
-  params.callback = param2;
-
-  if (_.isString(param1)) {
-    params.opts.url = param1;
-  } else {
-    params.opts = param1;
-  }
-
-  return params;
-};
-
-/**
 * Does an http request
 * @return {promise} a promise that resolves with the request's response
 */
