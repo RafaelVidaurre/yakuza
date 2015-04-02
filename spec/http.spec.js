@@ -18,7 +18,7 @@ chai.use(chaiAsPromised);
 nock.disableNetConnect();
 
 describe('Http', function () {
-  var body1, body2, headers1, headers2, headersS1, http;
+  var body1, body2, headers1, headers2, headers3, headersS1, http;
 
   beforeEach(function () {
     http = new Http();
@@ -38,6 +38,9 @@ describe('Http', function () {
     headersS1 = {
       'Set-Cookie': 'c=3',
       'content-type': 'text/html'
+    };
+    headers3 = {
+      'Set-Cookie': ['bar=2', 'foo=1;']
     };
 
     nock('http://www.1.com')
@@ -59,6 +62,8 @@ describe('Http', function () {
 
     nock('https://www.s1.com')
       .get('/').reply(200, 'BodyS1', headersS1);
+    nock('https://www.two-cookies.com')
+      .get('/').reply(200, 'body', headers3);
   });
 
   describe('#Http', function () {
@@ -142,14 +147,25 @@ describe('Http', function () {
       }).done();
     });
 
-    it('should save cookies from requests in jar', function () {
+    it('should save cookies from requests in jar', function (done) {
       var newHttp;
 
       newHttp = new Http({});
       newHttp.get('http://www.1.com/', function () {
         newHttp.get('http://www.2.com', function () {
           newHttp.getLog()[1].request.cookies.should.contain('a=1');
+          done();
         });
+      });
+    });
+
+    it('should save cookies form response', function (done) {
+      var newHttp;
+
+      newHttp = new Http({});
+      newHttp.get('https://www.two-cookies.com', function () {
+        newHttp.getLog()[0].response.cookies.should.eql('bar=2; foo=1;');
+        done();
       });
     });
   });
@@ -200,12 +216,16 @@ describe('Http', function () {
 
       it('should reject the promise with an error if request was unsuccessful', function (done) {
         requestMock = nock('http://www.errorpromise.com').get('/').times(1).reply(500);
-        http.get('http://www.promise.com/').then(function () {
-          throw new Error('Should not resolve this!');
-        }, function (error) {
+        http.get('http://www.promise.com/').fail(function (error) {
           error.should.be.instanceof(Error);
           done();
         }).done();
+      });
+
+      it('should throw if url is not passed', function () {
+        (function () {
+          http.get({}, function () {});
+        }).should.throw();
       });
     });
 

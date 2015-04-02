@@ -8,8 +8,9 @@
     "url": "https://github.com/Narzerus/yakuza.git"
   },
   "scripts": {
-    "test": "mocha spec",
-    "docs": "./node_modules/.bin/jsdoc . -c ./jsdocconfig.json"
+    "coverage": "istanbul cover _mocha -- spec",
+    "docs": "./node_modules/.bin/jsdoc . -c ./jsdocconfig.json",
+    "test": "mocha spec"
   },
   "keywords": [
     "scraping",
@@ -20,7 +21,7 @@
   "dependencies": {
     "eventemitter2": "^0.4.14",
     "lodash": "^2.4.1",
-    "needle": "^0.8.1",
+    "needle": "^0.9.0",
     "q": "^1.1.1",
     "shortid": "^2.1.3"
   },
