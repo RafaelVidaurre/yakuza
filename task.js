@@ -61,12 +61,18 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   this.__savedJar = null;
 
   /**
+  * Parameters with which the task's main method will be provided.
+  * @private
+  */
+  this.__currentParams = null;
+
+  /**
   * Promise which exposes Task's running state
   */
   this._runningPromise = this.__runningDeferred.promise;
 
   /**
-  * Parameters which will be used by its main method
+  * Parameters with which the task was instanced
   */
   this._params = params;
 
@@ -90,7 +96,10 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   this.elapsedTime = null;
 
 
+  // Instance a new Http object
   this.__http = new Http(defaultCookies);
+  // Set current instance params
+  this.__currentParams = this._params;
 }
 
 /**
@@ -240,7 +249,7 @@ Task.prototype._run = function () {
 
   this.__runs += 1;
   this.startTime = Date.now();
-  this.__main(emitter, this.__http, this._params);
+  this.__main(emitter, this.__http, this.__currentParams);
 };
 
 
