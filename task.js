@@ -28,7 +28,7 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   * Number of retries performed by the built task
   * @private
   */
-  this.__retries = 0;
+  this.__runs = 0;
 
   /**
   * Reference to the job that instanced this task
@@ -214,7 +214,8 @@ Task.prototype.__onFail = function (error, message) {
   };
 
   hookMessage = {
-    error: error
+    error: error,
+    runs: this.__runs
   };
 
   if (_.isFunction(this.__config.hooks.onFail)) {
@@ -237,9 +238,8 @@ Task.prototype._run = function () {
     saveCookies: this.__onSaveCookies.bind(this)
   };
 
+  this.__runs += 1;
   this.startTime = Date.now();
-
-  // TODO: Maybe handle the exception thrown by the onError method to control crashes
   this.__main(emitter, this.__http, this._params);
 };
 
