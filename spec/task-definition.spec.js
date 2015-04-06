@@ -117,6 +117,36 @@ describe('TaskDefinition', function () {
         job.enqueue('Task');
         job.run();
       });
+
+      it('should be able to rerun a task', function (done) {
+        var job;
+
+        yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
+          config.hooks = {
+            onFail: function (task) {
+              // Rerun task with its param increased by 1
+              task.rerun(task.params + 1);
+            }
+          };
+        })
+        .builder(function () {
+          return 0;
+        })
+        .main(function (task, http, params) {
+          if (params !== 3) {
+            task.fail();
+          } else {
+            task.success();
+          }
+        });
+
+        job = yakuza.job('Scraper', 'Agent');
+        job.on('task:Task:success', function () {
+          done();
+        });
+        job.enqueue('Task');
+        job.run();
+      });
     });
 
     describe('onSuccess', function () {
