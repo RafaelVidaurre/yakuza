@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Narzerus/yakuza.svg?branch=development)](https://travis-ci.org/Narzerus/yakuza)
+
 Yakuza
 ======
 Yakuza is a heavy-weight, highly-scalable framework for scraping projects.
@@ -301,23 +303,23 @@ Events support wildcards, meaning you can do things like: `task:*:fail` to liste
 An example:
 ```javascript
   var job = Yakuza.job('someScraper', 'someAgent');
-  
+
   job.on('job:fail', function (response) {
     // Handle job failure
   });
-  
+
   job.on('task:*:fail', function (response) {
     console.log(response.task.taskId + ' failed!');
   });
-  
+
   job.on('task:*:success', function (response) {
     // Handle all successful tasks
   });
-  
+
   job.on('task:login:fail', function (response) {
     console.log('Failed to log in');
   });
-  
+
   // Enqueue tasks and run job
 ```
 
@@ -547,4 +549,3 @@ We use ESLint as our linter.
 Known Issues
 ------------
 - Cookies with some special characters (like `:`) are not correctly parsed. This has to do with a bug in the [needle](https://github.com/tomas/needle) package and a PR with the fix is currently waiting to be merged
-
