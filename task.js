@@ -28,7 +28,7 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   * Number of retries performed by the built task
   * @private
   */
-  this.__retries = 0;
+  this.__runs = 0;
 
   /**
   * Reference to the job that instanced this task
@@ -61,12 +61,23 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   this.__savedJar = null;
 
   /**
+  * Default cookies to be used in the task
+  */
+  this.__defaultCookies = defaultCookies;
+
+  /**
+  * Parameters with which the task's main method will be provided.
+  * @private
+  */
+  this.__currentParams = null;
+
+  /**
   * Promise which exposes Task's running state
   */
   this._runningPromise = this.__runningDeferred.promise;
 
   /**
-  * Parameters which will be used by its main method
+  * Parameters with which the task was instanced
   */
   this._params = params;
 
@@ -90,7 +101,10 @@ function Task (taskId, main, params, defaultCookies, config, job) {
   this.elapsedTime = null;
 
 
-  this.__http = new Http(defaultCookies);
+  // Instance a new Http object
+  this.__http = new Http(this.__defaultCookies);
+  // Set current instance params
+  this.__currentParams = this._params;
 }
 
 /**
@@ -203,7 +217,7 @@ Task.prototype.__onSaveCookies = function () {
 * @private
 */
 Task.prototype.__onFail = function (error, message) {
-  var response, hookMessage;
+  var response, hookMessage, rerunTask, rerunParams;
 
   response = {
     error: error,
@@ -214,15 +228,47 @@ Task.prototype.__onFail = function (error, message) {
   };
 
   hookMessage = {
-    error: error
+    error: error,
+    runs: this.__runs,
+    rerun: function (newParams) {
+      rerunTask = true;
+      rerunParams = newParams;
+    },
+    params: this.__currentParams
   };
 
   if (_.isFunction(this.__config.hooks.onFail)) {
     this.__config.hooks.onFail(hookMessage);
   }
 
-  this.__onFinish();
-  this.__runningDeferred.reject(response);
+  if (rerunTask) {
+    this.__rerunTask(rerunParams);
+  } else {
+    this.__onFinish();
+    this.__runningDeferred.reject(response);
+  }
+};
+
+/**
+* Resets current task instance to when it was first created, except for statistic variables
+* like runs and startTime
+* @private
+*/
+Task.prototype.__resetTask = function () {
+  this.__savedJar = null;
+  this.__http = new Http(this.__defaultCookies);
+  this._sharedStorage = {};
+};
+
+/**
+* Resets and re-runs the current task instance
+* @param params Parameters to be used in this new run instead of original ones
+* @private
+*/
+Task.prototype.__rerunTask = function (params) {
+  this.__resetTask();
+  this.__currentParams = params || this._params;
+  this._run();
 };
 
 /**
@@ -237,10 +283,9 @@ Task.prototype._run = function () {
     saveCookies: this.__onSaveCookies.bind(this)
   };
 
-  this.startTime = Date.now();
-
-  // TODO: Maybe handle the exception thrown by the onError method to control crashes
-  this.__main(emitter, this.__http, this._params);
+  this.startTime = this.__runs === 0 ? Date.now() : this.startTime;
+  this.__runs += 1;
+  this.__main(emitter, this.__http, this.__currentParams);
 };
 
 
