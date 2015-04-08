@@ -29,6 +29,7 @@
     "chai": "^2.1.0",
     "chai-as-promised": "^4.3.0",
     "jsdoc": "^3.3.0-beta2",
+    "mocha": "^2.2.4",
     "nock": "^1.0.0",
     "should": "^5.0.1",
     "sinon": "^1.12.2",
