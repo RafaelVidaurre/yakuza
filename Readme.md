@@ -544,3 +544,7 @@ We use [Mocha](http://mochajs.org/) as our test runner and [Chai](http://chaijs.
 
 We use ESLint as our linter.
 
+Known Issues
+------------
+- Cookies with some special characters (like `:`) are not correctly parsed. This has to do with a bug in the [needle](https://github.com/tomas/needle) package and a PR with the fix is currently waiting to be merged
+
