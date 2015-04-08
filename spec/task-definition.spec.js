@@ -94,19 +94,29 @@ describe('TaskDefinition', function () {
     });
 
     describe('onFail', function () {
-      it('should be called right before a task fails', function (done) {
-        var job, hookCalled;
+      it('should be called right before a task fails with the right parameters', function (done) {
+        var job, hookCalled, error, params;
 
+        error = new Error('Test error');
         hookCalled = false;
+        params = {foo: 'bar'};
 
         yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
           config.hooks = {
-            onFail: function () {
+            onFail: function (task) {
+              task.error.should.equal(error);
+              task.runs.should.eql(1);
+              task.params.should.equal(params);
+
               hookCalled = true;
             }
           };
-        }).main(function (task) {
-          task.fail();
+        })
+        .builder(function () {
+          return params;
+        })
+        .main(function (task) {
+          task.fail(error);
         });
 
         job = yakuza.job('Scraper', 'Agent');
@@ -118,34 +128,72 @@ describe('TaskDefinition', function () {
         job.run();
       });
 
-      it('should be able to rerun a task', function (done) {
-        var job;
+      describe('task rerunning', function () {
+        it('should be able to rerun a task', function (done) {
+          var job;
 
-        yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
-          config.hooks = {
-            onFail: function (task) {
-              // Rerun task with its param increased by 1
-              task.rerun(task.params + 1);
+          yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
+            config.hooks = {
+              onFail: function (task) {
+                // Rerun task with its param increased by 1
+                task.rerun(task.params + 1);
+              }
+            };
+          })
+          .builder(function () {
+            return 0;
+          })
+          .main(function (task, http, params) {
+            if (params !== 3) {
+              task.fail();
+            } else {
+              task.success();
             }
-          };
-        })
-        .builder(function () {
-          return 0;
-        })
-        .main(function (task, http, params) {
-          if (params !== 3) {
-            task.fail();
-          } else {
-            task.success();
-          }
+          });
+
+          job = yakuza.job('Scraper', 'Agent');
+          job.on('task:Task:success', function () {
+            done();
+          });
+          job.enqueue('Task');
+          job.run();
         });
 
-        job = yakuza.job('Scraper', 'Agent');
-        job.on('task:Task:success', function () {
-          done();
+        it('should provide default parameters if none are specified', function (done) {
+          var job, runs;
+
+          runs = 0;
+
+          yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
+            config.hooks = {
+              onFail: function (task) {
+                if (task.runs === 2) {
+                  return;
+                }
+
+                task.rerun();
+              }
+            };
+          })
+          .builder(function () {
+            return 10;
+          })
+          .main(function (task, http, params) {
+            runs += 1;
+            if (runs === 2) {
+              params.should.eql(10);
+            }
+
+            task.fail();
+          });
+
+          job = yakuza.job('Scraper', 'Agent');
+          job.on('task:Task:fail', function () {
+            done();
+          });
+          job.enqueue('Task');
+          job.run();
         });
-        job.enqueue('Task');
-        job.run();
       });
     });
 
