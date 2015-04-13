@@ -330,6 +330,84 @@ To run the job simply use the job.run() method, please keep in mind jobs are not
   job.run(); // Job will start running
 ```
 
+Hooks
+=====
+Hooks are run in specific moments of an instanced `task`'s life (before emitting events to the outside), and they can modify the scrapers default behavior. 
+To specify a `task`'s hooks use its `setup` method.
+
+```javascript
+Yakuza.task('scraper', 'agent', 'someTask').setup(function (config) {
+  config.hooks = {
+    'onFail': function (task) {
+      // ... do stuff
+    },
+    'onSuccess': function (task) {
+      // ... do stuff
+    }
+  };
+});
+```
+
+onFail
+------
+Runs when a task fails, `onFail` can be used to do some fancy stuff like retrying failed tasks right away.
+
+The `task` object passed to the `onFail` hook has the following properties:
+- runs: Amount of times the task has run (starts from 1)
+- params: Parameters with which the task was instanced for the first time (doesn't change)
+- rerun([params]): Re-runs the task with original parameters (passed by the builder), if an object is provided, it will replace the task's parameters with the object passed.
+- error: Error thrown by the task's `fail` event, (if passed)
+
+onSuccess
+---------
+Runs when a task succeeds, `onSuccess` can be used to stop the job's execution even though the task was successful. This can be useful when we need to stop our execution depending on the data we receive.
+
+The `task` object passed to the `onSuccess` hook has the following properties:
+- data: Data returned by the `task`'s success() method
+- stopJob(): Method which, if called, stops the job execution in once the current `executionBlock` is done
+
+Here's an example on when this could be useful:
+
+```javascript
+  Yakuza.task('scraper', 'agent', 'login').setup(function (config) {
+    config.hooks = {
+      'onSuccess': function (task) {
+        // We stop the job if the loginStatus returns `wrongPassword`
+        // remember: in many cases wrongPassword might NOT be an error, identifying what's the login status
+        // can be part of a successful scraping process as well.
+      
+        if (task.data.loginStatus === 'wrongPassword') {
+          task.stopJob();
+        }
+      }
+    };
+  }).main(function (task, http, params) {
+    var opts;
+    
+    opts = {
+      url: 'http://someurl.com',
+      data: {
+        username: 'foo',
+        password: 'bar'
+      }
+    };
+    
+    http.post(opts)
+    .then(function (res, body) {
+      if (body === 'wrong password') {
+        task.success({loginStatus: 'wrongPassword});
+      } else {
+        task.success({loginStatus: 'authorized});
+      }
+    })
+    .fail(function (error) {
+      task.fail(error);
+    })
+    .done();
+  });
+```
+
+When calling `task.stopJob()` the `task:<taskName>:success` event is, of course, still fired.
 
 Advanced
 ========
@@ -483,6 +561,27 @@ Yakuza.task('scraper', 'agent', 'login').main(function (task, http, params) {
 ```
 
 Any new task will now have its `http` object initialized with the cookies that were present at the time `saveCookies` was called. Notice that only tasks from the next **execution block** will be afected.
+
+Retrying tasks
+--------------
+In many cases the websites we scrape are sloppy, implemented in very wrong ways or simply unstable. This will cause our tasks to sometimes fail without warning. For this reason `Yakuza` provides a way of re-running tasks when this happens via it's `onFail` hook.
+
+When a task is rerun, it restarts to the point in which it was instanced. Except (for some properties like `startTime` which marks the moment when the task was first run)
+
+```javascript
+Yakuza.task('scraper', 'agent', 'login').setup(function (config) {
+  config.hooks = {
+    onFail: function (task) {
+      if (task.runs <== 5) {
+        // Will retry the task a maximum amount of 5 times
+        task.rerun();
+      }
+    }
+  };
+});
+```
+
+You can find the `task` object's properties on the **Hooks section**
 
 Glossary
 ========
