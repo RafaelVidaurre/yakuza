@@ -24,12 +24,6 @@ function Agent (id) {
   this.__applied = false;
 
   /**
-  * List of functions which modify the Agent's configuration (provided by setup())
-  * @private
-  */
-  this.__configCallbacks = [];
-
-  /**
   * Agent's configuration object (set by running all configCallback functions)
   * @private
   */
@@ -57,17 +51,6 @@ function Agent (id) {
   */
   this.id = id;
 }
-
-/**
-* Run functions passed via config(), thus applying their config logic
-* @private
-*/
-Agent.prototype.__applyConfigCallbacks = function () {
-  var _this = this;
-  _.each(_this.__configCallbacks, function (configCallback) {
-    configCallback(_this.__config);
-  });
-};
 
 /**
 * Turns every element in the execution plan into an array for type consistency
@@ -109,40 +92,28 @@ Agent.prototype.__formatPlan = function () {
 };
 
 /**
-* Applies all task definitions
-* @private
-*/
-Agent.prototype.__applyTaskDefinitions = function () {
-  _.each(this._taskDefinitions, function (taskDefinition) {
-    taskDefinition._applySetup();
-  });
-};
-
-/**
 * Applies all necessary processes regarding the setup stage of the agent
 */
 Agent.prototype._applySetup = function () {
   if (this.__applied) {
     return;
   }
-  this.__applyConfigCallbacks();
-  this.__applyTaskDefinitions();
+
   this.__formatPlan();
   this.__applied = true;
 };
 
 /**
-* Saves a configuration function into the config callbacks array
-* @param {function} cbConfig method which modifies the agent's config object (passed as argument)
+* Sets the task's execution plan
+* @param {Array} executionPlan array representing the execution plan for this agent
 */
-Agent.prototype.setup = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) {
-    throw new Error('Setup argument must be a function');
+Agent.prototype.plan = function (executionPlan) {
+  // TODO: Validate execution plan format right away
+  if (!_.isArray(executionPlan)) {
+    throw new Error('Agent plan must be an array of task ids');
   }
 
-  this.__configCallbacks.push(cbConfig);
-
-  return this;
+  this.__config.plan = executionPlan;
 };
 
 /**

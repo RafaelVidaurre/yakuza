@@ -20,36 +20,35 @@ beforeEach(function () {
 });
 
 describe('Agent', function () {
-  describe('#setup', function () {
-    var error;
+  describe('#plan', function () {
+    it('should set the execution plan', function () {
+      var agent;
 
-    error = 'Setup argument must be a function';
+      agent = yakuza.agent('Scraper', 'Agent');
 
-    it('should throw if argument is not a function', function () {
-      (function () {
-        yakuza.agent('Scraper', 'Agent').setup('foo');
-      }).should.throw(error);
-      (function () {
-        yakuza.agent('Scraper', 'Agent').setup(['foo']);
-      }).should.throw(error);
-      (function () {
-        yakuza.agent('Scraper', 'Agent').setup(123);
-      }).should.throw(error);
+      agent.plan([
+        'Task1'
+      ]);
+
+      agent.__config.plan.should.eql(['Task1']);
     });
 
-    it('it should add a config callback', function (done) {
-      yakuza.agent('Scraper', 'Agent').setup(function (config) {
-        config.plan = [
-          'Task1'
-        ];
-        done();
-      });
+    it('should throw if argument is not an array', function () {
+      var error;
 
-      yakuza.task('Scraper', 'Agent', 'Task1').main(function (task) {
-        task.success();
-      });
+      error = 'Agent plan must be an array of task ids';
 
-      yakuza.ready();
+      (function () {
+        yakuza.agent('Scraper', 'Agent').plan(123);
+      }).should.throw(error);
+
+      (function () {
+        yakuza.agent('Scraper', 'Agent').plan({foo: 'bar'});
+      }).should.throw(error);
+
+      (function () {
+        yakuza.agent('Scraper', 'Agent').plan('foo');
+      }).should.throw(error);
     });
   });
 
@@ -65,13 +64,9 @@ describe('Agent', function () {
     beforeEach(function () {
       agent = yakuza.agent('Scraper', 'Agent');
     });
+
     it('should create an agent-level routine', function () {
-      agent.setup(function (config) {
-        config.plan = [
-          'Task1',
-          'Task2'
-        ];
-      });
+      agent.plan(['Task1', 'Task2']);
       agent.routine('OnlyOne', ['Task1']);
       yakuza.job('Scraper', 'Agent').routine('OnlyOne');
     });

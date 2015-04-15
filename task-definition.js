@@ -23,12 +23,6 @@ function TaskDefinition (id) {
   this.__id = id;
 
   /**
-  * List of function which modify the Task definition's configuration (provided by config())
-  * @private
-  */
-  this.__configCallbacks = [];
-
-  /**
   * Task definition's configuration object (set by running all configCallback functions)
   * Property names are pre-defined just for maintainability
   * @private
@@ -56,18 +50,6 @@ function TaskDefinition (id) {
 }
 
 /**
-* Run functions passed via config(), thus applying their config logic
-* @private
-*/
-TaskDefinition.prototype.__applyConfigCallbacks = function () {
-  var _this = this;
-
-  _.each(_this.__configCallbacks, function (configCallback) {
-    configCallback(_this.__config);
-  });
-};
-
-/**
 * Executes the builder function and builds the Task instances
 * Note: This is called by the job
 * @return {array} An array of Task instances
@@ -93,15 +75,16 @@ TaskDefinition.prototype._build = function (builderParams, cookieJar, job) {
 };
 
 /**
-* Applies the current task setup
+* Sets task hooks
 */
-TaskDefinition.prototype._applySetup = function () {
-  if (this._applied) {
-    return;
+TaskDefinition.prototype.hooks = function (hooks) {
+  if (!_.isObject(hooks) || _.isArray(hooks)) {
+    throw new Error('Hooks argument must be an object');
   }
 
-  this.__applyConfigCallbacks();
-  this._applied = true;
+  this.__config.hooks = hooks;
+
+  return this;
 };
 
 /**
@@ -135,19 +118,5 @@ TaskDefinition.prototype.builder = function (builderMethod) {
   return this;
 };
 
-/**
-* Saves a configuration function into the config callbacks array
-* @param {function} cbConfig method which modifies the Task definition's config object (passed as
-* argument)
-*/
-TaskDefinition.prototype.setup = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) {
-    throw new Error('Setup argument must be a function');
-  }
-
-  this.__configCallbacks.push(cbConfig);
-
-  return this;
-};
 
 module.exports = TaskDefinition;

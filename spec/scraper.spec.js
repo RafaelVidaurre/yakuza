@@ -13,11 +13,9 @@ chai.use(sinonChai);
 beforeEach(function () {
   yakuza = new YakuzaBase();
   yakuza.scraper('Scraper');
-  yakuza.agent('Scraper', 'Agent').setup(function (config) {
-    config.plan = [
-      'Task1'
-    ];
-  });
+  yakuza.agent('Scraper', 'Agent').plan([
+    'Task1'
+  ]);
   yakuza.task('Scraper', 'Agent', 'Task1').main(function (task) {
     task.success();
   });
@@ -113,12 +111,10 @@ describe('Scraper', function () {
         return newValue;
       });
 
-      yakuza.agent('Scraper', 'OtherAgent').setup(function (config) {
-        config.plan = [
-          'ConcatTask',
-          'FinalTask'
-        ];
-      });
+      yakuza.agent('Scraper', 'OtherAgent').plan([
+        'ConcatTask',
+        'FinalTask'
+      ]);
 
       yakuza.task('Scraper', 'OtherAgent', 'ConcatTask').builder(function () {
         return ['this', ' is', ' con', 'catenated'];
