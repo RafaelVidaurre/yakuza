@@ -19,12 +19,10 @@ beforeEach(function () {
 
   yakuza = new YakuzaBase();
   yakuza.scraper('Scraper');
-  yakuza.agent('Scraper', 'Agent').setup(function (config) {
-    config.plan = [
-      'Task1',
-      {taskId: 'Task2'}
-    ];
-  });
+  yakuza.agent('Scraper', 'Agent').plan([
+    'Task1',
+    {taskId: 'Task2'}
+  ]);
 });
 
 describe('Task', function () {

@@ -13,51 +13,15 @@ chai.use(sinonChai);
 beforeEach(function () {
   yakuza = new YakuzaBase();
   yakuza.scraper('Scraper');
-  yakuza.agent('Scraper', 'Agent').setup(function (config) {
-    config.plan = [
-      'Task1'
-    ];
-  });
+  yakuza.agent('Scraper', 'Agent').plan([
+    'Task1'
+  ]);
   yakuza.task('Scraper', 'Agent', 'Task1').main(function (task) {
     task.success();
   });
 });
 
 describe('Scraper', function () {
-  describe('#setup', function () {
-    it('should add a config callback', function (done) {
-      var job;
-
-      yakuza.scraper('Scraper').setup(function () {
-        done();
-      });
-
-      job = yakuza.job('Scraper', 'Agent');
-      job.enqueue('Task1');
-
-      job.run();
-    });
-
-    it('should throw if argument is not a function', function () {
-      var error;
-
-      error = 'Config argument must be a function';
-
-      (function () {
-        yakuza.scraper('Scraper').setup('foo');
-      }).should.throw(error);
-      (function () {
-        yakuza.scraper('Scraper').setup('foo');
-      }).should.throw(error);
-      (function () {
-        yakuza.scraper('Scraper').setup([123, 456]);
-      }).should.throw(error);
-      (function () {
-        yakuza.scraper('Scraper').setup({foo: 'bar'});
-      }).should.throw(error);
-    });
-  });
-
   describe('#agent', function () {
     it('should throw if argument is not a non-empty string', function () {
       var error;
@@ -147,12 +111,10 @@ describe('Scraper', function () {
         return newValue;
       });
 
-      yakuza.agent('Scraper', 'OtherAgent').setup(function (config) {
-        config.plan = [
-          'ConcatTask',
-          'FinalTask'
-        ];
-      });
+      yakuza.agent('Scraper', 'OtherAgent').plan([
+        'ConcatTask',
+        'FinalTask'
+      ]);
 
       yakuza.task('Scraper', 'OtherAgent', 'ConcatTask').builder(function () {
         return ['this', ' is', ' con', 'catenated'];

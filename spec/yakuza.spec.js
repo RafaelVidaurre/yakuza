@@ -154,17 +154,15 @@ describe('Yakuza', function () {
   });
 
   describe('#ready', function () {
-    it('should call scraper\'s and agent\'s _applySetup method', function () {
+    it('should apply ALL agents', function () {
       var scraper, agent;
 
       scraper = yakuza.scraper('scraper');
       agent = scraper.agent('agent');
-      sinon.stub(scraper, '_applySetup');
       sinon.stub(agent, '_applySetup');
 
       yakuza.ready();
 
-      scraper._applySetup.callCount.should.eql(1);
       agent._applySetup.callCount.should.eql(1);
     });
   });

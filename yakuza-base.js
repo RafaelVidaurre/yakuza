@@ -131,7 +131,6 @@ YakuzaBase.prototype.job = function (scraperId, agentId, params) {
 */
 YakuzaBase.prototype.ready = function () {
   _.each(this.__scrapers, function (scraper) {
-    scraper._applySetup();
     _.each(scraper._agents, function (agent) {
       agent._applySetup();
     });

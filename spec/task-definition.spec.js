@@ -19,31 +19,11 @@ describe('TaskDefinition', function () {
     yakuza.agent('Scraper', 'Agent');
   });
 
-  describe('#_applySetup', function () {
-    it('should only apply once', function () {
-      var task;
-
-      task = yakuza.task('Scraper', 'Agent', 'Task');
-
-      task.setup(function (config) {
-        return;
-      });
-
-      sinon.stub(task, '__applyConfigCallbacks');
-
-      task._applySetup();
-      task._applySetup();
-      task.__applyConfigCallbacks.callCount.should.eql(1);
-    });
-  });
-
   describe('#_build', function () {
     it('should throw if no main method is set', function () {
       var job;
 
-      yakuza.agent('Scraper', 'Agent').setup(function (config) {
-        config.plan = ['SomeTask'];
-      });
+      yakuza.agent('Scraper', 'Agent').plan(['SomeTask']);
       yakuza.task('Scraper', 'Agent', 'SomeTask');
       job = yakuza.job('Scraper', 'Agent');
       job.enqueue('SomeTask');
@@ -54,43 +34,42 @@ describe('TaskDefinition', function () {
     });
   });
 
-  describe('#setup', function () {
-    it('should push config callbacks', function () {
-      var calls;
-
-      calls = 0;
-      yakuza.task('Scraper', 'Agent', 'Task').setup(function () {
-        calls += 1;
-      }).setup(function () {
-        calls += 1;
-      });
-
-      yakuza.task('Scraper', 'Agent', 'Task')._applySetup();
-
-      calls.should.eql(2);
-    });
-
-    it('should throw if argument is not a function', function () {
-      (function () {
-        yakuza.task('Scraper', 'Agent', 'SomeTask').setup('foo');
-      }).should.throw();
-      (function () {
-        yakuza.task('Scraper', 'Agent', 'SomeTask').setup(['foo']);
-      }).should.throw();
-      (function () {
-        yakuza.task('Scraper', 'Agent', 'SomeTask').setup(123);
-      }).should.throw();
-    });
-  });
-
-  describe('hooks', function () {
+  describe('#hooks', function () {
     beforeEach(function () {
-      yakuza.agent('Scraper', 'Agent').setup(function (config) {
-        config.plan = [
-          'Task',
-          'OtherTask'
-        ];
-      });
+      yakuza.agent('Scraper', 'Agent').plan([
+        'Task',
+        'OtherTask'
+      ]);
+    });
+
+    it('should provide method chaining', function () {
+      var task;
+
+      task = yakuza.task('Scraper', 'Agent', 'Foo');
+
+      task.hooks({
+        onFail: function () {
+          // NOOP
+        }
+      }).should.eql(task);
+    });
+
+    it('should throw if argument is not an object', function () {
+      var error;
+
+      error = 'Hooks argument must be an object';
+
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'Foo').hooks();
+      }).should.throw(error);
+
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'Foo').hooks(123);
+      }).should.throw(error);
+
+      (function () {
+        yakuza.task('Scraper', 'Agent', 'Foo').hooks(['foo', 'bar']);
+      }).should.throw(error);
     });
 
     describe('onFail', function () {
@@ -101,16 +80,14 @@ describe('TaskDefinition', function () {
         hookCalled = false;
         params = {foo: 'bar'};
 
-        yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
-          config.hooks = {
-            onFail: function (task) {
-              task.error.should.equal(error);
-              task.runs.should.eql(1);
-              task.params.should.equal(params);
+        yakuza.task('Scraper', 'Agent', 'Task').hooks({
+          onFail: function (task) {
+            task.error.should.equal(error);
+            task.runs.should.eql(1);
+            task.params.should.equal(params);
 
-              hookCalled = true;
-            }
-          };
+            hookCalled = true;
+          }
         })
         .builder(function () {
           return params;
@@ -132,13 +109,11 @@ describe('TaskDefinition', function () {
         it('should be able to rerun a task', function (done) {
           var job;
 
-          yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
-            config.hooks = {
-              onFail: function (task) {
-                // Rerun task with its param increased by 1
-                task.rerun(task.params + 1);
-              }
-            };
+          yakuza.task('Scraper', 'Agent', 'Task').hooks({
+            onFail: function (task) {
+              // Rerun task with its param increased by 1
+              task.rerun(task.params + 1);
+            }
           })
           .builder(function () {
             return 0;
@@ -164,16 +139,14 @@ describe('TaskDefinition', function () {
 
           runs = 0;
 
-          yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
-            config.hooks = {
-              onFail: function (task) {
-                if (task.runs === 2) {
-                  return;
-                }
-
-                task.rerun();
+          yakuza.task('Scraper', 'Agent', 'Task').hooks({
+            onFail: function (task) {
+              if (task.runs === 2) {
+                return;
               }
-            };
+
+              task.rerun();
+            }
           })
           .builder(function () {
             return 10;
@@ -203,12 +176,10 @@ describe('TaskDefinition', function () {
 
         hookCalled = false;
 
-        yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
-          config.hooks = {
-            onSuccess: function () {
-              hookCalled = true;
-            }
-          };
+        yakuza.task('Scraper', 'Agent', 'Task').hooks({
+          onSuccess: function () {
+            hookCalled = true;
+          }
         }).main(function (task) {
           task.success();
         });
@@ -226,12 +197,10 @@ describe('TaskDefinition', function () {
       it('should finish the job if stopJob() is called', function (done) {
         var job;
 
-        yakuza.task('Scraper', 'Agent', 'Task').setup(function (config) {
-          config.hooks = {
-            onSuccess: function (event) {
-              event.stopJob();
-            }
-          };
+        yakuza.task('Scraper', 'Agent', 'Task').hooks({
+          onSuccess: function (event) {
+            event.stopJob();
+          }
         }).main(function (task) {
           task.success();
         });
