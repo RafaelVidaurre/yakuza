@@ -14,13 +14,11 @@ beforeEach(function () {
   yakuza = new YakuzaBase();
 
   yakuza.scraper('Scraper');
-  yakuza.agent('Scraper', 'Parallel').setup(function (config) {
-    config.plan = [
-      'Task1',
-      ['Task2', 'Task3'],
-      'Task4'
-    ];
-  });
+  yakuza.agent('Scraper', 'Parallel').plan([
+    'Task1',
+    ['Task2', 'Task3'],
+    'Task4'
+  ]);
 
   yakuza.task('Scraper', 'Parallel', 'Task1').main(function (task) {
     task.success(1);
@@ -182,12 +180,10 @@ describe('Job', function () {
 
     beforeEach(function () {
       newYakuza = new YakuzaBase();
-      newYakuza.agent('FooScraper', 'FooAgent').setup(function (config) {
-        config.plan = [
-          'FailTask',
-          'SuccessTask'
-        ];
-      });
+      newYakuza.agent('FooScraper', 'FooAgent').plan([
+        'FailTask',
+        'SuccessTask'
+      ]);
       newYakuza.task('FooScraper', 'FooAgent', 'FailTask').main(function (task) {
         task.fail(new Error('Error!'));
       });
@@ -360,11 +356,7 @@ describe('Job', function () {
       it('should throw if enqueued tasks are not defined', function () {
         var invalidJob;
 
-        yakuza.agent('Scraper', 'InvalidAgent').setup(function (config) {
-          config.plan = [
-            'FakeTask'
-          ];
-        });
+        yakuza.agent('Scraper', 'InvalidAgent').plan(['FakeTask']);
 
         invalidJob = yakuza.job('Scraper', 'InvalidAgent');
         invalidJob.enqueue('FakeTask');
@@ -377,12 +369,10 @@ describe('Job', function () {
 
     describe('execution queue', function () {
       beforeEach(function () {
-        yakuza.scraper('QueueTest').agent('SyncTest').setup(function (config) {
-          config.plan = [
-            {taskId: 'SyncTask', selfSync: true},
-            'AsyncTask'
-          ];
-        });
+        yakuza.scraper('QueueTest').agent('SyncTest').plan([
+          {taskId: 'SyncTask', selfSync: true},
+          'AsyncTask'
+        ]);
         yakuza.task('QueueTest', 'SyncTest', 'SyncTask').builder(function () {
           return [1, 2];
         })
