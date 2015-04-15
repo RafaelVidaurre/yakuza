@@ -103,23 +103,19 @@ Remember the `plan` property we mentioned before? Now is a good time to use that
 This plan runs `login`and `getArticlesList` sequentially:
 
 ```javascript
-Yakuza.agent('articles', 'techCrunch').setup(function (config) {
-  config.plan = [
-    'login',
-    'getArticlesList'
-  ];
-});
+Yakuza.agent('articles', 'techCrunch').plan([
+  'login',
+  'getArticlesList'
+]);
 ```
 
 This one runs `login` before the other tasks, but runs `getArticlesList` and `getUsersList` in parallel as they are in the same sub-array:
 
 ```javascript
-Yakuza.agent('articles', 'techCrunch').setup(function (config) {
-  config.plan = [
-    'login',
-    ['getArticlesList', 'getUsersList']
-  ];
-});
+Yakuza.agent('articles', 'techCrunch').plan([
+  'login',
+  ['getArticlesList', 'getUsersList']
+]);
 ```
 
 Agents can also define something called `routines` which in turn define a set of tasks to be run. For example you could want to define three routines:
@@ -336,15 +332,13 @@ Hooks are run in specific moments of an instanced `task`'s life (before emitting
 To specify a `task`'s hooks use its `setup` method.
 
 ```javascript
-Yakuza.task('scraper', 'agent', 'someTask').setup(function (config) {
-  config.hooks = {
-    'onFail': function (task) {
-      // ... do stuff
-    },
-    'onSuccess': function (task) {
-      // ... do stuff
-    }
-  };
+Yakuza.task('scraper', 'agent', 'someTask').hooks({
+  'onFail': function (task) {
+    // ... do stuff
+  },
+  'onSuccess': function (task) {
+    // ... do stuff
+  }
 });
 ```
 
@@ -369,18 +363,16 @@ The `task` object passed to the `onSuccess` hook has the following properties:
 Here's an example on when this could be useful:
 
 ```javascript
-  Yakuza.task('scraper', 'agent', 'login').setup(function (config) {
-    config.hooks = {
-      'onSuccess': function (task) {
-        // We stop the job if the loginStatus returns `wrongPassword`
-        // remember: in many cases wrongPassword might NOT be an error, identifying what's the login status
-        // can be part of a successful scraping process as well.
-      
-        if (task.data.loginStatus === 'wrongPassword') {
-          task.stopJob();
-        }
+  Yakuza.task('scraper', 'agent', 'login').hooks({
+    'onSuccess': function (task) {
+      // We stop the job if the loginStatus returns `wrongPassword`
+      // remember: in many cases wrongPassword might NOT be an error, identifying what's the login status
+      // can be part of a successful scraping process as well.
+    
+      if (task.data.loginStatus === 'wrongPassword') {
+        task.stopJob();
       }
-    };
+    }
   }).main(function (task, http, params) {
     var opts;
     
@@ -393,8 +385,8 @@ Here's an example on when this could be useful:
     };
     
     http.post(opts)
-    .then(function (res, body) {
-      if (body === 'wrong password') {
+    .then(function (result) {
+      if (result.body === 'wrong password') {
         task.success({loginStatus: 'wrongPassword});
       } else {
         task.success({loginStatus: 'authorized});
@@ -537,13 +529,12 @@ Running task instances sequentially
 Sometimes because of server limitations, we might want several instances of the same task to run sequentially. Take our previous example about articles, where we instanced `getArticleData` multiple times. Let's say the server doesn't allow us to view multiple articles in parallel because god knows why. We would need to change the default behavior of task instances and run them one after the other.
 
 This can be achieved in the agent plan by changing the `selfSync` property:
+
 ```javascript
-Yakuza.agent('articles', 'fooBlog').setup(function (config) {
-  config.plan = [
-    'getArticlesList',
-    {taskId: 'getArticleData', selfSync: true}
-  ];
-});
+Yakuza.agent('articles', 'fooBlog').plan([
+  'getArticlesList',
+  {taskId: 'getArticleData', selfSync: true}
+]);
 ```
 
 Saving cookies
@@ -551,8 +542,8 @@ Saving cookies
 A lot of times we need to preserve cookies so that they exist for other tasks. This can be achieved by a method called `saveCookies()`.
 
 Example:
-```javascript
 Yakuza.task('scraper', 'agent', 'login').main(function (task, http, params) {
+```javascript
   // .. Send a login form
   task.saveCookies();
   // .. Do more stuff
@@ -569,15 +560,13 @@ In many cases the websites we scrape are sloppy, implemented in very wrong ways 
 When a task is rerun, it restarts to the point in which it was instanced. Except (for some properties like `startTime` which marks the moment when the task was first run)
 
 ```javascript
-Yakuza.task('scraper', 'agent', 'login').setup(function (config) {
-  config.hooks = {
-    onFail: function (task) {
-      if (task.runs <== 5) {
-        // Will retry the task a maximum amount of 5 times
-        task.rerun();
-      }
+Yakuza.task('scraper', 'agent', 'login').hooks({
+  onFail: function (task) {
+    if (task.runs <== 5) {
+      // Will retry the task a maximum amount of 5 times
+      task.rerun();
     }
-  };
+  }
 });
 ```
 
@@ -590,13 +579,11 @@ Execution Block
 ---------------
 An execution block is a set of tasks that run in parallel. For example, take the following plan:
 ```javascript
-Yakuza.agent('scraper', 'agent').setup(function (config) {
-  config.plan = [
-    'task1', // Execution block 1
-    ['task2', 'task3'], // Execution block 2
-    'task4' // Execution block 3
-  ];
-});
+Yakuza.agent('scraper', 'agent').plan([
+  'task1', // Execution block 1
+  ['task2', 'task3'], // Execution block 2
+  'task4' // Execution block 3
+])
 ```
 
 Execution blocks run sequentially, meaning one execution block will only run when the previous block was run or **skipped**.
