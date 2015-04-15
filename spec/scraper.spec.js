@@ -24,40 +24,6 @@ beforeEach(function () {
 });
 
 describe('Scraper', function () {
-  describe('#setup', function () {
-    it('should add a config callback', function (done) {
-      var job;
-
-      yakuza.scraper('Scraper').setup(function () {
-        done();
-      });
-
-      job = yakuza.job('Scraper', 'Agent');
-      job.enqueue('Task1');
-
-      job.run();
-    });
-
-    it('should throw if argument is not a function', function () {
-      var error;
-
-      error = 'Config argument must be a function';
-
-      (function () {
-        yakuza.scraper('Scraper').setup('foo');
-      }).should.throw(error);
-      (function () {
-        yakuza.scraper('Scraper').setup('foo');
-      }).should.throw(error);
-      (function () {
-        yakuza.scraper('Scraper').setup([123, 456]);
-      }).should.throw(error);
-      (function () {
-        yakuza.scraper('Scraper').setup({foo: 'bar'});
-      }).should.throw(error);
-    });
-  });
-
   describe('#agent', function () {
     it('should throw if argument is not a non-empty string', function () {
       var error;

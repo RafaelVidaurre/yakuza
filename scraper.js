@@ -17,24 +17,6 @@ Agent = require('./agent');
 */
 function Scraper () {
   /**
-  * Determines if the setup processes have been applied
-  * @private
-  */
-  this.__applied = false;
-
-  /**
-  * Array of callbacks provided via config() which set the Scraper's configuration variables
-  * @private
-  */
-  this.__configCallbacks = [];
-
-  /**
-  * Config object, contains configuration data and is exposed via the setup() method
-  * @private
-  */
-  this.__config = {};
-
-  /**
   * Object which contains scraper-wide routine definitions, routines are set via the routine()
   * method
   */
@@ -68,43 +50,6 @@ function Scraper () {
 Scraper.prototype.__createAgent = function (agentId) {
   this._agents[agentId] = new Agent(agentId);
   return this._agents[agentId];
-};
-
-/**
-* Run functions passed via config(), thus applying their config logic
-* @private
-*/
-Scraper.prototype.__applyConfigCallbacks = function () {
-  var _this = this;
-  _.each(_this.__configCallbacks, function (configCallback) {
-    configCallback(_this.__config);
-  });
-};
-
-/**
-* Applies all necessary processes regarding the setup stage of the scraper
-*/
-Scraper.prototype._applySetup = function () {
-  if (this.__applied) {
-    return;
-  }
-  this.__applyConfigCallbacks();
-  this.__applied = true;
-};
-
-/**
-* Used to configure the scraper, it enqueues each configuration function meaning it
-* allows a scraper to be configured in multiple different places
-* @param {function} cbConfig function which will modify config parameters
-*/
-Scraper.prototype.setup = function (cbConfig) {
-  if (!_.isFunction(cbConfig)) {
-    throw new Error('Config argument must be a function');
-  }
-
-  this.__configCallbacks.push(cbConfig);
-
-  return Scraper;
 };
 
 /**
