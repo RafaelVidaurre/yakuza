@@ -811,9 +811,8 @@ Job.prototype.routine = function (routineName) {
 * @fires job:start
 */
 Job.prototype.run = function () {
-  // TODO: Throw error on job rerun
   if (this.__started) {
-    return;
+    throw new Error('A job cannot be run more than once');
   }
 
   if (!this.__enqueuedTasksExist()) {

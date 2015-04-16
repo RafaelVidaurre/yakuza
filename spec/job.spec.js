@@ -358,19 +358,11 @@ describe('Job', function () {
         someJob = yakuza.job('Scraper', 'Parallel');
       });
 
-      it('should not run twice', function (done) {
-        var startCount;
-
-        startCount = 0;
-        someJob.on('job:start', function () {
-          startCount += 1;
+      it('should throw if run twice', function () {
+        (function () {
           someJob.run();
-        });
-        someJob.on('job:finish', function () {
-          startCount.should.eql(1);
-          done();
-        });
-        someJob.run();
+          someJob.run();
+        }).should.throw('A job cannot be run more than once');
       });
 
       it('should throw if enqueued tasks are not defined', function () {
