@@ -182,7 +182,8 @@ describe('Job', function () {
       newYakuza = new YakuzaBase();
       newYakuza.agent('FooScraper', 'FooAgent').plan([
         'FailTask',
-        'SuccessTask'
+        'SuccessTask',
+        'StopTask'
       ]);
       newYakuza.task('FooScraper', 'FooAgent', 'FailTask').main(function (task) {
         task.fail(new Error('Error!'));
@@ -299,6 +300,25 @@ describe('Job', function () {
         successJob = newYakuza.job('FooScraper', 'FooAgent');
         successJob.enqueue('SuccessTask');
         successJob.on('task:SuccessTask:success', function () {
+          done();
+        });
+        successJob.run();
+      });
+
+      it('should be called if a task succeeds and rejects', function (done) {
+        var successJob;
+
+        newYakuza.task('FooScraper', 'FooAgent', 'StopTask').hooks({
+          onSuccess: function (task) {
+            task.stopJob();
+          }
+        }).main(function (task) {
+          task.success();
+        });
+
+        successJob = newYakuza.job('FooScraper', 'FooAgent');
+        successJob.enqueue('StopTask');
+        successJob.on('task:StopTask:success', function () {
           done();
         });
         successJob.run();

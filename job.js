@@ -201,7 +201,7 @@ Job.prototype.__cloneCookieJar = function (cookieJar) {
 * @return {array} an array of Tasks
 */
 Job.prototype.__buildTask = function (taskSpecs) {
-  var _this, buildResponse, builderParams, clonedCookieJar, taskDefinition;
+  var _this, builderResponse, builderParams, clonedCookieJar, taskDefinition;
 
   _this = this;
 
@@ -213,9 +213,9 @@ Job.prototype.__buildTask = function (taskSpecs) {
   };
 
   clonedCookieJar = this.__cloneCookieJar(this.__cookieJar);
-  buildResponse = taskDefinition._build(builderParams, clonedCookieJar, this);
+  builderResponse = taskDefinition._build(builderParams, clonedCookieJar, this);
 
-  return buildResponse;
+  return builderResponse;
 };
 
 /**
@@ -272,7 +272,7 @@ Job.prototype.__buildExecutionBlock = function (planGroup) {
 * // Input example
 * [{task: <taskInstance>, next: {...}}, {task: <taskInstance>, next: null}]
 */
-Job.prototype.__retrieveExecutionBlockPromises = function (executionBlock) {
+Job.prototype.__retrieveExecutionQueueBlockPromises = function (executionBlock) {
   var finalPromises;
 
   function retrieveTaskSpecPromises (taskSpec) {
@@ -354,7 +354,7 @@ Job.prototype.__runExecutionBlock = function (executionBlock) {
   var _this, runningTasks;
 
   _this = this;
-  runningTasks = this.__retrieveExecutionBlockPromises(executionBlock);
+  runningTasks = this.__retrieveExecutionQueueBlockPromises(executionBlock);
 
   Q.all(runningTasks).then(function (results) {
     // Set cookies of results
@@ -388,12 +388,12 @@ Job.prototype.__runCurrentExecutionBlock = function () {
 };
 
 /**
-* increments execution plan index, builds an execution block from it and pushes it to the execution
-* queue.
+* increments execution plan index, builds an execution queue block from it and pushes it to the
+* execution queue
 * @fires eq:blockApply
 * @private
 */
-Job.prototype.__applyNextExecutionBlock = function () {
+Job.prototype.__applyNextExecutionQueueBlock = function () {
   var executionBlock;
 
   this.__planIdx += 1;
@@ -425,11 +425,12 @@ Job.prototype.__prepareRun = function () {
 * @fires task:finish
 * @private
 */
-Job.prototype.__prepareCurrentExecutionBlock = function () {
-  var _this, promises;
+Job.prototype.__prepareCurrentExecutionQueueBlock = function () {
+  var _this, promises, currentEQBlock;
 
   _this = this;
-  promises = this.__retrieveExecutionBlockPromises(this.__executionQueue[this.__executionQueueIdx]);
+  currentEQBlock = this.__executionQueue[this.__executionQueueIdx];
+  promises = this.__retrieveExecutionQueueBlockPromises(currentEQBlock);
 
   _.each(promises, function (promise) {
     promise.then(function (response) {
@@ -444,7 +445,12 @@ Job.prototype.__prepareCurrentExecutionBlock = function () {
       _this.__events.emit('task:finish', response);
 
     }, function (response) {
-      _this.__events.emit('task:fail', response);
+      if (response.status === 'success') {
+        _this.__events.emit('task:success', response);
+      } else {
+        _this.__events.emit('task:fail', response);
+      }
+
       _this.__events.emit('task:finish', response);
     }).done();
   });
@@ -506,7 +512,7 @@ Job.prototype.__onTaskFinish = function (response) {
 Job.prototype.__onJobStart = function () {
   this.__publicEvents.emit('job:start');
   this.__prepareRun();
-  this.__applyNextExecutionBlock();
+  this.__applyNextExecutionQueueBlock();
 };
 
 /**
@@ -543,7 +549,7 @@ Job.prototype.__onJobFail = function (response) {
 */
 Job.prototype.__onEqBlockApply = function () {
   // Set the new built tasks' events and listens to their promises
-  this.__prepareCurrentExecutionBlock();
+  this.__prepareCurrentExecutionQueueBlock();
   // Run the new execution block
   this.__runCurrentExecutionBlock();
 };
@@ -566,7 +572,7 @@ Job.prototype.__onEqBlockStop = function () {
 * @private
 */
 Job.prototype.__onEqBlockContinue = function () {
-  this.__applyNextExecutionBlock();
+  this.__applyNextExecutionQueueBlock();
 };
 
 /**
@@ -805,6 +811,7 @@ Job.prototype.routine = function (routineName) {
 * @fires job:start
 */
 Job.prototype.run = function () {
+  // TODO: Throw error on job rerun
   if (this.__started) {
     return;
   }
