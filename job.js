@@ -631,7 +631,6 @@ Job.prototype.__applyComponents = function () {
     return;
   }
 
-  this._scraper._applySetup();
   this.__agent._applySetup();
 
   this.__componentsApplied = true;
