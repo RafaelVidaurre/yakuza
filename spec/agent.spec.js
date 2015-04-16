@@ -108,13 +108,15 @@ describe('Agent', function () {
 
   describe('running', function () {
     it('should throw if enqueuing without plan', function () {
-      var newJob;
+      var newJob, error;
 
+      error = 'Agent Agent has no execution plan, use the agent\'s plan method' +
+        ' to define it';
       newJob = yakuza.job('Scraper', 'Agent');
 
       (function () {
         newJob.enqueue('Task1');
-      }).should.throw();
+      }).should.throw(error);
     });
   });
 

@@ -49,6 +49,7 @@ function Scraper () {
 */
 Scraper.prototype.__createAgent = function (agentId) {
   this._agents[agentId] = new Agent(agentId);
+
   return this._agents[agentId];
 };
 
@@ -66,6 +67,7 @@ Scraper.prototype.agent = function (agentId) {
 
   agentExists = utils.hasKey(this._agents, agentId);
   thisAgent = agentExists ? this._agents[agentId] : this.__createAgent(agentId);
+
   return thisAgent;
 };
 

@@ -120,6 +120,7 @@ YakuzaBase.prototype.job = function (scraperId, agentId, params) {
 
   newId = shortId.generate();
   newJob = new Job(newId, scraper, agent, params);
+  // TODO: Remove this
   this.__jobs[newId] = newJob;
 
   return newJob;
@@ -136,5 +137,6 @@ YakuzaBase.prototype.ready = function () {
     });
   });
 };
+
 
 module.exports = YakuzaBase;
