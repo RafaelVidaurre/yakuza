@@ -114,6 +114,8 @@ Agent.prototype.plan = function (executionPlan) {
   }
 
   this.__config.plan = executionPlan;
+
+  return this;
 };
 
 /**

@@ -50,6 +50,14 @@ describe('Agent', function () {
         yakuza.agent('Scraper', 'Agent').plan('foo');
       }).should.throw(error);
     });
+
+    it('should provide chaining', function () {
+      var agent;
+
+      agent = yakuza.agent('Scraper', 'Agent');
+
+      agent.plan(['Test']).should.eql(agent);
+    });
   });
 
   describe('#task', function () {
