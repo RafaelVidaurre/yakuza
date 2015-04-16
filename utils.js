@@ -11,7 +11,7 @@ _ = require('lodash');
 
 module.exports = {
   /**
-  * Tells wether a key is present in a given object
+  * Tells whether a key is present in a given object
   * @param {object} obj Object on which to look for a key
   * @param {string} key Key to look for
   * @return {boolean}

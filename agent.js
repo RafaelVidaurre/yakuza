@@ -63,8 +63,8 @@ Agent.prototype.__formatPlan = function () {
   formattedPlan = [];
 
   if (_this.__config.plan.length <= 0) {
-    throw new Error('Agent ' + _this.id + ' has no execution plan, use the config object provided' +
-      ' by the setup method to define an execution plan');
+    throw new Error('Agent ' + _this.id + ' has no execution plan, use the agent\'s plan method' +
+      ' to define it');
   }
 
   // Turn each tier into an array
