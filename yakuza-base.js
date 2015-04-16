@@ -26,12 +26,6 @@ function YakuzaBase () {
   * @private
   */
   this.__scrapers = {};
-
-  /**
-  * Set of job instances
-  * @private
-  */
-  this.__jobs = {};
 }
 
 /**
@@ -120,8 +114,6 @@ YakuzaBase.prototype.job = function (scraperId, agentId, params) {
 
   newId = shortId.generate();
   newJob = new Job(newId, scraper, agent, params);
-  // TODO: Remove this
-  this.__jobs[newId] = newJob;
 
   return newJob;
 };
