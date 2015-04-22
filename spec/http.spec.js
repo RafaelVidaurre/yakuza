@@ -227,6 +227,17 @@ describe('Http', function () {
           http.get({}, function () {});
         }).should.throw();
       });
+
+      it('should not set cookie header if cookies are empty', function (done) {
+        var newHttp;
+
+        newHttp = new Http();
+
+        newHttp.get('http://www.1.com/', function (error, res) {
+          res.req._headers.should.not.have.property('cookie');
+          done();
+        });
+      });
     });
 
     describe('#del', function () {
