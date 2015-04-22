@@ -1,7 +1,7 @@
 {
   "name": "yakuza",
   "version": "1.0.3",
-  "description": "",
+  "description": "Heavyweight scraping framework for mobsters",
   "main": "yakuza.js",
   "repository": {
     "type": "git",
@@ -14,7 +14,9 @@
   },
   "keywords": [
     "scraping",
-    "framework"
+    "framework",
+    "heavy",
+    "full"
   ],
   "author": "Rafael Vidaurre",
   "license": "MIT",
