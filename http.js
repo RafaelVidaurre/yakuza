@@ -113,7 +113,7 @@ Http.prototype.__pushToLog = function (logEntry) {
 * @return {promise} a promise that resolves with the request's response
 */
 Http.prototype.request = function (method, opts, callback) {
-  var _this, data, url, finalOpts, makeRequest;
+  var _this, data, url, finalOpts, makeRequest, extendedCookies;
 
   _this = this;
   makeRequest = Q.defer();
@@ -128,7 +128,8 @@ Http.prototype.request = function (method, opts, callback) {
   data = opts.data || null;
 
   finalOpts = _.omit(opts, ['data', 'url']);
-  finalOpts.cookies = _.extend(this._cookieJar, finalOpts.cookies);
+  extendedCookies = _.extend(this._cookieJar, finalOpts.cookies);
+  finalOpts.cookies = _.keys(extendedCookies).length > 0 ? extendedCookies : null;
 
   needle.request(method, url, data, finalOpts, function (err, res, body) {
     _this.__interceptResponse(err, res, body, url, data, makeRequest, callback);
