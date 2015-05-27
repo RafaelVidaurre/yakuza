@@ -709,7 +709,7 @@ Job.prototype.__taskIsInPlan = function (taskId) {
 */
 Job.prototype._getShared = function (taskId, key) {
   if (this.__taskStorages[taskId] && this.__taskStorages[taskId][key] !== undefined) {
-    return this.__taskStorages[taskId][key];
+    return _.cloneDeep(this.__taskStorages[taskId][key]);
   }
 
   return undefined;
