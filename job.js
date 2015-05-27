@@ -709,7 +709,7 @@ Job.prototype.__taskIsInPlan = function (taskId) {
 */
 Job.prototype._getShared = function (taskId, key) {
   if (this.__taskStorages[taskId] && this.__taskStorages[taskId][key] !== undefined) {
-    return this.__taskStorages[taskId][key];
+    return _.cloneDeep(this.__taskStorages[taskId][key]);
   }
 
   return undefined;
@@ -723,7 +723,7 @@ Job.prototype._getShared = function (taskId, key) {
 */
 Job.prototype._setShared = function (taskId, key, value) {
   this.__taskStorages[taskId] = this.__taskStorages[taskId] || {};
-  this.__taskStorages[taskId][key] = _.cloneDeep(value);
+  this.__taskStorages[taskId][key] = value;
 };
 
 /**
