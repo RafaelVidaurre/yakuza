@@ -324,7 +324,11 @@ Job.prototype.__runTask = function (taskSpec) {
   if (nextTaskSpec) {
     taskRunning.then(function () {
       _this.__runTask(nextTaskSpec);
-    }).done();
+    })
+    .fail(function () {
+      // Do nothing, this rejection is being handled in `__runExecutionBlock`'s Q.all call
+    })
+    .done();
   }
 
   _this.__events.emit('task:start', thisTask);
