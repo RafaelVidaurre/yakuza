@@ -515,7 +515,7 @@ Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData').main(function (task,
 Perfect, our articles are now all in one single shared value. We should now retrieve it with a tiny final task. Let's call it `getJoinedArticles`
 
 ```javascript
-Yakuza.task('articlesScraper', 'fooBlog', 'getArticleData')
+Yakuza.task('articlesScraper', 'fooBlog', 'getJoinedArticles')
   .builder(function (job) {
     return job.shared('getArticleData.allArticles'); // Retrieve array of articles
   })
