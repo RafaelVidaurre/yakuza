@@ -387,9 +387,9 @@ Here's an example on when this could be useful:
     http.post(opts)
     .then(function (result) {
       if (result.body === 'wrong password') {
-        task.success({loginStatus: 'wrongPassword});
+        task.success({loginStatus: 'wrongPassword'});
       } else {
-        task.success({loginStatus: 'authorized});
+        task.success({loginStatus: 'authorized'});
       }
     })
     .fail(function (error) {
