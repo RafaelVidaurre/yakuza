@@ -7,6 +7,10 @@ Installation
 ------------
 `npm install yakuza`
 
+Looking for the docs?
+---------------------
+[Documentation](http://narzerus.github.io/yakuza)
+
 Scraper structure
 =================
 Yakuza introduces several concepts to help you build your scraper's structure
@@ -503,3 +507,4 @@ To test Yakuza run the following command:
 We use [Mocha](http://mochajs.org/) for as our test runner and [Chai](http://chaijs.com/) as our assertion library.
 
 We use ESLint as our linter.
+
