@@ -92,7 +92,7 @@ Http.prototype._interceptResponse = function (err, res, body, url, callback) {
 */
 Http.prototype._pushToLog = function (logEntry) {
   if (this._log.length === 10) {
-    this._log.pop();
+    this._log.shift();
   }
 
   this._log.push(logEntry);
