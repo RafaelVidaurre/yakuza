@@ -91,6 +91,10 @@ Http.prototype._interceptResponse = function (err, res, body, url, callback) {
 * @param {object} logEntry entry that represents a unit of the log
 */
 Http.prototype._pushToLog = function (logEntry) {
+  if (this._log.length === 10) {
+    this._log.pop();
+  }
+
   this._log.push(logEntry);
 };
 
